@@ -12,26 +12,25 @@ namespace DriveCareCore.Data.BD
     using System;
     using System.Collections.Generic;
     
-    public partial class Users
+    public partial class CarSales
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Users()
+        public CarSales()
         {
-            this.UserCars = new HashSet<UserCars>();
-            this.UserRoles = new HashSet<UserRoles>();
+            this.CarSalePrices = new HashSet<CarSalePrices>();
             this.UserCarSales = new HashSet<UserCarSales>();
         }
     
         public System.Guid RowId { get; set; }
-        public string Login { get; set; }
-        public string Password { get; set; }
+        public System.Guid CarId { get; set; }
+        public string Title { get; set; }
         public string Description { get; set; }
-        public string Email { get; set; }
+        public string PhotoPath { get; set; }
+        public Nullable<System.DateTime> CreatedAt { get; set; }
     
+        public virtual Cars Cars { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserCars> UserCars { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserRoles> UserRoles { get; set; }
+        public virtual ICollection<CarSalePrices> CarSalePrices { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserCarSales> UserCarSales { get; set; }
     }

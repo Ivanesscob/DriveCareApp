@@ -1,10 +1,11 @@
+using DriveCare.Pages.User.ActionPages;
 using DriveCareCore;
 using DriveCareCore.Data.BD;
 using DriveCareCore.Services;
-using DriveCare.Pages.User.ActionPages;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -25,15 +26,21 @@ namespace DriveCare.Pages.User
         public UserHomePage()
         {
             GarageCars = new ObservableCollection<CarDisplayItem>();
+            NotificationItems = new ObservableCollection<NotificationDisplayItem>();
             InitializeComponent();
             DataContext = this;
 
             PrevCommand = new DelegateCommand(_ => Shift(-1), _ => GarageCars.Count > 1);
             NextCommand = new DelegateCommand(_ => Shift(1), _ => GarageCars.Count > 1);
-            Loaded += (_, __) => ReloadCars();
+            Loaded += (_, __) =>
+            {
+                ReloadCars();
+                ReloadNotifications();
+            };
         }
 
         public ObservableCollection<CarDisplayItem> GarageCars { get; }
+        public ObservableCollection<NotificationDisplayItem> NotificationItems { get; }
 
         public DelegateCommand PrevCommand { get; }
         public DelegateCommand NextCommand { get; }
@@ -94,6 +101,12 @@ namespace DriveCare.Pages.User
         public Visibility EmptyStatePanelVisibility =>
             GarageCars.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
 
+        public Visibility NoNotificationsVisibility =>
+            NotificationItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility NotificationsListVisibility =>
+            NotificationItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
         private void ReloadCars()
         {
             GarageCars.Clear();
@@ -150,6 +163,57 @@ namespace DriveCare.Pages.User
             OnPropertyChanged(nameof(SelectedCarIndex));
             NotifyChrome();
             ApplyHeroFromIndex();
+        }
+
+        private void ReloadNotifications()
+        {
+            NotificationItems.Clear();
+            if (!IsLoggedIn)
+            {
+                OnPropertyChanged(nameof(NoNotificationsVisibility));
+                OnPropertyChanged(nameof(NotificationsListVisibility));
+                return;
+            }
+
+            
+                var uid = AppState.CurrentUserId;
+
+                const string sql = @"SELECT 
+    n.Title,
+    n.Message,
+    n.Description,
+    n.CreatedAt,
+    un.IsRead
+FROM UserNotifications un
+JOIN Notifications n ON n.RowId = un.NotificationId
+WHERE un.UserId = @UserId
+ORDER BY n.CreatedAt DESC;";
+
+                var param = new SqlParameter("@UserId", uid);
+
+                var rows = AppConnect.model1.Database
+                    .SqlQuery<UserNotificationSqlRow>(sql, param) 
+                    .ToList();
+                foreach (var row in rows)
+                {
+                    NotificationItems.Add(new NotificationDisplayItem
+                    {
+                        Title = string.IsNullOrWhiteSpace(row.Title) ? "Уведомление" : row.Title.Trim(),
+                        Text = BuildNotificationText(row.Message, row.CreatedAt, row.IsRead)
+                    });
+                }
+            
+
+            OnPropertyChanged(nameof(NoNotificationsVisibility));
+            OnPropertyChanged(nameof(NotificationsListVisibility));
+        }
+
+        private static string BuildNotificationText(string message, DateTime? createdAt, bool isRead)
+        {
+            var msg = string.IsNullOrWhiteSpace(message) ? "Без текста" : message.Trim();
+            var datePart = createdAt.HasValue ? createdAt.Value.ToString("dd.MM.yyyy HH:mm") : "без даты";
+            var state = isRead ? "прочитано" : "не прочитано";
+            return $"{msg}\n{datePart} · {state}";
         }
 
         private void Shift(int delta)
@@ -256,6 +320,12 @@ namespace DriveCare.Pages.User
             AppState.SetFrame<ProfilePage>();
         }
 
+        private void NotificationsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ReloadNotifications();
+            NotificationsPopup.IsOpen = !NotificationsPopup.IsOpen;
+        }
+
         private void HeroCar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount != 2) return;
@@ -304,5 +374,19 @@ namespace DriveCare.Pages.User
             {
             }
         }
+    }
+
+    public sealed class NotificationDisplayItem
+    {
+        public string Title { get; set; }
+        public string Text { get; set; }
+    }
+
+    internal sealed class UserNotificationSqlRow
+    {
+        public string Title { get; set; }
+        public string Message { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public bool IsRead { get; set; }
     }
 }

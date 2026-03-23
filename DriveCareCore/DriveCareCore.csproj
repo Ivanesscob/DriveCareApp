@@ -85,6 +85,12 @@
     <Compile Include="Data\BD\Cars.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BD\CarSalePrices.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\CarSales.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\CarTypes.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -131,6 +137,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BD\UserCars.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\UserCarSales.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BD\UserRoles.cs">
@@ -193,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Иконки для меню (основные действия на UserHomePage). -->
+    <Resource Include="Data\Pics\Notification.png" />
     <Resource Include="Data\Pics\MainMenu\Bascket.png" />
     <Resource Include="Data\Pics\MainMenu\BuyCar.png" />
     <Resource Include="Data\Pics\MainMenu\CarRepair.png" />

@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="0c1babde56bc4eadb676f48b7007fd16" Name="Diagram1">
+      <Diagram DiagramId="0c1babde56bc4eadb676f48b7007fd16" Name="Diagram1" ZoomLevel="74">
         <EntityTypeShape EntityType="DriveCareDBModel.Addresses" Width="1.5" PointX="3" PointY="12.625" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Brands" Width="1.5" PointX="0.75" PointY="4" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.CarColors" Width="1.5" PointX="7.5" PointY="3.625" IsExpanded="true" />
@@ -38,6 +38,18 @@
         <EntityTypeShape EntityType="DriveCareDBModel.UserRoles" Width="1.5" PointX="13.5" PointY="9" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserRoles__RoleI__160F4887" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserRoles__UserI__151B244E" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarSalePrices" Width="1.5" PointX="9.75" PointY="1.25" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarSales" Width="1.5" PointX="7.5" PointY="0.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserCarSales" Width="1.5" PointX="13.5" PointY="5.5" />
+        <AssociationConnector Association="DriveCareDBModel.FK__CarSales__CarId__1AD3FDA4" />
+        <AssociationConnector Association="DriveCareDBModel.FK__CarSalePr__CarSa__245D67DE" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserCarSa__CarSa__1F98B2C1" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserCarSa__UserI__1EA48E88" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Notifications" Width="1.5" PointX="11.25" PointY="16" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserNotifications" Width="1.5" PointX="13.5" PointY="12.125" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Notificat__CarId__29221CFB" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserNotif__Notif__2EDAF651" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

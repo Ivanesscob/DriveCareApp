@@ -172,6 +172,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Data\NotPhotoCar.png" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\DriveCareCore\DriveCareCore.csproj">
       <Project>{b14239ed-f8a7-4eea-9fc6-12024f9c647d}</Project>
       <Name>DriveCareCore</Name>

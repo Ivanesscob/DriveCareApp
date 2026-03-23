@@ -43,5 +43,8 @@ namespace DriveCareCore.Data.BD
         public virtual DbSet<WarehouseManagers> WarehouseManagers { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<UserRoles> UserRoles { get; set; }
+        public virtual DbSet<CarSalePrices> CarSalePrices { get; set; }
+        public virtual DbSet<CarSales> CarSales { get; set; }
+        public virtual DbSet<UserCarSales> UserCarSales { get; set; }
     }
 }

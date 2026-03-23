@@ -193,22 +193,87 @@
                 </StackPanel>
 
                 <!-- Профиль (пока заглушка, повесим навигацию позже) -->
-                <Button x:Name="BtnProfile"
-                        Grid.Column="1"
-                        Style="{StaticResource ProfileIconButton}"
-                        Click="ProfileButton_Click"
-                        ToolTip="Профиль">
-                    <Grid>
-                        <Image x:Name="IconProfile" Width="20" Height="20" Stretch="Uniform" Visibility="Collapsed"/>
-                        <TextBlock x:Name="TxtProfileFallback"
-                                   Text="П"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="White"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                    </Grid>
-                </Button>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="BtnNotifications"
+                            Style="{StaticResource ProfileIconButton}"
+                            Margin="0,0,10,0"
+                            Click="NotificationsButton_Click"
+                            ToolTip="Уведомления">
+                        <Grid>
+                            <Image Width="20" Height="20" Stretch="Uniform"
+                                   Source="pack://application:,,,/DriveCareCore;component/Data/Pics/Notification.png"/>
+                        </Grid>
+                    </Button>
+
+                    <Button x:Name="BtnProfile"
+                            Style="{StaticResource ProfileIconButton}"
+                            Click="ProfileButton_Click"
+                            ToolTip="Профиль">
+                        <Grid>
+                            <Image x:Name="IconProfile" Width="20" Height="20" Stretch="Uniform" Visibility="Collapsed"/>
+                            <TextBlock x:Name="TxtProfileFallback"
+                                       Text="П"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+
+                <Popup x:Name="NotificationsPopup"
+                       PlacementTarget="{Binding ElementName=BtnNotifications}"
+                       Placement="Bottom"
+                       StaysOpen="False"
+                       AllowsTransparency="True">
+                    <Border Background="#1B1B2A" BorderBrush="#3D3D55" BorderThickness="1" CornerRadius="12"
+                            MinWidth="330" MaxWidth="360" Padding="10" Margin="0,8,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="Уведомления" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="4,2,0,8"/>
+
+                            <Grid Grid.Row="1">
+                                <TextBlock Text="Нет уведомлений"
+                                           Foreground="#9AA0B0"
+                                           FontSize="13"
+                                           TextAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="{Binding NoNotificationsVisibility}"/>
+
+                                <ListBox ItemsSource="{Binding NotificationItems}"
+                                         Visibility="{Binding NotificationsListVisibility}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         MaxHeight="260">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Margin" Value="0,0,0,8"/>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#232338" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="8" Padding="10">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" Foreground="White" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding Text}" Foreground="#9AA0B0" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Popup>
             </Grid>
 
             <!-- Карточка героя -->

@@ -19,6 +19,7 @@ namespace DriveCareCore.Data.BD
         {
             this.CarColors = new HashSet<CarColors>();
             this.UserCars = new HashSet<UserCars>();
+            this.CarSales = new HashSet<CarSales>();
         }
     
         public System.Guid RowId { get; set; }
@@ -35,5 +36,7 @@ namespace DriveCareCore.Data.BD
         public virtual Models Models { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserCars> UserCars { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CarSales> CarSales { get; set; }
     }
 }

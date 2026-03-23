@@ -2,10 +2,100 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Покупка машины">
+    <Page.Resources>
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#1A1A28"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Page.Resources>
+
     <Grid Background="#14141F">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,24,0,0" HorizontalAlignment="Center">
             <TextBlock Text="Покупка машины" Foreground="White" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Листинг с продажами из CarSales" Foreground="#9AA0B0" FontSize="14" Margin="0,8,0,0" HorizontalAlignment="Center"/>
         </StackPanel>
+
+        <Grid Grid.Row="1" Margin="24,16,24,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ListView ItemsSource="{Binding SalesItems}" Grid.Row="0" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0,0,12,12"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="260" Height="300"
+                                Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="140"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
+                                    <Image Source="/DriveCare;component/Data/NotPhotoCar.png" Stretch="UniformToFill"/>
+                                </Border>
+
+                                <StackPanel Grid.Row="1">
+                                    <TextBlock Text="{Binding CarLabel}" Foreground="White" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding SellerLabel}" Foreground="#9AA0B0" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+
+                                <Border Grid.Row="2" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1"
+                                        CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
+                                    <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                </Border>
+
+                                <Button Grid.Row="3"
+                                        Content="Подробнее"
+                                        Height="34"
+                                        Margin="0,10,0,0"
+                                        Background="#222236"
+                                        Foreground="White"
+                                        BorderBrush="#7C6CF5"
+                                        BorderThickness="1"
+                                        FontWeight="SemiBold"
+                                        Cursor="Hand"
+                                        Click="SaleDetails_Click"/>
+                            </Grid>
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <EventSetter Event="MouseLeftButtonDown" Handler="SaleCard_MouseLeftButtonDown"/>
+                                </Style>
+                            </Border.Style>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Grid.Row="1" Content="Назад на главную" Style="{StaticResource BackButtonStyle}" Margin="0,14,0,0"
+                    HorizontalAlignment="Center" Click="Back_Click"/>
+        </Grid>
     </Grid>
 </Page>
 
