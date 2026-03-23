@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DriveCare/DriveCare.csproj" Id="5edb5f45-9f3a-43a7-974b-539b83c71c77" />
+  <Project Path="DriveCareCore/DriveCareCore.csproj" Id="b14239ed-f8a7-4eea-9fc6-12024f9c647d" />
+  <Project Path="DriveCarePro/DriveCarePro.csproj" Id="e70baaef-5801-4daf-9435-f1a00d552256" />
+</Solution>

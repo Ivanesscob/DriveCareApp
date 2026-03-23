@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="0c1babde56bc4eadb676f48b7007fd16" Name="Diagram1">
+        <EntityTypeShape EntityType="DriveCareDBModel.Addresses" Width="1.5" PointX="3" PointY="12.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Brands" Width="1.5" PointX="0.75" PointY="4" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarColors" Width="1.5" PointX="7.5" PointY="3.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Cars" Width="1.5" PointX="5.25" PointY="3.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarTypes" Width="1.5" PointX="3" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Colors" Width="1.5" PointX="5.25" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Countries" Width="1.5" PointX="0.75" PointY="14.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.FuelTypes" Width="1.5" PointX="3" PointY="7.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Models" Width="1.5" PointX="3" PointY="3.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.PartManufacturers" Width="1.5" PointX="3" PointY="16.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Parts" Width="1.5" PointX="7.5" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Statuses" Width="1.5" PointX="5.25" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.sysdiagrams" Width="1.5" PointX="10.75" PointY="6.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserCars" Width="1.5" PointX="10.5" PointY="3.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Users" Width="1.5" PointX="8.25" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WarehouseManagers" Width="1.5" PointX="10.75" PointY="9.875" IsExpanded="true" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Addresses__Count__0E6E26BF" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Models__BrandId__534D60F1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__CarColors__CarId__73BA3083" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__CarColors__Color__74AE54BC" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Cars__CarTypeId__5812160E" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Cars__FuelTypeId__59063A47" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Cars__ModelId__571DF1D5" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserCars__CarId__628FA481" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Parts__ColorId__05D8E0BE" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__PartManuf__Count__01142BA1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Parts__PartManuf__04E4BC85" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__Parts__StatusId__06CD04F7" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserCars__UserId__619B8048" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
