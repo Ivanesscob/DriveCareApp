@@ -34,6 +34,10 @@
         <AssociationConnector Association="DriveCareDBModel.FK__Parts__PartManuf__04E4BC85" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__Parts__StatusId__06CD04F7" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserCars__UserId__619B8048" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Roles" Width="1.5" PointX="11.25" PointY="13.125" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserRoles" Width="1.5" PointX="13.5" PointY="9" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserRoles__RoleI__160F4887" />
+        <AssociationConnector Association="DriveCareDBModel.FK__UserRoles__UserI__151B244E" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

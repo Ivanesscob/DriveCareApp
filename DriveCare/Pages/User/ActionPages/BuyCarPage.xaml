@@ -1,0 +1,11 @@
+<Page x:Class="DriveCare.Pages.User.ActionPages.BuyCarPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Покупка машины">
+    <Grid Background="#14141F">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Покупка машины" Foreground="White" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</Page>
+

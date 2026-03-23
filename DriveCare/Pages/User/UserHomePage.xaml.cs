@@ -1,6 +1,7 @@
 using DriveCareCore;
 using DriveCareCore.Data.BD;
 using DriveCareCore.Services;
+using DriveCare.Pages.User.ActionPages;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -110,10 +112,13 @@ namespace DriveCare.Pages.User
                         .Where(uc => uc.UserId == uid)
                         .ToList();
 
-                    foreach (var uc in rows)
+                    var seenCarIds = new System.Collections.Generic.HashSet<Guid>();
+                    foreach (var uc in rows.Where(uc => uc.Cars != null))
                     {
-                        if (uc.Cars == null)
+                        if (seenCarIds.Contains(uc.CarId))
                             continue;
+                        seenCarIds.Add(uc.CarId);
+
                         var car = uc.Cars;
                         var photo = CarTypeImageHelper.GetImageForCarTypeName(car.CarTypes?.Name);
                         var brand = car.Models?.Brands?.Name?.Trim();
@@ -128,7 +133,13 @@ namespace DriveCare.Pages.User
                         else
                             name = "Автомобиль";
 
-                        GarageCars.Add(new CarDisplayItem { Photo = photo, Name = name });
+                        GarageCars.Add(new CarDisplayItem
+                        {
+                            Photo = photo,
+                            Name = name,
+                            CarId = uc.CarId,
+                            UserCarId = uc.RowId
+                        });
                     }
                 }
                 catch
@@ -210,6 +221,88 @@ namespace DriveCare.Pages.User
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void QuickActionButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+            var action = btn.Tag as string ?? string.Empty;
+
+            switch (action)
+            {
+                case "ToolsStore":
+                    AppState.SetFrame<ToolsStorePage>();
+                    break;
+                case "ServiceSelect":
+                    AppState.SetFrame<ServiceSelectPage>();
+                    break;
+                case "PaintCar":
+                    AppState.SetFrame<PaintCarPage>();
+                    break;
+                case "ServiceCar":
+                    AppState.SetFrame<ServiceCarPage>();
+                    break;
+                case "BuyCar":
+                    AppState.SetFrame<BuyCarPage>();
+                    break;
+                default:
+                    return;
+            }
+        }
+
+        private void ProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppState.SetFrame<ProfilePage>();
+        }
+
+        private void HeroCar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount != 2) return;
+            if (GarageCars.Count == 0) return;
+
+            var idx = Math.Max(0, Math.Min(_index, GarageCars.Count - 1));
+            OpenCarDetailsWindow(GarageCars[idx]);
+            e.Handled = true;
+        }
+
+        private void GarageCars_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (GarageCars.Count == 0) return;
+            var lb = sender as ListBox;
+            if (lb == null) return;
+
+            var container = FindAncestor<ListBoxItem>((DependencyObject)e.OriginalSource);
+            var item = container?.Content as CarDisplayItem ?? lb.SelectedItem as CarDisplayItem;
+            if (item == null) return;
+
+            OpenCarDetailsWindow(item);
+            e.Handled = true;
+        }
+
+        private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
+        {
+            while (current != null)
+            {
+                var match = current as T;
+                if (match != null)
+                    return match;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
+
+        private void OpenCarDetailsWindow(CarDisplayItem item)
+        {
+            try
+            {
+                var owner = Window.GetWindow(this);
+                //var wnd = new CarDetailsWindow(item) { Owner = owner };
+                //wnd.Show();
+            }
+            catch
+            {
+            }
         }
     }
 }

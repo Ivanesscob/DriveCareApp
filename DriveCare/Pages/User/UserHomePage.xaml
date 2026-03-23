@@ -46,26 +46,90 @@
             </Setter>
         </Style>
 
+        <Style x:Key="QuickActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#14141F"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="92"/>
+            <Setter Property="Height" Value="92"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                CornerRadius="22"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
+                                <Setter TargetName="bd" Property="Background" Value="#1B1B2A"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#252538"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ProfileIconButton" TargetType="Button">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Background" Value="#14141F"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                CornerRadius="22"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
+                                <Setter TargetName="bd" Property="Background" Value="#1B1B2A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Миниатюра в ленте -->
         <DataTemplate x:Key="CarStripItemTemplate">
-            <Border CornerRadius="12" Padding="10,10,10,8" MinWidth="100" MaxWidth="128"
+            <Border CornerRadius="10" Padding="8,8,8,6" MinWidth="84" MaxWidth="112"
                     Background="#18182A" SnapsToDevicePixels="True">
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.4" Color="#000000"/>
                 </Border.Effect>
                 <StackPanel>
-                    <Border Height="52" CornerRadius="8" Background="#0F0F18" ClipToBounds="True">
+                    <Border Height="46" CornerRadius="8" Background="#0F0F18" ClipToBounds="True">
                         <Image Source="{Binding Photo}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <TextBlock Text="{Binding Name}" Foreground="#D0D5E0" FontSize="11" FontWeight="Medium"
-                               TextTrimming="CharacterEllipsis" TextAlignment="Center" Margin="0,8,0,0" MaxWidth="108" LineHeight="14"/>
+                    <TextBlock Text="{Binding Name}" Foreground="#D0D5E0" FontSize="10" FontWeight="Medium"
+                               TextTrimming="CharacterEllipsis" TextAlignment="Center" Margin="0,6,0,0" MaxWidth="96" LineHeight="13"/>
                 </StackPanel>
             </Border>
         </DataTemplate>
 
         <Style x:Key="CarStripListBoxItem" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -115,15 +179,40 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" MaxWidth="920" HorizontalAlignment="Center" Margin="28,0">
-                <TextBlock Text="Мои автомобили" FontSize="22" FontWeight="SemiBold" Foreground="White"/>
-                <TextBlock Text="Выберите машину в ленте ниже или листайте стрелками"
-                           FontSize="13" Foreground="{StaticResource Brush.Muted}" Margin="0,6,0,0"
-                           Visibility="{Binding ShowNavChrome, Converter={StaticResource BoolToVis}}"/>
-            </StackPanel>
+            <Grid Grid.Row="0" Margin="28,0,28,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" MaxWidth="920" HorizontalAlignment="Center">
+                    <TextBlock Text="Мои автомобили" FontSize="22" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="Выберите машину в ленте ниже или листайте стрелками"
+                               FontSize="13" Foreground="{StaticResource Brush.Muted}" Margin="0,6,0,0"
+                               Visibility="{Binding ShowNavChrome, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+
+                <!-- Профиль (пока заглушка, повесим навигацию позже) -->
+                <Button x:Name="BtnProfile"
+                        Grid.Column="1"
+                        Style="{StaticResource ProfileIconButton}"
+                        Click="ProfileButton_Click"
+                        ToolTip="Профиль">
+                    <Grid>
+                        <Image x:Name="IconProfile" Width="20" Height="20" Stretch="Uniform" Visibility="Collapsed"/>
+                        <TextBlock x:Name="TxtProfileFallback"
+                                   Text="П"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+            </Grid>
 
             <!-- Карточка героя -->
-            <Grid Grid.Row="1" MaxWidth="920" HorizontalAlignment="Center" Margin="28,20,28,0"
+            <Grid Grid.Row="1" MaxWidth="920" HorizontalAlignment="Center" Margin="28,12,28,0"
                   Visibility="{Binding HeroVisibility}">
                 <!-- Обводка-градиент -->
                 <Border CornerRadius="24" Padding="2" HorizontalAlignment="Stretch">
@@ -134,18 +223,19 @@
                             <GradientStop Color="#7C6CF5" Offset="1"/>
                         </LinearGradientBrush>
                     </Border.Background>
-                    <Border CornerRadius="22" Background="#14141F">
+                    <Border CornerRadius="22" Background="#14141F"
+                            MouseLeftButtonDown="HeroCar_MouseLeftButtonDown">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="40" ShadowDepth="0" Opacity="0.55" Color="#1A1040"/>
                         </Border.Effect>
-                        <Grid MinHeight="280">
+                        <Grid MinHeight="230">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1.15*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- Фото -->
-                            <Border Grid.Column="0" Margin="20,20,12,20" CornerRadius="18" ClipToBounds="True">
+                            <Border Grid.Column="0" Margin="14,16,10,16" CornerRadius="18" ClipToBounds="True">
                                 <Border.Background>
                                     <RadialGradientBrush GradientOrigin="0.4,0.3" Center="0.4,0.35" RadiusX="0.85" RadiusY="0.85">
                                         <GradientStop Color="#2A2548" Offset="0"/>
@@ -157,12 +247,12 @@
                             </Border>
 
                             <!-- Текст -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,20,28,20">
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,14,22,14">
                                 <TextBlock Text="{Binding PositionText}" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource Brush.Accent}" Margin="0,0,0,10"
                                            Visibility="{Binding ShowNavChrome, Converter={StaticResource BoolToVis}}"/>
-                                <TextBlock Text="{Binding CarTitle}" FontSize="26" FontWeight="SemiBold"
-                                           Foreground="White" TextWrapping="Wrap" LineHeight="32"/>
+                                <TextBlock Text="{Binding CarTitle}" FontSize="22" FontWeight="SemiBold"
+                                           Foreground="White" TextWrapping="Wrap" LineHeight="28"/>
                                 <TextBlock Text="Ваш активный автомобиль в DriveCare"
                                            FontSize="13" Foreground="{StaticResource Brush.Muted}" Margin="0,14,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
@@ -186,30 +276,81 @@
             </Grid>
 
             <!-- Лента-селектор -->
-            <StackPanel Grid.Row="2" MaxWidth="920" HorizontalAlignment="Center" Margin="28,24,28,0"
-                        Visibility="{Binding StripVisibility}">
-                <TextBlock Text="Быстрый выбор" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Brush.Muted}" Margin="4,0,0,12"/>
-                <Border Background="#1A1A28" CornerRadius="18" Padding="14,14,14,16" BorderBrush="#2E2E44" BorderThickness="1">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                                  Focusable="False" PanningMode="HorizontalOnly">
-                        <ListBox ItemsSource="{Binding GarageCars}"
-                                 SelectedIndex="{Binding SelectedCarIndex, Mode=TwoWay}"
-                                 ItemTemplate="{StaticResource CarStripItemTemplate}"
-                                 ItemContainerStyle="{StaticResource CarStripListBoxItem}"
-                                 Background="Transparent" BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                        </ListBox>
-                    </ScrollViewer>
-                </Border>
+            <StackPanel Grid.Row="2" MaxWidth="920" HorizontalAlignment="Center" Margin="28,16,28,0"
+                        Visibility="{Binding HeroVisibility}">
+                <WrapPanel Margin="0,0,0,12" HorizontalAlignment="Center">
+                    <Button x:Name="BtnToolsStore"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="QuickActionButton_Click"
+                            Tag="ToolsStore">
+                        <StackPanel Orientation="Vertical">
+                            <Image x:Name="IconToolsStore"
+                                   Width="40" Height="40"
+                                   Stretch="Uniform"
+                                   Margin="0,8,0,6"
+                                   Source="pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/Bascket.png"/>
+                            <TextBlock Text="Магазин" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnServiceSelect"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="QuickActionButton_Click"
+                            Tag="ServiceSelect">
+                        <StackPanel Orientation="Vertical">
+                            <Image x:Name="IconServiceSelect"
+                                   Width="40" Height="40"
+                                   Stretch="Uniform"
+                                   Margin="0,8,0,6"
+                                   Source="pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/STO.png"/>
+                            <TextBlock Text="СТО" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnPaintCar"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="QuickActionButton_Click"
+                            Tag="PaintCar">
+                        <StackPanel Orientation="Vertical">
+                            <Image x:Name="IconPaintCar"
+                                   Width="40" Height="40"
+                                   Stretch="Uniform"
+                                   Margin="0,8,0,6"
+                                   Source="pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/SprayGun.png"/>
+                            <TextBlock Text="Покраска" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnServiceCar"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="QuickActionButton_Click"
+                            Tag="ServiceCar">
+                        <StackPanel Orientation="Vertical">
+                            <Image x:Name="IconServiceCar"
+                                   Width="40" Height="40"
+                                   Stretch="Uniform"
+                                   Margin="0,8,0,6"
+                                   Source="pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/CarRepair.png"/>
+                            <TextBlock Text="Обслуживание" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="BtnBuyCar"
+                            Style="{StaticResource QuickActionButton}"
+                            Click="QuickActionButton_Click"
+                            Tag="BuyCar">
+                        <StackPanel Orientation="Vertical">
+                            <Image x:Name="IconBuyCar"
+                                   Width="40" Height="40"
+                                   Stretch="Uniform"
+                                   Margin="0,8,0,6"
+                                   Source="pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/BuyCar.png"/>
+                            <TextBlock Text="Покупка" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
             </StackPanel>
 
-            <!-- Пусто / не авторизован -->
             <Border Grid.Row="1" Grid.RowSpan="2" MaxWidth="520" HorizontalAlignment="Center" VerticalAlignment="Center"
                     CornerRadius="20" Background="#1B1B2A" BorderBrush="#3D3D55" BorderThickness="1" Padding="32,36"
                     Margin="28,40" Visibility="{Binding EmptyStatePanelVisibility}">

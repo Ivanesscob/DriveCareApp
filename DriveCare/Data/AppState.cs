@@ -1,5 +1,6 @@
 using DriveCareCore.Data.BD;
 using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
 
 namespace DriveCare
@@ -18,5 +19,7 @@ namespace DriveCare
         public static void Navigate(Page page) => MainFrame.Navigate(page);
 
         public static void SetFrame<T>() where T : Page, new() => MainFrame.Navigate(new T());
+
+        public static List<Roles> UserRoles { get; set; } 
     }
 }

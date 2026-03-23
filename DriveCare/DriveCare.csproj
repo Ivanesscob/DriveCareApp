@@ -74,6 +74,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CarDisplayItem.cs" />
+    <Compile Include="CarDetailsWindow.cs" />
     <Compile Include="Data\AppState.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -91,6 +92,30 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\User\ProfilePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\ActionPages\ToolsStorePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\ActionPages\ServiceSelectPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\ActionPages\PaintCarPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\ActionPages\ServiceCarPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\ActionPages\BuyCarPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Pages\LoginPages\LoginPage.xaml.cs">
@@ -101,6 +126,24 @@
     </Compile>
     <Compile Include="Pages\User\UserHomePage.xaml.cs">
       <DependentUpon>UserHomePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ProfilePage.xaml.cs">
+      <DependentUpon>ProfilePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\ToolsStorePage.xaml.cs">
+      <DependentUpon>ToolsStorePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\ServiceSelectPage.xaml.cs">
+      <DependentUpon>ServiceSelectPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\PaintCarPage.xaml.cs">
+      <DependentUpon>PaintCarPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\ServiceCarPage.xaml.cs">
+      <DependentUpon>ServiceCarPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\BuyCarPage.xaml.cs">
+      <DependentUpon>BuyCarPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

@@ -83,7 +83,7 @@
                             <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource Brush.AccentSoft}"
                                     BorderBrush="#5548C8" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,16"
                                     ClipToBounds="True" Padding="6">
-                                <Image Source="/Data/Pics/AppIcon.ico"
+                                <Image Source="/DriveCareCore;component/Data/Pics/AppIcon.ico"
                                        Stretch="Uniform"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>

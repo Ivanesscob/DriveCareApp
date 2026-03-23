@@ -1,0 +1,181 @@
+<Page x:Class="DriveCare.Pages.User.ActionPages.ToolsStorePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Магазин инструментов">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <SolidColorBrush x:Key="Brush.Accent" Color="#7C6CF5"/>
+        <SolidColorBrush x:Key="Brush.AccentDim" Color="#5548C8"/>
+        <SolidColorBrush x:Key="Brush.Surface" Color="#1B1B2A"/>
+        <SolidColorBrush x:Key="Brush.Muted" Color="#9AA0B0"/>
+
+        <Style x:Key="HeroNavButton" TargetType="Button">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" CornerRadius="24" Background="#35FFFFFF" BorderBrush="#55FFFFFF" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#55FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="b" Property="Background" Value="#28FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="QuickActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#14141F"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="92"/>
+            <Setter Property="Height" Value="92"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                        CornerRadius="22"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
+                                <Setter TargetName="bd" Property="Background" Value="#1B1B2A"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#252538"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ProfileIconButton" TargetType="Button">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Background" Value="#14141F"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                        CornerRadius="22"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
+                                <Setter TargetName="bd" Property="Background" Value="#1B1B2A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Page.Resources>
+    <Grid Background="#14141F">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,24,0,0" HorizontalAlignment="Center">
+            <TextBlock Text="Магазин инструментов" Foreground="White" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <WrapPanel Grid.Row="1" Margin="0,0,0,12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="BtnToolsStore"
+            Style="{StaticResource QuickActionButton}"
+            Tag="ToolsStore">
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="IconToolsStore"
+                   Width="40" Height="40"
+                   Stretch="Uniform"
+                   Margin="0,8,0,6"
+                   />
+                        <TextBlock Text="Двигатель" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BtnServiceSelect"
+            Style="{StaticResource QuickActionButton}"
+            Tag="ServiceSelect">
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="IconServiceSelect"
+                   Width="40" Height="40"
+                   Stretch="Uniform"
+                   Margin="0,8,0,6"
+                   />
+                        <TextBlock Text="Коробка передачь" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BtnPaintCar"
+            Style="{StaticResource QuickActionButton}"
+            Tag="PaintCar">
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="IconPaintCar"
+                   Width="40" Height="40"
+                   Stretch="Uniform"
+                   Margin="0,8,0,6"
+                   />
+                        <TextBlock Text="Кузов" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BtnServiceCar"
+            Style="{StaticResource QuickActionButton}"
+            Tag="ServiceCar">
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="IconServiceCar"
+                   Width="40" Height="40"
+                   Stretch="Uniform"
+                   Margin="0,8,0,6"
+                   />
+                        <TextBlock Text="Шины" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BtnBuyCar"
+            Style="{StaticResource QuickActionButton}"
+            Tag="BuyCar">
+                    <StackPanel Orientation="Vertical">
+                        <Image x:Name="IconBuyCar"
+                   Width="40" Height="40"
+                   Stretch="Uniform"
+                   Margin="0,8,0,6"
+                   />
+                        <TextBlock Text="Акссесуары" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </WrapPanel>
+    </Grid>
+</Page>
+

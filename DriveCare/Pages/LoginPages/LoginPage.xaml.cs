@@ -57,15 +57,17 @@ namespace DriveCare.Pages.LoginPages
                 {
                     AppState.CurrentUserId = user.RowId;
                     AppState.CurrentUser = user;
+                    AppState.UserRoles = AppConnect.model1.UserRoles
+                        .Where(u => u.UserId == AppState.CurrentUserId)
+                        .Select(u => u.Roles)
+                        .ToList();
                 AppState.SetFrame<UserHomePage>();
-            }
+                }
                 else
                 {
                     AppMessageBox.Show("Неверный логин или пароль.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
-            
-            
-        }
+            }
 
         private void RegisterExecute()
         {
