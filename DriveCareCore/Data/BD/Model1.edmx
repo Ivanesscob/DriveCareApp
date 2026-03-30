@@ -251,6 +251,8 @@
           <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
           <Property Name="Email" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" />
+          <Property Name="BirthDate" Type="date" />
         </EntityType>
         <EntityType Name="WarehouseManagers">
           <Key>
@@ -919,6 +921,8 @@
           <NavigationProperty Name="UserRoles" Relationship="DriveCareDBModel.FK__UserRoles__UserI__151B244E" FromRole="Users" ToRole="UserRoles" />
           <NavigationProperty Name="UserCarSales" Relationship="DriveCareDBModel.FK__UserCarSa__UserI__1EA48E88" FromRole="Users" ToRole="UserCarSales" />
           <NavigationProperty Name="UserNotifications" Relationship="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" FromRole="Users" ToRole="UserNotifications" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="BirthDate" Type="DateTime" Precision="0" />
         </EntityType>
         <EntityType Name="WarehouseManagers">
           <Key>
@@ -1691,6 +1695,8 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="DriveCareDBModel.Users">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="BirthDate" ColumnName="BirthDate" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
                 <ScalarProperty Name="RowId" ColumnName="RowId" />
                 <ScalarProperty Name="Login" ColumnName="Login" />
                 <ScalarProperty Name="Password" ColumnName="Password" />

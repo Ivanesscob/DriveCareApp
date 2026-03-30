@@ -28,6 +28,8 @@ namespace DriveCareCore.Data.BD
         public string Password { get; set; }
         public string Description { get; set; }
         public string Email { get; set; }
+        public Nullable<System.DateTime> CreatedAt { get; set; }
+        public Nullable<System.DateTime> BirthDate { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserCars> UserCars { get; set; }
