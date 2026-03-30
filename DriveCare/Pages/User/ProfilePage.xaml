@@ -101,6 +101,18 @@
                                     <TextBlock Text="{Binding CurrentUser.Email}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
+                            <Border Margin="0,0,10,10" Padding="12" CornerRadius="12" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="Телефон" Foreground="#9AA0B0"/>
+                                    <TextBlock Text="{Binding CurrentUser.Phone, TargetNullValue=—}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Margin="0,0,0,10" Padding="12" CornerRadius="12" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="Дата рождения" Foreground="#9AA0B0"/>
+                                    <TextBlock Text="{Binding CurrentUser.BirthDate, StringFormat=dd.MM.yyyy, TargetNullValue=—}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
                         </UniformGrid>
                     </StackPanel>
                 </Border>

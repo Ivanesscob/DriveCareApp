@@ -303,9 +303,9 @@ namespace DriveCare.Pages.LoginPages
             var loginTrim = UserLogin.Trim();
             var emailTrim = Email.Trim();
 
-            if (AppConnect.model1.Users.Any(u => u.Login == loginTrim || u.Email == emailTrim))
+            if (AppConnect.model1.Users.Any(u => u.Login == loginTrim))
             {
-                AppMessageBox.Show("Пользователь с таким логином или почтой уже существует.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AppMessageBox.Show("Пользователь с таким логином уже существует.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -385,9 +385,9 @@ namespace DriveCare.Pages.LoginPages
             var loginTrim = UserLogin.Trim();
             var emailTrim = Email.Trim();
 
-            if (AppConnect.model1.Users.Any(u => u.Login == loginTrim || u.Email == emailTrim))
+            if (AppConnect.model1.Users.Any(u => u.Login == loginTrim))
             {
-                AppMessageBox.Show("Пользователь уже зарегистрирован. Войдите в приложение.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppMessageBox.Show("Пользователь с таким логином уже существует. Войдите в приложение.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -411,7 +411,6 @@ namespace DriveCare.Pages.LoginPages
             }
 
             var phoneTrim = Phone.Trim();
-            var description = string.Format("Тел.: {0}; дата рождения: {1:dd.MM.yyyy}", phoneTrim, birthDate);
 
             var user = new Users
             {
@@ -419,7 +418,10 @@ namespace DriveCare.Pages.LoginPages
                 Login = loginTrim,
                 Password = pwd,
                 Email = emailTrim,
-                Description = description
+                Phone = phoneTrim,
+                BirthDate = birthDate,
+                CreatedAt = DateTime.Now,
+                Description = null
             };
 
             try
