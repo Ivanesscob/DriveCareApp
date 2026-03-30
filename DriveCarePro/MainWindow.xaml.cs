@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +20,13 @@ namespace DriveCarePro
     /// </summary>
     public partial class MainWindow : Window
     {
+        public Frame MainFrame { get; set; } = AppState.MainFrame;
+
         public MainWindow()
         {
             InitializeComponent();
+            AppState.SetFrame<Pages.LoginPages.LoginPage>();
+            DataContext = this;
         }
     }
 }

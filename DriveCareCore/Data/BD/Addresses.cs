@@ -14,6 +14,12 @@ namespace DriveCareCore.Data.BD
     
     public partial class Addresses
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Addresses()
+        {
+            this.Workshops = new HashSet<Workshops>();
+        }
+    
         public System.Guid RowId { get; set; }
         public Nullable<System.Guid> CountryId { get; set; }
         public string City { get; set; }
@@ -24,5 +30,7 @@ namespace DriveCareCore.Data.BD
         public string Description { get; set; }
     
         public virtual Countries Countries { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Workshops> Workshops { get; set; }
     }
 }

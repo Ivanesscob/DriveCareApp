@@ -12,13 +12,12 @@ namespace DriveCareCore.Data.BD
     using System;
     using System.Collections.Generic;
     
-    public partial class Roles
+    public partial class Companies
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Roles()
+        public Companies()
         {
-            this.UserRoles = new HashSet<UserRoles>();
-            this.EmployeeRolesMap = new HashSet<EmployeeRolesMap>();
+            this.Workshops = new HashSet<Workshops>();
         }
     
         public System.Guid RowId { get; set; }
@@ -26,8 +25,6 @@ namespace DriveCareCore.Data.BD
         public string Description { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserRoles> UserRoles { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<EmployeeRolesMap> EmployeeRolesMap { get; set; }
+        public virtual ICollection<Workshops> Workshops { get; set; }
     }
 }

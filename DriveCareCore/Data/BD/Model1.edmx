@@ -86,6 +86,14 @@
           <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
         </EntityType>
+        <EntityType Name="Companies">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+        </EntityType>
         <EntityType Name="Countries">
           <Key>
             <PropertyRef Name="RowId" />
@@ -94,6 +102,33 @@
           <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Code" Type="nvarchar" MaxLength="10" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="EmployeeRolesMap">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="EmployeeId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RoleId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="Employees">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="FirstName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="MidName" Type="nvarchar" MaxLength="100" />
+          <Property Name="Login" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Email" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Phone" Type="nvarchar" MaxLength="50" />
+          <Property Name="BirthDate" Type="date" />
+          <Property Name="HireDate" Type="datetime" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+          <Property Name="WorkshopId" Type="uniqueidentifier" />
         </EntityType>
         <EntityType Name="FuelTypes">
           <Key>
@@ -111,6 +146,17 @@
           <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="BrandId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="Notifications">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Message" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+          <Property Name="CarId" Type="uniqueidentifier" />
+          <Property Name="CreatedAt" Type="datetime" />
         </EntityType>
         <EntityType Name="PartManufacturers">
           <Key>
@@ -177,6 +223,16 @@
           <Property Name="CarSaleId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
         </EntityType>
+        <EntityType Name="UserNotifications">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="NotificationId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IsRead" Type="bit" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+        </EntityType>
         <EntityType Name="UserRoles">
           <Key>
             <PropertyRef Name="RowId" />
@@ -206,6 +262,16 @@
           <Property Name="MidName" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Phone" Type="nvarchar" MaxLength="50" />
           <Property Name="Email" Type="nvarchar" MaxLength="100" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="Workshops">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="CompanyId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="AddressId" Type="uniqueidentifier" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <Association Name="FK__Addresses__Count__0E6E26BF">
@@ -316,6 +382,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__Notificat__CarId__29221CFB">
+          <End Role="Cars" Type="Self.Cars" Multiplicity="0..1" />
+          <End Role="Notifications" Type="Self.Notifications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cars">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Notifications">
+              <PropertyRef Name="CarId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__PartManuf__Count__01142BA1">
           <End Role="Countries" Type="Self.Countries" Multiplicity="0..1" />
           <End Role="PartManufacturers" Type="Self.PartManufacturers" Multiplicity="*" />
@@ -412,6 +490,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__UserNotif__Notif__2EDAF651">
+          <End Role="Notifications" Type="Self.Notifications" Multiplicity="1" />
+          <End Role="UserNotifications" Type="Self.UserNotifications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Notifications">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="UserNotifications">
+              <PropertyRef Name="NotificationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserNotif__UserI__2DE6D218">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="UserNotifications" Type="Self.UserNotifications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="UserNotifications">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__UserRoles__RoleI__160F4887">
           <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
           <End Role="UserRoles" Type="Self.UserRoles" Multiplicity="*" />
@@ -436,6 +538,72 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_EmployeeRolesMap_Employee">
+          <End Role="Employees" Type="Self.Employees" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="EmployeeRolesMap" Type="Self.EmployeeRolesMap" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employees">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="EmployeeRolesMap">
+              <PropertyRef Name="EmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeeRolesMap_Role">
+          <End Role="Roles" Type="Self.Roles" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="EmployeeRolesMap" Type="Self.EmployeeRolesMap" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="EmployeeRolesMap">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Employees_Workshop">
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="0..1" />
+          <End Role="Employees" Type="Self.Employees" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Employees">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Workshops_Address">
+          <End Role="Addresses" Type="Self.Addresses" Multiplicity="0..1" />
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Addresses">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Workshops">
+              <PropertyRef Name="AddressId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Workshops_Company">
+          <End Role="Companies" Type="Self.Companies" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Companies">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Workshops">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="DriveCareDBModelStoreContainer">
           <EntitySet Name="Addresses" EntityType="Self.Addresses" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Brands" EntityType="Self.Brands" Schema="dbo" store:Type="Tables" />
@@ -445,9 +613,13 @@
           <EntitySet Name="CarSales" EntityType="Self.CarSales" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CarTypes" EntityType="Self.CarTypes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Colors" EntityType="Self.Colors" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Companies" EntityType="Self.Companies" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Countries" EntityType="Self.Countries" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeeRolesMap" EntityType="Self.EmployeeRolesMap" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Employees" EntityType="Self.Employees" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="FuelTypes" EntityType="Self.FuelTypes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Models" EntityType="Self.Models" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Notifications" EntityType="Self.Notifications" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PartManufacturers" EntityType="Self.PartManufacturers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Parts" EntityType="Self.Parts" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
@@ -455,9 +627,11 @@
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserCars" EntityType="Self.UserCars" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserCarSales" EntityType="Self.UserCarSales" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserNotifications" EntityType="Self.UserNotifications" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserRoles" EntityType="Self.UserRoles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="WarehouseManagers" EntityType="Self.WarehouseManagers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Workshops" EntityType="Self.Workshops" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__Addresses__Count__0E6E26BF" Association="Self.FK__Addresses__Count__0E6E26BF">
             <End Role="Countries" EntitySet="Countries" />
             <End Role="Addresses" EntitySet="Addresses" />
@@ -494,6 +668,10 @@
             <End Role="Brands" EntitySet="Brands" />
             <End Role="Models" EntitySet="Models" />
           </AssociationSet>
+          <AssociationSet Name="FK__Notificat__CarId__29221CFB" Association="Self.FK__Notificat__CarId__29221CFB">
+            <End Role="Cars" EntitySet="Cars" />
+            <End Role="Notifications" EntitySet="Notifications" />
+          </AssociationSet>
           <AssociationSet Name="FK__PartManuf__Count__01142BA1" Association="Self.FK__PartManuf__Count__01142BA1">
             <End Role="Countries" EntitySet="Countries" />
             <End Role="PartManufacturers" EntitySet="PartManufacturers" />
@@ -526,6 +704,14 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="UserCarSales" EntitySet="UserCarSales" />
           </AssociationSet>
+          <AssociationSet Name="FK__UserNotif__Notif__2EDAF651" Association="Self.FK__UserNotif__Notif__2EDAF651">
+            <End Role="Notifications" EntitySet="Notifications" />
+            <End Role="UserNotifications" EntitySet="UserNotifications" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserNotif__UserI__2DE6D218" Association="Self.FK__UserNotif__UserI__2DE6D218">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserNotifications" EntitySet="UserNotifications" />
+          </AssociationSet>
           <AssociationSet Name="FK__UserRoles__RoleI__160F4887" Association="Self.FK__UserRoles__RoleI__160F4887">
             <End Role="Roles" EntitySet="Roles" />
             <End Role="UserRoles" EntitySet="UserRoles" />
@@ -533,6 +719,26 @@
           <AssociationSet Name="FK__UserRoles__UserI__151B244E" Association="Self.FK__UserRoles__UserI__151B244E">
             <End Role="Users" EntitySet="Users" />
             <End Role="UserRoles" EntitySet="UserRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeRolesMap_Employee" Association="Self.FK_EmployeeRolesMap_Employee">
+            <End Role="Employees" EntitySet="Employees" />
+            <End Role="EmployeeRolesMap" EntitySet="EmployeeRolesMap" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeRolesMap_Role" Association="Self.FK_EmployeeRolesMap_Role">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="EmployeeRolesMap" EntitySet="EmployeeRolesMap" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Employees_Workshop" Association="Self.FK_Employees_Workshop">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="Employees" EntitySet="Employees" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Workshops_Address" Association="Self.FK_Workshops_Address">
+            <End Role="Addresses" EntitySet="Addresses" />
+            <End Role="Workshops" EntitySet="Workshops" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Workshops_Company" Association="Self.FK_Workshops_Company">
+            <End Role="Companies" EntitySet="Companies" />
+            <End Role="Workshops" EntitySet="Workshops" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -552,6 +758,7 @@
           <Property Name="FullAddress" Type="String" MaxLength="404" FixedLength="false" Unicode="true" Nullable="false" annotation:StoreGeneratedPattern="Computed" />
           <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Countries" Relationship="Self.FK__Addresses__Count__0E6E26BF" FromRole="Addresses" ToRole="Countries" />
+          <NavigationProperty Name="Workshops" Relationship="DriveCareDBModel.FK_Workshops_Address" FromRole="Addresses" ToRole="Workshops" />
         </EntityType>
         <EntityType Name="Brands">
           <Key>
@@ -591,6 +798,7 @@
           <NavigationProperty Name="Models" Relationship="Self.FK__Cars__ModelId__571DF1D5" FromRole="Cars" ToRole="Models" />
           <NavigationProperty Name="UserCars" Relationship="Self.FK__UserCars__CarId__628FA481" FromRole="Cars" ToRole="UserCars" />
           <NavigationProperty Name="CarSales" Relationship="DriveCareDBModel.FK__CarSales__CarId__1AD3FDA4" FromRole="Cars" ToRole="CarSales" />
+          <NavigationProperty Name="Notifications" Relationship="DriveCareDBModel.FK__Notificat__CarId__29221CFB" FromRole="Cars" ToRole="Notifications" />
         </EntityType>
         <EntityType Name="CarTypes">
           <Key>
@@ -710,6 +918,7 @@
           <NavigationProperty Name="UserCars" Relationship="Self.FK__UserCars__UserId__619B8048" FromRole="Users" ToRole="UserCars" />
           <NavigationProperty Name="UserRoles" Relationship="DriveCareDBModel.FK__UserRoles__UserI__151B244E" FromRole="Users" ToRole="UserRoles" />
           <NavigationProperty Name="UserCarSales" Relationship="DriveCareDBModel.FK__UserCarSa__UserI__1EA48E88" FromRole="Users" ToRole="UserCarSales" />
+          <NavigationProperty Name="UserNotifications" Relationship="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" FromRole="Users" ToRole="UserNotifications" />
         </EntityType>
         <EntityType Name="WarehouseManagers">
           <Key>
@@ -977,6 +1186,44 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="UserCarSales" EntitySet="UserCarSales" />
           </AssociationSet>
+          <EntitySet Name="Companies" EntityType="DriveCareDBModel.Companies" />
+          <EntitySet Name="EmployeeRolesMap" EntityType="DriveCareDBModel.EmployeeRolesMap" />
+          <EntitySet Name="Employees" EntityType="DriveCareDBModel.Employees" />
+          <EntitySet Name="Notifications" EntityType="DriveCareDBModel.Notifications" />
+          <EntitySet Name="UserNotifications" EntityType="DriveCareDBModel.UserNotifications" />
+          <EntitySet Name="Workshops" EntityType="DriveCareDBModel.Workshops" />
+          <AssociationSet Name="FK_Workshops_Address" Association="DriveCareDBModel.FK_Workshops_Address">
+            <End Role="Addresses" EntitySet="Addresses" />
+            <End Role="Workshops" EntitySet="Workshops" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Notificat__CarId__29221CFB" Association="DriveCareDBModel.FK__Notificat__CarId__29221CFB">
+            <End Role="Cars" EntitySet="Cars" />
+            <End Role="Notifications" EntitySet="Notifications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Workshops_Company" Association="DriveCareDBModel.FK_Workshops_Company">
+            <End Role="Companies" EntitySet="Companies" />
+            <End Role="Workshops" EntitySet="Workshops" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeRolesMap_Employee" Association="DriveCareDBModel.FK_EmployeeRolesMap_Employee">
+            <End Role="Employees" EntitySet="Employees" />
+            <End Role="EmployeeRolesMap" EntitySet="EmployeeRolesMap" />
+          </AssociationSet>
+          <AssociationSet Name="FK_EmployeeRolesMap_Role" Association="DriveCareDBModel.FK_EmployeeRolesMap_Role">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="EmployeeRolesMap" EntitySet="EmployeeRolesMap" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Employees_Workshop" Association="DriveCareDBModel.FK_Employees_Workshop">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="Employees" EntitySet="Employees" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserNotif__Notif__2EDAF651" Association="DriveCareDBModel.FK__UserNotif__Notif__2EDAF651">
+            <End Role="Notifications" EntitySet="Notifications" />
+            <End Role="UserNotifications" EntitySet="UserNotifications" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UserNotif__UserI__2DE6D218" Association="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="UserNotifications" EntitySet="UserNotifications" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Roles">
           <Key>
@@ -986,6 +1233,7 @@
           <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="UserRoles" Relationship="DriveCareDBModel.FK__UserRoles__RoleI__160F4887" FromRole="Roles" ToRole="UserRoles" />
+          <NavigationProperty Name="EmployeeRolesMap" Relationship="DriveCareDBModel.FK_EmployeeRolesMap_Role" FromRole="Roles" ToRole="EmployeeRolesMap" />
         </EntityType>
         <EntityType Name="UserRoles">
           <Key>
@@ -1103,6 +1351,186 @@
               <PropertyRef Name="RowId" />
             </Principal>
             <Dependent Role="UserCarSales">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Companies">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Workshops" Relationship="DriveCareDBModel.FK_Workshops_Company" FromRole="Companies" ToRole="Workshops" />
+        </EntityType>
+        <EntityType Name="EmployeeRolesMap">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="EmployeeId" Type="Guid" Nullable="false" />
+          <Property Name="RoleId" Type="Guid" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Employees" Relationship="DriveCareDBModel.FK_EmployeeRolesMap_Employee" FromRole="EmployeeRolesMap" ToRole="Employees" />
+          <NavigationProperty Name="Roles" Relationship="DriveCareDBModel.FK_EmployeeRolesMap_Role" FromRole="EmployeeRolesMap" ToRole="Roles" />
+        </EntityType>
+        <EntityType Name="Employees">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="MidName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Login" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Password" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Phone" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="BirthDate" Type="DateTime" Precision="0" />
+          <Property Name="HireDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="WorkshopId" Type="Guid" />
+          <NavigationProperty Name="EmployeeRolesMap" Relationship="DriveCareDBModel.FK_EmployeeRolesMap_Employee" FromRole="Employees" ToRole="EmployeeRolesMap" />
+          <NavigationProperty Name="Workshops" Relationship="DriveCareDBModel.FK_Employees_Workshop" FromRole="Employees" ToRole="Workshops" />
+        </EntityType>
+        <EntityType Name="Notifications">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="Title" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="CarId" Type="Guid" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Cars" Relationship="DriveCareDBModel.FK__Notificat__CarId__29221CFB" FromRole="Notifications" ToRole="Cars" />
+          <NavigationProperty Name="UserNotifications" Relationship="DriveCareDBModel.FK__UserNotif__Notif__2EDAF651" FromRole="Notifications" ToRole="UserNotifications" />
+        </EntityType>
+        <EntityType Name="UserNotifications">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="UserId" Type="Guid" Nullable="false" />
+          <Property Name="NotificationId" Type="Guid" Nullable="false" />
+          <Property Name="IsRead" Type="Boolean" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Notifications" Relationship="DriveCareDBModel.FK__UserNotif__Notif__2EDAF651" FromRole="UserNotifications" ToRole="Notifications" />
+          <NavigationProperty Name="Users" Relationship="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" FromRole="UserNotifications" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Workshops">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyId" Type="Guid" Nullable="false" />
+          <Property Name="AddressId" Type="Guid" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Addresses" Relationship="DriveCareDBModel.FK_Workshops_Address" FromRole="Workshops" ToRole="Addresses" />
+          <NavigationProperty Name="Companies" Relationship="DriveCareDBModel.FK_Workshops_Company" FromRole="Workshops" ToRole="Companies" />
+          <NavigationProperty Name="Employees" Relationship="DriveCareDBModel.FK_Employees_Workshop" FromRole="Workshops" ToRole="Employees" />
+        </EntityType>
+        <Association Name="FK_Workshops_Address">
+          <End Type="DriveCareDBModel.Addresses" Role="Addresses" Multiplicity="0..1" />
+          <End Type="DriveCareDBModel.Workshops" Role="Workshops" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Addresses">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Workshops">
+              <PropertyRef Name="AddressId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Notificat__CarId__29221CFB">
+          <End Type="DriveCareDBModel.Cars" Role="Cars" Multiplicity="0..1" />
+          <End Type="DriveCareDBModel.Notifications" Role="Notifications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cars">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Notifications">
+              <PropertyRef Name="CarId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Workshops_Company">
+          <End Type="DriveCareDBModel.Companies" Role="Companies" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="DriveCareDBModel.Workshops" Role="Workshops" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Companies">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Workshops">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeeRolesMap_Employee">
+          <End Type="DriveCareDBModel.Employees" Role="Employees" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="DriveCareDBModel.EmployeeRolesMap" Role="EmployeeRolesMap" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employees">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="EmployeeRolesMap">
+              <PropertyRef Name="EmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_EmployeeRolesMap_Role">
+          <End Type="DriveCareDBModel.Roles" Role="Roles" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="DriveCareDBModel.EmployeeRolesMap" Role="EmployeeRolesMap" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="EmployeeRolesMap">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Employees_Workshop">
+          <End Type="DriveCareDBModel.Workshops" Role="Workshops" Multiplicity="0..1" />
+          <End Type="DriveCareDBModel.Employees" Role="Employees" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="Employees">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserNotif__Notif__2EDAF651">
+          <End Type="DriveCareDBModel.Notifications" Role="Notifications" Multiplicity="1" />
+          <End Type="DriveCareDBModel.UserNotifications" Role="UserNotifications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Notifications">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="UserNotifications">
+              <PropertyRef Name="NotificationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UserNotif__UserI__2DE6D218">
+          <End Type="DriveCareDBModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="DriveCareDBModel.UserNotifications" Role="UserNotifications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="UserNotifications">
               <PropertyRef Name="UserId" />
             </Dependent>
           </ReferentialConstraint>
@@ -1333,6 +1761,78 @@
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="CarSaleId" ColumnName="CarSaleId" />
                 <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Companies">
+            <EntityTypeMapping TypeName="DriveCareDBModel.Companies">
+              <MappingFragment StoreEntitySet="Companies">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmployeeRolesMap">
+            <EntityTypeMapping TypeName="DriveCareDBModel.EmployeeRolesMap">
+              <MappingFragment StoreEntitySet="EmployeeRolesMap">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="EmployeeId" ColumnName="EmployeeId" />
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Employees">
+            <EntityTypeMapping TypeName="DriveCareDBModel.Employees">
+              <MappingFragment StoreEntitySet="Employees">
+                <ScalarProperty Name="WorkshopId" ColumnName="WorkshopId" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="HireDate" ColumnName="HireDate" />
+                <ScalarProperty Name="BirthDate" ColumnName="BirthDate" />
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Login" ColumnName="Login" />
+                <ScalarProperty Name="MidName" ColumnName="MidName" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Notifications">
+            <EntityTypeMapping TypeName="DriveCareDBModel.Notifications">
+              <MappingFragment StoreEntitySet="Notifications">
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CarId" ColumnName="CarId" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserNotifications">
+            <EntityTypeMapping TypeName="DriveCareDBModel.UserNotifications">
+              <MappingFragment StoreEntitySet="UserNotifications">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="IsRead" ColumnName="IsRead" />
+                <ScalarProperty Name="NotificationId" ColumnName="NotificationId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Workshops">
+            <EntityTypeMapping TypeName="DriveCareDBModel.Workshops">
+              <MappingFragment StoreEntitySet="Workshops">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="AddressId" ColumnName="AddressId" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="RowId" ColumnName="RowId" />
               </MappingFragment>
             </EntityTypeMapping>

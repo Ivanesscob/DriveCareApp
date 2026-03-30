@@ -1,0 +1,23 @@
+<Page x:Class="DriveCarePro.Pages.ProHomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="DriveCare Pro"
+      Background="#0F0F1A">
+
+    <Grid Margin="32">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="420">
+            <TextBlock Text="DriveCare Pro" FontSize="28" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="Вы вошли в систему." FontSize="15" Foreground="#9AA0B0" Margin="0,12,0,28" HorizontalAlignment="Center"/>
+            <Button x:Name="LogoutButton" Content="Выйти" Height="44" MinWidth="160" FontSize="14" FontWeight="SemiBold"
+                    Foreground="White" Cursor="Hand" BorderThickness="0" Click="Logout_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" Background="#7C6CF5" Padding="20,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Page>

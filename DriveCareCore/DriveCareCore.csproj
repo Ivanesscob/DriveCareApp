@@ -97,7 +97,16 @@
     <Compile Include="Data\BD\Colors.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BD\Companies.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\Countries.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\EmployeeRolesMap.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\Employees.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BD\FuelTypes.cs">
@@ -121,6 +130,9 @@
     <Compile Include="Data\BD\Models.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BD\Notifications.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\PartManufacturers.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -142,6 +154,9 @@
     <Compile Include="Data\BD\UserCarSales.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BD\UserNotifications.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\UserRoles.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -150,6 +165,9 @@
     </Compile>
     <Compile Include="Data\BD\VinService.cs" />
     <Compile Include="Data\BD\WarehouseManagers.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\Workshops.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\DelegateCommand.cs" />

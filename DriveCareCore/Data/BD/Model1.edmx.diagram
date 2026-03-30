@@ -5,16 +5,16 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="0c1babde56bc4eadb676f48b7007fd16" Name="Diagram1" ZoomLevel="74">
-        <EntityTypeShape EntityType="DriveCareDBModel.Addresses" Width="1.5" PointX="3" PointY="12.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Addresses" Width="1.5" PointX="2.625" PointY="11.375" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Brands" Width="1.5" PointX="0.75" PointY="4" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.CarColors" Width="1.5" PointX="7.5" PointY="3.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Cars" Width="1.5" PointX="5.25" PointY="3.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Cars" Width="1.5" PointX="5.25" PointY="3.625" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.CarTypes" Width="1.5" PointX="3" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Colors" Width="1.5" PointX="5.25" PointY="8.875" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Countries" Width="1.5" PointX="0.75" PointY="14.375" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.FuelTypes" Width="1.5" PointX="3" PointY="7.25" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Models" Width="1.5" PointX="3" PointY="3.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.PartManufacturers" Width="1.5" PointX="3" PointY="16.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.PartManufacturers" Width="1.5" PointX="4.375" PointY="16.875" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Parts" Width="1.5" PointX="7.5" PointY="12.125" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.Statuses" Width="1.5" PointX="5.25" PointY="12.75" IsExpanded="true" />
         <EntityTypeShape EntityType="DriveCareDBModel.sysdiagrams" Width="1.5" PointX="10.75" PointY="6.875" IsExpanded="true" />
@@ -45,12 +45,21 @@
         <AssociationConnector Association="DriveCareDBModel.FK__CarSalePr__CarSa__245D67DE" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserCarSa__CarSa__1F98B2C1" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserCarSa__UserI__1EA48E88" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Notifications" Width="1.5" PointX="11.25" PointY="16" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Notifications" Width="1.5" PointX="15.375" PointY="16.625" />
         <EntityTypeShape EntityType="DriveCareDBModel.UserNotifications" Width="1.5" PointX="13.5" PointY="12.125" />
         <AssociationConnector Association="DriveCareDBModel.FK__Notificat__CarId__29221CFB" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserNotif__Notif__2EDAF651" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" />
-      </Diagram>
+        <EntityTypeShape EntityType="DriveCareDBModel.EmployeeRolesMap" Width="1.5" PointX="13.125" PointY="17.5" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Employees" Width="1.5" PointX="10.25" PointY="18.75" />
+        <AssociationConnector Association="DriveCareDBModel.FK_EmployeeRolesMap_Employee" />
+        <AssociationConnector Association="DriveCareDBModel.FK_EmployeeRolesMap_Role" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Companies" Width="1.5" PointX="3" PointY="19.25" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Workshops" Width="1.5" PointX="7.125" PointY="16" />
+        <AssociationConnector Association="DriveCareDBModel.FK_Workshops_Address" />
+        <AssociationConnector Association="DriveCareDBModel.FK_Workshops_Company" />
+        <AssociationConnector Association="DriveCareDBModel.FK_Employees_Workshop" />
+        </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
 </edmx:Edmx>
