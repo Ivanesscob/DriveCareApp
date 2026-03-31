@@ -15,9 +15,10 @@ using System.Windows.Media.Imaging;
 
 namespace DriveCare.Pages.User.ActionPages
 {
-    public partial class BuyCarPage : Page, INotifyPropertyChanged
+    public partial class MyCarSalesPage : Page, INotifyPropertyChanged
     {
         private const string FallbackImagePath = "pack://application:,,,/DriveCare;component/Data/NotPhotoCar.png";
+
         public ObservableCollection<BuyCarSaleItemVm> SalesItems { get; } = new ObservableCollection<BuyCarSaleItemVm>();
         public ObservableCollection<string> Brands { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> Models { get; } = new ObservableCollection<string>();
@@ -60,7 +61,7 @@ namespace DriveCare.Pages.User.ActionPages
             }
         }
 
-        public BuyCarPage()
+        public MyCarSalesPage()
         {
             InitializeComponent();
             DataContext = this;
@@ -72,9 +73,28 @@ namespace DriveCare.Pages.User.ActionPages
             AppState.SetFrame<UserHomePage>();
         }
 
+        private void Catalog_Click(object sender, RoutedEventArgs e)
+        {
+            AppState.SetFrame<BuyCarPage>();
+        }
+
+        private void AddAd_Click(object sender, RoutedEventArgs e)
+        {
+            AppState.SetFrame<AddCarSalePage>();
+        }
+
         private void LoadSales()
         {
             _allSales.Clear();
+            var userId = AppState.CurrentUserId;
+            if (userId == Guid.Empty)
+            {
+                RebuildBrandFilter();
+                RebuildModelFilter();
+                ApplyFilters();
+                return;
+            }
+
             try
             {
                 const string sql = @"
@@ -88,6 +108,7 @@ SELECT
     ISNULL(lastPrice.Price, 0) AS LastPrice,
     cs.PhotoPath
 FROM CarSales cs
+INNER JOIN UserCarSales ucs ON ucs.CarSaleId = cs.RowId AND ucs.UserId = @p0
 INNER JOIN Cars c ON c.RowId = cs.CarId
 LEFT JOIN Models m ON m.RowId = c.ModelId
 LEFT JOIN Brands b ON b.RowId = m.BrandId
@@ -108,13 +129,13 @@ OUTER APPLY (
     ORDER BY p.StartDate DESC
 ) lastPrice;";
 
-                var rows = AppConnect.model1.Database.SqlQuery<BuyCarSqlRow>(sql).ToList();
+                var rows = AppConnect.model1.Database.SqlQuery<BuyCarSqlRow>(sql, userId).ToList();
                 foreach (var row in rows)
                 {
                     var brand = Safe(row.BrandName, "Марка");
                     var model = Safe(row.ModelName, "Модель");
                     var color = Safe(row.ColorName, "Без цвета");
-                    var yearPart = row.CarYear.HasValue ? $" · {row.CarYear.Value}" : string.Empty;
+                    var yearPart = row.CarYear.HasValue ? string.Format(" · {0}", row.CarYear.Value) : string.Empty;
 
                     _allSales.Add(new BuyCarSaleItemVm
                     {
@@ -125,8 +146,8 @@ OUTER APPLY (
                         Color = color,
                         Year = row.CarYear,
                         Price = row.LastPrice,
-                        CarLabel = $"{brand} {model}{yearPart} · {color}",
-                        PriceLabel = $"{row.LastPrice:0} ₽",
+                        CarLabel = string.Format("{0} {1}{2} · {3}", brand, model, yearPart, color),
+                        PriceLabel = string.Format("{0:0} ₽", row.LastPrice),
                         SellerLabel = Safe(row.SaleTitle, "Объявление"),
                         Photo = ResolveSaleImage(row.PhotoPath)
                     });
@@ -134,7 +155,6 @@ OUTER APPLY (
             }
             catch
             {
-                // Если таблицы/поля пока не совпадают с БД, просто оставляем пустой список.
             }
 
             RebuildBrandFilter();
@@ -228,16 +248,13 @@ OUTER APPLY (
 
             try
             {
-                // Если в БД уже лежит локальный путь и файл есть — используем его.
                 if (File.Exists(raw))
                     return LoadImageOrFallback(raw);
 
-                // Сначала пробуем как "имя на сервере" (как в вашем GET-методе).
                 var downloadedByRaw = PhotoTcpStorageService.DownloadPhotoByName(raw);
                 if (!string.IsNullOrWhiteSpace(downloadedByRaw))
                     return LoadImageOrFallback(downloadedByRaw);
 
-                // Если в БД попал путь, а не имя — fallback на имя файла.
                 var serverFileName = Path.GetFileName(raw);
                 if (string.IsNullOrWhiteSpace(serverFileName))
                     return LoadImageOrFallback(null);
@@ -290,7 +307,7 @@ OUTER APPLY (
         private void SaleDetails_Click(object sender, RoutedEventArgs e)
         {
             var fe = sender as FrameworkElement;
-            var item = fe?.DataContext as BuyCarSaleItemVm;
+            var item = fe != null ? fe.DataContext as BuyCarSaleItemVm : null;
             OpenSaleDetails(item);
         }
 
@@ -298,24 +315,13 @@ OUTER APPLY (
         {
             if (e.ClickCount != 2) return;
             var fe = sender as FrameworkElement;
-            var item = fe?.DataContext as BuyCarSaleItemVm;
+            var item = fe != null ? fe.DataContext as BuyCarSaleItemVm : null;
             OpenSaleDetails(item);
             e.Handled = true;
         }
 
-        private void OpenSaleDetails(BuyCarSaleItemVm item)
+        private static void OpenSaleDetails(BuyCarSaleItemVm item)
         {
-            // Пока пустой общий метод для кнопки "Подробнее" и двойного клика по карточке.
-        }
-
-        private void MyAds_Click(object sender, RoutedEventArgs e)
-        {
-            AppState.SetFrame<MyCarSalesPage>();
-        }
-
-        private void AddAd_Click(object sender, RoutedEventArgs e)
-        {
-            AppState.SetFrame<AddCarSalePage>();
         }
 
         private void ClearFilters_Click(object sender, RoutedEventArgs e)
@@ -330,34 +336,10 @@ OUTER APPLY (
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-    }
-
-    public sealed class BuyCarSaleItemVm
-    {
-        public Guid SaleId { get; set; }
-        public string SaleTitle { get; set; }
-        public string Brand { get; set; }
-        public string Model { get; set; }
-        public string Color { get; set; }
-        public int? Year { get; set; }
-        public decimal Price { get; set; }
-        public string CarLabel { get; set; }
-        public string PriceLabel { get; set; }
-        public string SellerLabel { get; set; }
-        public ImageSource Photo { get; set; }
-    }
-
-    internal sealed class BuyCarSqlRow
-    {
-        public Guid SaleId { get; set; }
-        public string SaleTitle { get; set; }
-        public string BrandName { get; set; }
-        public string ModelName { get; set; }
-        public string ColorName { get; set; }
-        public int? CarYear { get; set; }
-        public decimal LastPrice { get; set; }
-        public string PhotoPath { get; set; }
+        private void OnPropertyChanged([CallerMemberName] string prop = null)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
     }
 }
-

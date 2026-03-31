@@ -23,7 +23,6 @@ namespace DriveCareCore.Data.Services
             return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath());
         }
 
-        // Явный алиас: даём имя файла, получаем локальный путь скачанного файла.
         public static string DownloadPhotoByName(string serverFileName)
         {
             return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath());
@@ -63,20 +62,20 @@ namespace DriveCareCore.Data.Services
                     client.Connect(serverIp, port);
                     using (NetworkStream stream = client.GetStream())
                     {
-                        // --- отправляем команду GET ---
+                        
                         string command = "GET";
                         byte[] cmdBytes = Encoding.UTF8.GetBytes(command);
                         byte[] cmdLength = BitConverter.GetBytes(cmdBytes.Length);
                         stream.Write(cmdLength, 0, 4);
                         stream.Write(cmdBytes, 0, cmdBytes.Length);
 
-                        // --- отправляем имя файла ---
+                        
                         byte[] nameBytes = Encoding.UTF8.GetBytes(serverFileName);
                         byte[] nameLength = BitConverter.GetBytes(nameBytes.Length);
                         stream.Write(nameLength, 0, 4);
                         stream.Write(nameBytes, 0, nameBytes.Length);
 
-                        // --- читаем размер файла (8 байт) ---
+                       
                         byte[] fileSizeBytes = new byte[8];
                         int readSize = ReadExactly(stream, fileSizeBytes, 8);
                         if (readSize != 8)
@@ -86,7 +85,7 @@ namespace DriveCareCore.Data.Services
                         if (fileSize <= 0)
                             return null;
 
-                        // --- читаем сам файл ---
+                       
                         using (FileStream fs = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
                         {
                             byte[] buffer = new byte[8192];
