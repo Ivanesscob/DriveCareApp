@@ -1,18 +1,23 @@
 using DriveCareCore.Data.BD;
+using DriveCareCore.Data.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace DriveCare.Pages.User.ActionPages
 {
     public partial class BuyCarPage : Page, INotifyPropertyChanged
     {
+        private const string FallbackImagePath = "pack://application:,,,/DriveCare;component/Data/NotPhotoCar.png";
         public ObservableCollection<BuyCarSaleItemVm> SalesItems { get; } = new ObservableCollection<BuyCarSaleItemVm>();
         public ObservableCollection<string> Brands { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> Models { get; } = new ObservableCollection<string>();
@@ -122,7 +127,8 @@ OUTER APPLY (
                         Price = row.LastPrice,
                         CarLabel = $"{brand} {model}{yearPart} · {color}",
                         PriceLabel = $"{row.LastPrice:0} ₽",
-                        SellerLabel = Safe(row.SaleTitle, "Объявление")
+                        SellerLabel = Safe(row.SaleTitle, "Объявление"),
+                        Photo = ResolveSaleImage(row.PhotoPath)
                     });
                 }
             }
@@ -214,6 +220,73 @@ OUTER APPLY (
             return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
         }
 
+        private static ImageSource ResolveSaleImage(string photoPathFromDb)
+        {
+            var raw = (photoPathFromDb ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(raw))
+                return LoadImageOrFallback(null);
+
+            try
+            {
+                // Если в БД уже лежит локальный путь и файл есть — используем его.
+                if (File.Exists(raw))
+                    return LoadImageOrFallback(raw);
+
+                // Сначала пробуем как "имя на сервере" (как в вашем GET-методе).
+                var downloadedByRaw = PhotoTcpStorageService.DownloadPhotoByName(raw);
+                if (!string.IsNullOrWhiteSpace(downloadedByRaw))
+                    return LoadImageOrFallback(downloadedByRaw);
+
+                // Если в БД попал путь, а не имя — fallback на имя файла.
+                var serverFileName = Path.GetFileName(raw);
+                if (string.IsNullOrWhiteSpace(serverFileName))
+                    return LoadImageOrFallback(null);
+
+                var downloadedByName = PhotoTcpStorageService.DownloadPhotoByName(serverFileName);
+                return LoadImageOrFallback(downloadedByName);
+            }
+            catch
+            {
+                return LoadImageOrFallback(null);
+            }
+        }
+
+        private static ImageSource LoadImageOrFallback(string localPath)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(localPath) && File.Exists(localPath))
+                {
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.UriSource = new Uri(localPath, UriKind.Absolute);
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                var fallback = new BitmapImage();
+                fallback.BeginInit();
+                fallback.UriSource = new Uri(FallbackImagePath, UriKind.Absolute);
+                fallback.CacheOption = BitmapCacheOption.OnLoad;
+                fallback.EndInit();
+                fallback.Freeze();
+                return fallback;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private void SaleDetails_Click(object sender, RoutedEventArgs e)
         {
             var fe = sender as FrameworkElement;
@@ -272,6 +345,7 @@ OUTER APPLY (
         public string CarLabel { get; set; }
         public string PriceLabel { get; set; }
         public string SellerLabel { get; set; }
+        public ImageSource Photo { get; set; }
     }
 
     internal sealed class BuyCarSqlRow
@@ -283,6 +357,7 @@ OUTER APPLY (
         public string ColorName { get; set; }
         public int? CarYear { get; set; }
         public decimal LastPrice { get; set; }
+        public string PhotoPath { get; set; }
     }
 }
 

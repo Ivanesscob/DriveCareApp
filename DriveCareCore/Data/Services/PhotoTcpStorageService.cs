@@ -23,6 +23,12 @@ namespace DriveCareCore.Data.Services
             return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath());
         }
 
+        // Явный алиас: даём имя файла, получаем локальный путь скачанного файла.
+        public static string DownloadPhotoByName(string serverFileName)
+        {
+            return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath());
+        }
+
         public static string DownloadPhotoFromServer(string serverFileName, string serverIp, int port, string outputFolder)
         {
             if (string.IsNullOrWhiteSpace(serverFileName))

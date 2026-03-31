@@ -166,7 +166,7 @@
                                 </Grid.RowDefinitions>
 
                                 <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
-                                    <Image Source="/DriveCare;component/Data/NotPhotoCar.png" Stretch="UniformToFill"/>
+                                    <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
                                 </Border>
 
                                 <StackPanel Grid.Row="1">
