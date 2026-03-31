@@ -1,0 +1,128 @@
+UML-схема DriveCareApp (высокий уровень)
+========================================
+
+Обозначения
+- [Проект] содержит пространства имён/классы
+- A --> B : использует / зависит от
+- A --* B : композиция/агрегация (один-ко-многим)
+- A -- B : ассоциация
+
+
+[DriveCareCore]
+---------------
+Основное назначение: общий слой данных/домена, диалоги, утилиты.
+
+Ключевые классы:
+- Data/BD/AppConnect
+- Data/BD/DriveCareDBEntities (EF DbContext)
+- Data/BD сущности:
+  Users, Roles, UserRoles, Employees, EmployeeRolesMap,
+  Cars, UserCars, CarSales, CarSalePrices, UserCarSales,
+  Notifications, UserNotifications, Brands, Models, Colors, CarColors и др.
+- Data/DelegateCommand
+- Data/Services/CarTypeImageHelper
+- Data/Services/PhotoTcpStorageService
+- Dialogs/AppMessageBox
+
+Связи сущностей (ядро домена):
+- Users --* UserRoles
+- Roles --* UserRoles
+- Users --* UserCars
+- Cars --* UserCars
+- Cars --* CarSales
+- CarSales --* CarSalePrices
+- Users --* UserCarSales
+- CarSales --* UserCarSales
+- Users --* UserNotifications
+- Notifications --* UserNotifications
+- Brands --* Models
+- Models --* Cars
+- Colors --* CarColors
+- Cars --* CarColors
+
+
+[DriveCare]
+-----------
+Основное назначение: пользовательское приложение (WPF UI).
+
+Ключевые классы/страницы:
+- MainWindow
+- Data/AppState (навигация + текущая сессия пользователя)
+- Pages/LoginPages/LoginPage
+- Pages/LoginPages/RegisterPage
+- Pages/User/UserHomePage
+- Pages/User/ProfilePage
+- Pages/User/ActionPages:
+  ToolsStorePage, ServiceSelectPage, PaintCarPage, ServiceCarPage,
+  BuyCarPage, AddCarSalePage
+- Services/RegistrationMailHelper
+
+Внутренние view-model/вспомогательные классы:
+- UserHomePage:
+  NotificationDisplayItem, UserNotificationSqlRow
+- BuyCarPage:
+  BuyCarSaleItemVm, BuyCarSqlRow
+- AddCarSalePage:
+  UserCarOption
+
+Зависимости:
+- DriveCare --> DriveCareCore.Data.BD (EF-контекст/сущности)
+- DriveCare --> DriveCareCore.Data (DelegateCommand, хелперы)
+- DriveCare --> DriveCareCore.Dialogs (AppMessageBox)
+
+Основной runtime-поток:
+- MainWindow -> AppState.MainFrame
+- LoginPage аутентифицирует Users и заполняет AppState.CurrentUser/CurrentUserId/UserRoles
+- UserHomePage — основной хаб перехода к action-страницам
+- BuyCarPage читает список CarSales и применяет фильтры
+- AddCarSalePage создаёт CarSales + CarSalePrices + UserCarSales
+- RegisterPage создаёт Users с подтверждением email (mail helper)
+
+
+[DriveCarePro]
+--------------
+Основное назначение: отдельное Pro-приложение (UI).
+
+Ключевые классы/страницы:
+- MainWindow
+- AppState
+- Pages/LoginPages/LoginPage
+- Pages/LoginPages/RegisterPage
+- Pages/ProHomePage
+
+Зависимости:
+- DriveCarePro --> DriveCareCore.Data.BD
+- DriveCarePro --> DriveCareCore.Dialogs
+- DriveCarePro --> DriveCareCore.Data (DelegateCommand)
+
+Runtime-поток:
+- MainWindow -> AppState.MainFrame
+- LoginPage аутентифицирует Employees
+- ProHomePage — стартовая страница после успешного входа
+
+
+Граф зависимостей проектов
+--------------------------
+DriveCare ------> DriveCareCore
+DriveCarePro ---> DriveCareCore
+
+
+Упрощённая диаграмма пакетов
+----------------------------
+[DriveCareCore]
+  + Data.BD (EF + сущности)
+  + Data.Services (утилиты изображений/хранилища)
+  + Dialogs (диалоги)
+  + Data (команды/общие вспомогательные классы)
+
+[DriveCare]
+  + UI (страницы/окна)
+  + App state (навигация/сессия)
+  + Mail helper
+  + Использует общие модули из DriveCareCore
+
+[DriveCarePro]
+  + UI (pro-страницы/окна)
+  + App state (навигация/сессия)
+  + Использует общие модули из DriveCareCore
+

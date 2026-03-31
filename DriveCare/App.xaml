@@ -1,9 +1,41 @@
-﻿<Application x:Class="DriveCare.App"
+<Application x:Class="DriveCare.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:DriveCare"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <SolidColorBrush x:Key="App.ComboBg" Color="#14141F"/>
+        <SolidColorBrush x:Key="App.ComboBorder" Color="#2E2E44"/>
+        <SolidColorBrush x:Key="App.ComboFg" Color="White"/>
+        <SolidColorBrush x:Key="App.ComboItemHover" Color="#2A2A3E"/>
+        <SolidColorBrush x:Key="App.ComboItemSelected" Color="#7C6CF5"/>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource App.ComboFg}"/>
+            <Setter Property="Background" Value="{StaticResource App.ComboBg}"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{StaticResource App.ComboItemHover}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource App.ComboItemSelected}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource App.ComboBg}"/>
+            <Setter Property="Foreground" Value="{StaticResource App.ComboFg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource App.ComboBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

@@ -3,35 +3,144 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Покупка машины">
     <Page.Resources>
-        <Style x:Key="BackButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="220"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Background" Value="#1A1A28"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#2E2E44"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
+        <Style x:Key="LightComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#E9ECFF"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#D9DEFF"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
-    </Page.Resources>
 
+        <Style x:Key="LightComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#A6A6A6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource LightComboBoxItemStyle}"/>
+        </Style>
+
+        <DataTemplate x:Key="LightComboItemTemplate">
+            <TextBlock Text="{Binding}" Foreground="Black"/>
+        </DataTemplate>
+    </Page.Resources>
     <Grid Background="#14141F">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,24,0,0" HorizontalAlignment="Center">
-            <TextBlock Text="Покупка машины" Foreground="White" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-            <TextBlock Text="Листинг с продажами из CarSales" Foreground="#9AA0B0" FontSize="14" Margin="0,8,0,0" HorizontalAlignment="Center"/>
-        </StackPanel>
+        <Grid Grid.Row="0" Margin="24,18,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="1" Margin="24,16,24,24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <Border Grid.Column="0" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="10" Padding="10,4">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="White"
+                         FontSize="14"
+                         CaretBrush="White"
+                         VerticalContentAlignment="Center"
+                         ToolTip="Поиск по названию, марке, модели, цвету"/>
+            </Border>
 
-            <ListView ItemsSource="{Binding SalesItems}" Grid.Row="0" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
+                <Button Content="Мои объявления"
+                        Height="40"
+                        Margin="0,0,10,0"
+                        Padding="16,0"
+                        Background="#1A1A28"
+                        Foreground="White"
+                        BorderBrush="#2E2E44"
+                        BorderThickness="1"
+                        Cursor="Hand"
+                        Click="MyAds_Click"/>
+                <Button Content="Добавить объявление"
+                        Height="40"
+                        Padding="16,0"
+                        Background="#7C6CF5"
+                        Foreground="White"
+                        BorderBrush="#7C6CF5"
+                        BorderThickness="1"
+                        Cursor="Hand"
+                        Click="AddAd_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="24,0,24,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="270"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="14">
+                <StackPanel>
+                    <TextBlock Text="Фильтры" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Цена, ₽" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding MinPriceText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
+                        <TextBox Grid.Column="2" Text="{Binding MaxPriceText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
+                    </Grid>
+
+                    <TextBlock Text="Марка" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <ComboBox ItemsSource="{Binding Brands}"
+                              SelectedItem="{Binding SelectedBrand}"
+                              Margin="0,0,0,10"
+                              Style="{StaticResource LightComboBoxStyle}"
+                              Foreground="Black"
+                              Background="White"
+                              ItemTemplate="{StaticResource LightComboItemTemplate}"/>
+
+                    <TextBlock Text="Модель" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <ComboBox ItemsSource="{Binding Models}"
+                              SelectedItem="{Binding SelectedModel}"
+                              Margin="0,0,0,10"
+                              Style="{StaticResource LightComboBoxStyle}"
+                              Foreground="Black"
+                              Background="White"
+                              ItemTemplate="{StaticResource LightComboItemTemplate}"/>
+
+                    <TextBlock Text="Год выпуска" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding MinYearText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
+                        <TextBox Grid.Column="2" Text="{Binding MaxYearText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
+                    </Grid>
+
+                    <Button Content="Сбросить фильтры"
+                            Height="36"
+                            Background="#222236"
+                            Foreground="White"
+                            BorderBrush="#2E2E44"
+                            BorderThickness="1"
+                            Cursor="Hand"
+                            Click="ClearFilters_Click"/>
+                </StackPanel>
+            </Border>
+
+            <ListView Grid.Column="2" ItemsSource="{Binding SalesItems}" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel IsItemsHost="True"/>
@@ -47,8 +156,7 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="260" Height="300"
-                                Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                        <Border Width="260" Height="300" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="140"/>
@@ -66,8 +174,7 @@
                                     <TextBlock Text="{Binding SellerLabel}" Foreground="#9AA0B0" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>
 
-                                <Border Grid.Row="2" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1"
-                                        CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
+                                <Border Grid.Row="2" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1" CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
                                     <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
                                 </Border>
 
@@ -92,10 +199,20 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-
-            <Button Grid.Row="1" Content="Назад на главную" Style="{StaticResource BackButtonStyle}" Margin="0,14,0,0"
-                    HorizontalAlignment="Center" Click="Back_Click"/>
         </Grid>
+
+        <Button Grid.Row="2"
+                Content="Назад на главную"
+                Width="220"
+                Height="40"
+                Margin="0,0,0,16"
+                HorizontalAlignment="Center"
+                Background="#1A1A28"
+                Foreground="White"
+                BorderBrush="#2E2E44"
+                BorderThickness="1"
+                Cursor="Hand"
+                Click="Back_Click"/>
     </Grid>
 </Page>
 

@@ -48,7 +48,7 @@ namespace DriveCare.Pages.LoginPages
                 AppMessageBox.Show("Введите логин и пароль.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-
+            
             
                 var user = AppConnect.model1.Users.FirstOrDefault(u =>
                     u.Login == Username && u.Password == password);

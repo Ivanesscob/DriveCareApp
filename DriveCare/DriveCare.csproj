@@ -118,6 +118,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\User\ActionPages\AddCarSalePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Pages\LoginPages\LoginPage.xaml.cs">
@@ -146,6 +150,9 @@
     </Compile>
     <Compile Include="Pages\User\ActionPages\BuyCarPage.xaml.cs">
       <DependentUpon>BuyCarPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\AddCarSalePage.xaml.cs">
+      <DependentUpon>AddCarSalePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

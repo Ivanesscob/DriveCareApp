@@ -172,6 +172,7 @@
     </Compile>
     <Compile Include="Data\DelegateCommand.cs" />
     <Compile Include="Data\Services\CarTypeImageHelper.cs" />
+    <Compile Include="Data\Services\PhotoTcpStorageService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dialogs\AppMessageBox.cs" />
