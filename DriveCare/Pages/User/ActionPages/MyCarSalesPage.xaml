@@ -140,69 +140,164 @@
                 </StackPanel>
             </Border>
 
-            <ListView Grid.Column="2" ItemsSource="{Binding SalesItems}" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1">
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel IsItemsHost="True"/>
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="Margin" Value="0,0,12,12"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Width="260" Height="300" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="140"/>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.45*"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                                <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
-                                    <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
-                                </Border>
+                <ListView Grid.Column="0"
+                          ItemsSource="{Binding SalesItems}"
+                          SelectedItem="{Binding SelectedSale, Mode=TwoWay}"
+                          Background="#14141F"
+                          BorderBrush="#2E2E44"
+                          BorderThickness="1"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          ScrollViewer.CanContentScroll="False">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,12,12"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Width="260" Height="300" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Row="1">
-                                    <TextBlock Text="{Binding CarLabel}" Foreground="White" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                    <TextBlock Text="{Binding SellerLabel}" Foreground="#9AA0B0" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
-                                </StackPanel>
+                                    <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
+                                        <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
+                                    </Border>
 
-                                <Border Grid.Row="2" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1" CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
-                                    <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                                </Border>
+                                    <StackPanel Grid.Row="1">
+                                        <TextBlock Text="{Binding CarLabel}" Foreground="White" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding SellerLabel}" Foreground="#9AA0B0" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding ModelInfoLabel}"
+                                                   Foreground="#BFC5D6"
+                                                   FontSize="12"
+                                                   Margin="0,6,0,0"
+                                                   TextWrapping="Wrap"
+                                                   MaxHeight="48"/>
+                                    </StackPanel>
 
-                                <Button Grid.Row="3"
-                                        Content="Подробнее"
-                                        Height="34"
-                                        Margin="0,10,0,0"
-                                        Background="#222236"
-                                        Foreground="White"
-                                        BorderBrush="#7C6CF5"
-                                        BorderThickness="1"
-                                        FontWeight="SemiBold"
-                                        Cursor="Hand"
-                                        Click="SaleDetails_Click"/>
-                            </Grid>
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <EventSetter Event="MouseLeftButtonDown" Handler="SaleCard_MouseLeftButtonDown"/>
-                                </Style>
-                            </Border.Style>
-                        </Border>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                                    <Border Grid.Row="2" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1" CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
+                                        <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                    </Border>
+
+                                </Grid>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <EventSetter Event="MouseLeftButtonDown" Handler="SaleCard_MouseLeftButtonDown"/>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <Border Grid.Column="2" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                    <StackPanel>
+                        <TextBlock Text="Редактирование" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock Text="Выберите объявление слева" Foreground="#9AA0B0" Margin="0,4,0,12"/>
+
+                        <TextBlock Text="Описание" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding EditableDescription, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="80"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 Background="#14141F"
+                                 Foreground="White"
+                                 BorderBrush="#2E2E44"
+                                 BorderThickness="1"
+                                 Padding="8,6"/>
+
+                        <TextBlock Text="Новая цена, ₽" Foreground="#9AA0B0" Margin="0,10,0,6"/>
+                        <TextBox Text="{Binding EditablePriceText, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="#14141F"
+                                 Foreground="White"
+                                 BorderBrush="#2E2E44"
+                                 BorderThickness="1"
+                                 Padding="8,6"/>
+
+                        <TextBlock Text="{Binding SelectedSaleTitle}" Foreground="White" Margin="0,10,0,6" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Фото" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                        <ListBox ItemsSource="{Binding EditablePhotos}"
+                                 Background="#14141F"
+                                 Foreground="White"
+                                 BorderBrush="#2E2E44"
+                                 BorderThickness="1"
+                                 Height="120">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel Margin="4,2">
+                                        <Button Content="Удалить"
+                                                Tag="{Binding}"
+                                                Click="RemoveEditPhoto_Click"
+                                                DockPanel.Dock="Right"
+                                                Margin="8,0,0,0"
+                                                Height="24"
+                                                Padding="8,0"
+                                                Background="#222236"
+                                                Foreground="White"
+                                                BorderBrush="#2E2E44"
+                                                BorderThickness="1"/>
+                                        <TextBlock Text="{Binding DisplayName}" Foreground="White" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <Button Content="Добавить фото"
+                                Height="32"
+                                Margin="0,8,0,0"
+                                Background="#222236"
+                                Foreground="White"
+                                BorderBrush="#2E2E44"
+                                BorderThickness="1"
+                                Cursor="Hand"
+                                Click="AddEditPhoto_Click"/>
+
+                        <Button Content="Сохранить изменения"
+                                Height="36"
+                                Margin="0,12,0,0"
+                                Background="#7C6CF5"
+                                Foreground="White"
+                                BorderBrush="#7C6CF5"
+                                BorderThickness="1"
+                                Cursor="Hand"
+                                Click="SaveChanges_Click"/>
+
+                        <Button Content="Удалить объявление"
+                                Height="36"
+                                Margin="0,8,0,0"
+                                Background="#4A1D2A"
+                                Foreground="White"
+                                BorderBrush="#A24662"
+                                BorderThickness="1"
+                                Cursor="Hand"
+                                Click="DeleteSale_Click"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
 
         <Button Grid.Row="2"
-                Content="Назад на главную"
+                Content="Назад к объявлениям"
                 Width="220"
                 Height="40"
                 Margin="0,0,0,16"

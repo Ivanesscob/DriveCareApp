@@ -326,6 +326,11 @@ ORDER BY n.CreatedAt DESC;";
             NotificationsPopup.IsOpen = !NotificationsPopup.IsOpen;
         }
 
+        private void ChatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Раздел чатов будет добавлен в следующем обновлении.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void HeroCar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount != 2) return;

@@ -16,19 +16,24 @@ namespace DriveCare.Pages.User.ActionPages
 {
     public partial class AddCarSalePage : Page, INotifyPropertyChanged
     {
+        private const char PhotoListSeparator = '|';
         private string _saleTitle = string.Empty;
         private string _saleDescription = string.Empty;
         private string _priceText = string.Empty;
-        private string _photoPath = string.Empty;
-        private string _selectedPhotoPath = string.Empty;
+        private string _photoPathPreview = "Фото не выбраны";
         private UserCarOption _selectedUserCar;
 
         public ObservableCollection<UserCarOption> UserCars { get; } = new ObservableCollection<UserCarOption>();
+        public ObservableCollection<string> SelectedPhotoPaths { get; } = new ObservableCollection<string>();
 
         public string SaleTitle { get => _saleTitle; set { _saleTitle = value ?? string.Empty; OnPropertyChanged(); } }
         public string SaleDescription { get => _saleDescription; set { _saleDescription = value ?? string.Empty; OnPropertyChanged(); } }
         public string PriceText { get => _priceText; set { _priceText = value ?? string.Empty; OnPropertyChanged(); } }
-        public string PhotoPath { get => _photoPath; set { _photoPath = value ?? string.Empty; OnPropertyChanged(); } }
+        public string PhotoPath
+        {
+            get => _photoPathPreview;
+            set { _photoPathPreview = value ?? string.Empty; OnPropertyChanged(); }
+        }
 
         public UserCarOption SelectedUserCar
         {
@@ -156,11 +161,30 @@ namespace DriveCare.Pages.User.ActionPages
 
         private string ResolvePhotoPathForStorage()
         {
-            if (string.IsNullOrWhiteSpace(_selectedPhotoPath))
+            if (SelectedPhotoPaths.Count == 0)
                 return null;
 
-            string serverIp = "ivanessco.servebeer.com";
-            int port = 5000;
+            var uploadedNames = new System.Collections.Generic.List<string>();
+            foreach (var localPath in SelectedPhotoPaths.ToList())
+            {
+                var uploadedName = UploadPhotoToServer(localPath);
+                if (!string.IsNullOrWhiteSpace(uploadedName))
+                    uploadedNames.Add(uploadedName.Trim());
+            }
+
+            if (uploadedNames.Count == 0)
+                return null;
+
+            return string.Join(PhotoListSeparator.ToString(), uploadedNames);
+        }
+
+        private string UploadPhotoToServer(string localPath)
+        {
+            if (string.IsNullOrWhiteSpace(localPath) || !File.Exists(localPath))
+                return null;
+
+            const string serverIp = "5.35.86.99";
+            const int port = 5000;
 
             try
             {
@@ -169,36 +193,29 @@ namespace DriveCare.Pages.User.ActionPages
                     client.Connect(serverIp, port);
                     using (NetworkStream stream = client.GetStream())
                     {
-                        // --- подготовка данных ---
-                        string originalFileName = Path.GetFileName(_selectedPhotoPath);
-                        byte[] fileData = File.ReadAllBytes(_selectedPhotoPath);
+                        string originalFileName = Path.GetFileName(localPath);
+                        byte[] fileData = File.ReadAllBytes(localPath);
 
-                        // команда UPLOAD
                         string command = "UPLOAD";
                         byte[] cmdBytes = Encoding.UTF8.GetBytes(command);
                         byte[] cmdLength = BitConverter.GetBytes(cmdBytes.Length);
                         stream.Write(cmdLength, 0, 4);
                         stream.Write(cmdBytes, 0, cmdBytes.Length);
 
-                        // длина имени файла
                         byte[] nameBytes = Encoding.UTF8.GetBytes(originalFileName);
                         byte[] nameLength = BitConverter.GetBytes(nameBytes.Length);
                         stream.Write(nameLength, 0, 4);
-
-                        // имя файла
                         stream.Write(nameBytes, 0, nameBytes.Length);
 
-                        // размер файла
                         byte[] fileSize = BitConverter.GetBytes((long)fileData.Length);
                         stream.Write(fileSize, 0, 8);
-
-                        // сам файл
                         stream.Write(fileData, 0, fileData.Length);
 
-                        // --- читаем сгенерированное имя от сервера ---
                         byte[] genNameLengthBytes = new byte[4];
                         stream.Read(genNameLengthBytes, 0, 4);
                         int genNameLength = BitConverter.ToInt32(genNameLengthBytes, 0);
+                        if (genNameLength <= 0)
+                            return null;
 
                         byte[] genNameBytes = new byte[genNameLength];
                         int totalRead = 0;
@@ -209,14 +226,12 @@ namespace DriveCare.Pages.User.ActionPages
                             totalRead += bytesRead;
                         }
 
-                        string generatedFileName = Encoding.UTF8.GetString(genNameBytes);
-                        return generatedFileName;
+                        return Encoding.UTF8.GetString(genNameBytes, 0, totalRead).Trim();
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine("Ошибка отправки: " + ex.Message);
                 return null;
             }
         }
@@ -225,18 +240,49 @@ namespace DriveCare.Pages.User.ActionPages
         {
             var dialog = new OpenFileDialog
             {
-                Title = "Выберите фото автомобиля",
+                Title = "Выберите фото автомобиля(ей)",
                 Filter = "Изображения (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png",
                 CheckFileExists = true,
-                Multiselect = false
+                Multiselect = true
             };
 
             var result = dialog.ShowDialog();
             if (result != true)
                 return;
 
-            PhotoPath = dialog.FileName;
-            _selectedPhotoPath = dialog.FileName;
+            foreach (var path in dialog.FileNames.Where(File.Exists))
+            {
+                if (!SelectedPhotoPaths.Any(p => string.Equals(p, path, StringComparison.OrdinalIgnoreCase)))
+                    SelectedPhotoPaths.Add(path);
+            }
+
+            RefreshPhotoPreview();
+        }
+
+        private void RemovePhoto_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var path = button?.Tag as string;
+            if (string.IsNullOrWhiteSpace(path))
+                return;
+
+            var existing = SelectedPhotoPaths.FirstOrDefault(p => string.Equals(p, path, StringComparison.OrdinalIgnoreCase));
+            if (existing == null)
+                return;
+
+            SelectedPhotoPaths.Remove(existing);
+            RefreshPhotoPreview();
+        }
+
+        private void RefreshPhotoPreview()
+        {
+            if (SelectedPhotoPaths.Count == 0)
+            {
+                PhotoPath = "Фото не выбраны";
+                return;
+            }
+
+            PhotoPath = $"Выбрано фото: {SelectedPhotoPaths.Count}";
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)

@@ -205,6 +205,19 @@
                         </Grid>
                     </Button>
 
+                    <Button x:Name="BtnChats"
+                            Style="{StaticResource ProfileIconButton}"
+                            Margin="0,0,10,0"
+                            Click="ChatsButton_Click"
+                            ToolTip="Чаты">
+                        <Grid>
+                            <TextBlock Text="💬"
+                                       FontSize="16"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
+
                     <Button x:Name="BtnProfile"
                             Style="{StaticResource ProfileIconButton}"
                             Click="ProfileButton_Click"

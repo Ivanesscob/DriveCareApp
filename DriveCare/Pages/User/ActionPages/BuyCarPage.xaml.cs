@@ -8,6 +8,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -17,6 +19,7 @@ namespace DriveCare.Pages.User.ActionPages
 {
     public partial class BuyCarPage : Page, INotifyPropertyChanged
     {
+        private const char PhotoListSeparator = '|';
         private const string FallbackImagePath = "pack://application:,,,/DriveCare;component/Data/NotPhotoCar.png";
         public ObservableCollection<BuyCarSaleItemVm> SalesItems { get; } = new ObservableCollection<BuyCarSaleItemVm>();
         public ObservableCollection<string> Brands { get; } = new ObservableCollection<string>();
@@ -64,7 +67,7 @@ namespace DriveCare.Pages.User.ActionPages
         {
             InitializeComponent();
             DataContext = this;
-            Loaded += (_, __) => LoadSales();
+            Loaded += async (_, __) => await LoadSalesAsync();
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -72,9 +75,11 @@ namespace DriveCare.Pages.User.ActionPages
             AppState.SetFrame<UserHomePage>();
         }
 
-        private void LoadSales()
+        private async Task LoadSalesAsync()
         {
             _allSales.Clear();
+            var pendingPhotoItems = new List<(BuyCarSaleItemVm Item, string PhotoPath)>();
+            var fallback = LoadImageOrFallback(null);
             try
             {
                 const string sql = @"
@@ -83,6 +88,7 @@ SELECT
     cs.Title AS SaleTitle,
     b.Name AS BrandName,
     m.Name AS ModelName,
+    m.Description AS ModelDescription,
     c.[Year] AS CarYear,
     clr.Name AS ColorName,
     ISNULL(lastPrice.Price, 0) AS LastPrice,
@@ -116,20 +122,27 @@ OUTER APPLY (
                     var color = Safe(row.ColorName, "Без цвета");
                     var yearPart = row.CarYear.HasValue ? $" · {row.CarYear.Value}" : string.Empty;
 
-                    _allSales.Add(new BuyCarSaleItemVm
+                    var item = new BuyCarSaleItemVm
                     {
                         SaleId = row.SaleId,
                         SaleTitle = Safe(row.SaleTitle, "Объявление"),
                         Brand = brand,
                         Model = model,
+                        ModelDescription = row.ModelDescription ?? string.Empty,
                         Color = color,
                         Year = row.CarYear,
                         Price = row.LastPrice,
                         CarLabel = $"{brand} {model}{yearPart} · {color}",
+                        ModelInfoLabel = string.IsNullOrWhiteSpace(row.ModelDescription) ? "Характеристики модели не указаны" : row.ModelDescription.Trim(),
                         PriceLabel = $"{row.LastPrice:0} ₽",
                         SellerLabel = Safe(row.SaleTitle, "Объявление"),
-                        Photo = ResolveSaleImage(row.PhotoPath)
-                    });
+                        Photo = fallback,
+                        IsPhotoLoading = true,
+                        PhotoLoadProgressPercent = 0
+                    };
+
+                    _allSales.Add(item);
+                    pendingPhotoItems.Add((item, row.PhotoPath));
                 }
             }
             catch
@@ -140,6 +153,49 @@ OUTER APPLY (
             RebuildBrandFilter();
             RebuildModelFilter();
             ApplyFilters();
+
+            await LoadPhotosInBackgroundAsync(pendingPhotoItems, fallback);
+        }
+
+        private async Task LoadPhotosInBackgroundAsync(List<(BuyCarSaleItemVm Item, string PhotoPath)> pendingPhotoItems, ImageSource fallback)
+        {
+            if (pendingPhotoItems == null || pendingPhotoItems.Count == 0)
+                return;
+
+            var semaphore = new SemaphoreSlim(4);
+            var tasks = pendingPhotoItems.Select(async tuple =>
+            {
+                await semaphore.WaitAsync();
+                try
+                {
+                    var image = await Task.Run(() => ResolveSaleImage(tuple.PhotoPath, progress =>
+                    {
+                        _ = Dispatcher.InvokeAsync(() => tuple.Item.PhotoLoadProgressPercent = progress);
+                    }));
+                    var resolved = image ?? fallback;
+
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        tuple.Item.Photo = resolved;
+                        tuple.Item.PhotoLoadProgressPercent = 100;
+                        tuple.Item.IsPhotoLoading = false;
+                    });
+                }
+                catch
+                {
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        tuple.Item.Photo = fallback;
+                        tuple.Item.IsPhotoLoading = false;
+                    });
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }).ToArray();
+
+            await Task.WhenAll(tasks);
         }
 
         private void RebuildBrandFilter()
@@ -179,7 +235,8 @@ OUTER APPLY (
                     ContainsCi(s.SaleTitle, search) ||
                     ContainsCi(s.Brand, search) ||
                     ContainsCi(s.Model, search) ||
-                    ContainsCi(s.Color, search));
+                    ContainsCi(s.Color, search) ||
+                    ContainsCi(s.ModelDescription, search));
             }
 
             if (!string.Equals(SelectedBrand, "Все", StringComparison.OrdinalIgnoreCase))
@@ -220,35 +277,71 @@ OUTER APPLY (
             return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
         }
 
-        private static ImageSource ResolveSaleImage(string photoPathFromDb)
+        private static ImageSource ResolveSaleImage(string photoPathFromDb, Action<double> progress)
         {
             var raw = (photoPathFromDb ?? string.Empty).Trim();
+            var primary = GetPrimaryPhotoToken(raw);
             if (string.IsNullOrWhiteSpace(raw))
+            {
+                progress?.Invoke(100);
                 return LoadImageOrFallback(null);
+            }
 
             try
             {
                 // Если в БД уже лежит локальный путь и файл есть — используем его.
-                if (File.Exists(raw))
-                    return LoadImageOrFallback(raw);
+                if (File.Exists(primary))
+                {
+                    progress?.Invoke(100);
+                    return LoadImageOrFallback(primary);
+                }
 
                 // Сначала пробуем как "имя на сервере" (как в вашем GET-методе).
-                var downloadedByRaw = PhotoTcpStorageService.DownloadPhotoByName(raw);
+                var downloadedByRaw = PhotoTcpStorageService.DownloadPhotoByName(primary, (read, total) =>
+                {
+                    if (total <= 0) return;
+                    progress?.Invoke(Math.Min(100, read * 100.0 / total));
+                });
                 if (!string.IsNullOrWhiteSpace(downloadedByRaw))
+                {
+                    progress?.Invoke(100);
                     return LoadImageOrFallback(downloadedByRaw);
+                }
 
                 // Если в БД попал путь, а не имя — fallback на имя файла.
-                var serverFileName = Path.GetFileName(raw);
+                var serverFileName = Path.GetFileName(primary);
                 if (string.IsNullOrWhiteSpace(serverFileName))
+                {
+                    progress?.Invoke(100);
                     return LoadImageOrFallback(null);
+                }
 
-                var downloadedByName = PhotoTcpStorageService.DownloadPhotoByName(serverFileName);
+                var downloadedByName = PhotoTcpStorageService.DownloadPhotoByName(serverFileName, (read, total) =>
+                {
+                    if (total <= 0) return;
+                    progress?.Invoke(Math.Min(100, read * 100.0 / total));
+                });
+                progress?.Invoke(100);
                 return LoadImageOrFallback(downloadedByName);
             }
             catch
             {
+                progress?.Invoke(100);
                 return LoadImageOrFallback(null);
             }
+        }
+
+        private static string GetPrimaryPhotoToken(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return raw;
+
+            var first = raw
+                .Split(new[] { PhotoListSeparator }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .FirstOrDefault();
+
+            return string.IsNullOrWhiteSpace(first) ? raw : first;
         }
 
         private static ImageSource LoadImageOrFallback(string localPath)
@@ -305,7 +398,10 @@ OUTER APPLY (
 
         private void OpenSaleDetails(BuyCarSaleItemVm item)
         {
-            // Пока пустой общий метод для кнопки "Подробнее" и двойного клика по карточке.
+            if (item == null || item.SaleId == Guid.Empty)
+                return;
+
+            AppState.Navigate(new SaleDetailsPage(item.SaleId));
         }
 
         private void MyAds_Click(object sender, RoutedEventArgs e)
@@ -333,27 +429,70 @@ OUTER APPLY (
         private void OnPropertyChanged([CallerMemberName] string prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     }
 
-    public sealed class BuyCarSaleItemVm
+    public sealed class BuyCarSaleItemVm : INotifyPropertyChanged
     {
         public Guid SaleId { get; set; }
         public string SaleTitle { get; set; }
+        public string SaleDescription { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
+        public string ModelDescription { get; set; }
         public string Color { get; set; }
         public int? Year { get; set; }
         public decimal Price { get; set; }
         public string CarLabel { get; set; }
+        public string ModelInfoLabel { get; set; }
         public string PriceLabel { get; set; }
         public string SellerLabel { get; set; }
-        public ImageSource Photo { get; set; }
+        public string PhotoPathRaw { get; set; }
+        private bool _isPhotoLoading;
+        private double _photoLoadProgressPercent;
+        private ImageSource _photo;
+        public bool IsPhotoLoading
+        {
+            get => _isPhotoLoading;
+            set
+            {
+                if (_isPhotoLoading == value)
+                    return;
+                _isPhotoLoading = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPhotoLoading)));
+            }
+        }
+        public double PhotoLoadProgressPercent
+        {
+            get => _photoLoadProgressPercent;
+            set
+            {
+                if (Math.Abs(_photoLoadProgressPercent - value) < 0.01)
+                    return;
+                _photoLoadProgressPercent = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PhotoLoadProgressPercent)));
+            }
+        }
+        public ImageSource Photo
+        {
+            get => _photo;
+            set
+            {
+                if (Equals(_photo, value))
+                    return;
+                _photo = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Photo)));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     internal sealed class BuyCarSqlRow
     {
         public Guid SaleId { get; set; }
         public string SaleTitle { get; set; }
+        public string SaleDescription { get; set; }
         public string BrandName { get; set; }
         public string ModelName { get; set; }
+        public string ModelDescription { get; set; }
         public string ColorName { get; set; }
         public int? CarYear { get; set; }
         public decimal LastPrice { get; set; }

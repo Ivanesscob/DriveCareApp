@@ -4,37 +4,6 @@
       Title="Магазин инструментов">
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
-        <SolidColorBrush x:Key="Brush.Accent" Color="#7C6CF5"/>
-        <SolidColorBrush x:Key="Brush.AccentDim" Color="#5548C8"/>
-        <SolidColorBrush x:Key="Brush.Surface" Color="#1B1B2A"/>
-        <SolidColorBrush x:Key="Brush.Muted" Color="#9AA0B0"/>
-
-        <Style x:Key="HeroNavButton" TargetType="Button">
-            <Setter Property="Width" Value="48"/>
-            <Setter Property="Height" Value="48"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="22"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="b" CornerRadius="24" Background="#35FFFFFF" BorderBrush="#55FFFFFF" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="b" Property="Background" Value="#55FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="b" Property="Background" Value="#28FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
         <Style x:Key="QuickActionButton" TargetType="Button">
             <Setter Property="Background" Value="#14141F"/>
             <Setter Property="Foreground" Value="White"/>
@@ -45,137 +14,140 @@
             <Setter Property="Height" Value="92"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="10,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd"
-                        CornerRadius="22"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
-                                <Setter TargetName="bd" Property="Background" Value="#1B1B2A"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#252538"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
-
-        <Style x:Key="ProfileIconButton" TargetType="Button">
-            <Setter Property="Width" Value="44"/>
-            <Setter Property="Height" Value="44"/>
-            <Setter Property="Background" Value="#14141F"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#2E2E44"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd"
-                        CornerRadius="22"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
-                                <Setter TargetName="bd" Property="Background" Value="#1B1B2A"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </Page.Resources>
+
     <Grid Background="#14141F">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,24,0,0" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0" Margin="0,24,0,8" HorizontalAlignment="Center">
             <TextBlock Text="Магазин инструментов" Foreground="White" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
         </StackPanel>
 
-        <WrapPanel Grid.Row="1" Margin="0,0,0,12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:Name="BtnToolsStore"
-            Style="{StaticResource QuickActionButton}"
-            Tag="ToolsStore">
-                    <StackPanel Orientation="Vertical">
-                        <Image x:Name="IconToolsStore"
-                   Width="40" Height="40"
-                   Stretch="Uniform"
-                   Margin="0,8,0,6"
-                   />
-                        <TextBlock Text="Двигатель" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+        <Grid Grid.Row="1" Margin="24,0,24,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
 
-                <Button x:Name="BtnServiceSelect"
-            Style="{StaticResource QuickActionButton}"
-            Tag="ServiceSelect">
-                    <StackPanel Orientation="Vertical">
-                        <Image x:Name="IconServiceSelect"
-                   Width="40" Height="40"
-                   Stretch="Uniform"
-                   Margin="0,8,0,6"
-                   />
-                        <TextBlock Text="Коробка передачь" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                <Button x:Name="BtnPaintCar"
-            Style="{StaticResource QuickActionButton}"
-            Tag="PaintCar">
-                    <StackPanel Orientation="Vertical">
-                        <Image x:Name="IconPaintCar"
-                   Width="40" Height="40"
-                   Stretch="Uniform"
-                   Margin="0,8,0,6"
-                   />
-                        <TextBlock Text="Кузов" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                <WrapPanel Grid.Row="0" HorizontalAlignment="Center">
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Engine" Click="Category_Click"><TextBlock Text="Двигатель" Foreground="White" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Transmission" Click="Category_Click"><TextBlock Text="Трансмиссия" Foreground="White" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Body" Click="Category_Click"><TextBlock Text="Кузов" Foreground="White" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Tires" Click="Category_Click"><TextBlock Text="Шины" Foreground="White" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Accessories" Click="Category_Click"><TextBlock Text="Аксессуары" Foreground="White" TextAlignment="Center"/></Button>
+                </WrapPanel>
 
-                <Button x:Name="BtnServiceCar"
-            Style="{StaticResource QuickActionButton}"
-            Tag="ServiceCar">
-                    <StackPanel Orientation="Vertical">
-                        <Image x:Name="IconServiceCar"
-                   Width="40" Height="40"
-                   Stretch="Uniform"
-                   Margin="0,8,0,6"
-                   />
-                        <TextBlock Text="Шины" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                <ListView Grid.Row="2"
+                          ItemsSource="{Binding VisibleProducts}"
+                          Background="#14141F"
+                          BorderBrush="#2E2E44"
+                          BorderThickness="1"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          ScrollViewer.CanContentScroll="False">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,12,12"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Width="240" Height="290" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="130"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                <Button x:Name="BtnBuyCar"
-            Style="{StaticResource QuickActionButton}"
-            Tag="BuyCar">
-                    <StackPanel Orientation="Vertical">
-                        <Image x:Name="IconBuyCar"
-                   Width="40" Height="40"
-                   Stretch="Uniform"
-                   Margin="0,8,0,6"
-                   />
-                        <TextBlock Text="Акссесуары" FontSize="12" FontWeight="SemiBold" Foreground="#D0D5E0" TextAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-            </WrapPanel>
+                                    <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
+                                            <Border VerticalAlignment="Bottom" Background="#CC1A1A28" Padding="6" Visibility="{Binding IsPhotoLoading, Converter={StaticResource BoolToVis}}">
+                                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding PhotoLoadProgressPercent}" Height="6"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+
+                                    <StackPanel Grid.Row="1">
+                                        <TextBlock Text="{Binding Name}" Foreground="White" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Description}" Foreground="#9AA0B0" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="42"/>
+                                    </StackPanel>
+
+                                    <Grid Grid.Row="2" Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1" CornerRadius="10" Padding="10,6">
+                                            <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <Button Grid.Column="1" Content="В корзину" Margin="8,0,0,0" Padding="10,6" Tag="{Binding}" Click="AddToCart_Click"
+                                                Background="#222236" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+
+            <Border Grid.Column="2" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{Binding CartTitle}" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                    <ListView Grid.Row="1" Margin="0,10,0,10" ItemsSource="{Binding CartItems}" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="6,4">
+                                    <Button DockPanel.Dock="Right" Content="−" Width="24" Height="24" Tag="{Binding}" Click="RemoveFromCart_Click"
+                                            Background="#222236" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1"/>
+                                    <TextBlock Text="{Binding DisplayText}" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <TextBlock Grid.Row="2" Text="{Binding CartTotalText}" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Button Grid.Row="2"
+                Content="Назад на главную"
+                Width="220"
+                Height="40"
+                Margin="0,0,0,16"
+                HorizontalAlignment="Center"
+                Background="#1A1A28"
+                Foreground="White"
+                BorderBrush="#2E2E44"
+                BorderThickness="1"
+                Cursor="Hand"
+                Click="Back_Click"/>
     </Grid>
 </Page>
 

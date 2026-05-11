@@ -15,20 +15,30 @@ namespace DriveCareCore.Data.Services
     /// </summary>
     public static class PhotoTcpStorageService
     {
-        public static string DefaultServerIp = "ivanessco.servebeer.com";
+        public static string DefaultServerIp = "5.35.86.99";
         public static int DefaultPort = 5000;
 
         public static string DownloadPhotoFromServer(string serverFileName)
         {
-            return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath());
+            return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath(), null);
         }
 
         public static string DownloadPhotoByName(string serverFileName)
         {
-            return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath());
+            return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath(), null);
+        }
+
+        public static string DownloadPhotoByName(string serverFileName, Action<long, long> progress)
+        {
+            return DownloadPhotoFromServer(serverFileName, DefaultServerIp, DefaultPort, Path.GetTempPath(), progress);
         }
 
         public static string DownloadPhotoFromServer(string serverFileName, string serverIp, int port, string outputFolder)
+        {
+            return DownloadPhotoFromServer(serverFileName, serverIp, port, outputFolder, null);
+        }
+
+        public static string DownloadPhotoFromServer(string serverFileName, string serverIp, int port, string outputFolder, Action<long, long> progress)
         {
             if (string.IsNullOrWhiteSpace(serverFileName))
                 return null;
@@ -85,6 +95,8 @@ namespace DriveCareCore.Data.Services
                         if (fileSize <= 0)
                             return null;
 
+                        progress?.Invoke(0, fileSize);
+
                        
                         using (FileStream fs = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
                         {
@@ -99,6 +111,7 @@ namespace DriveCareCore.Data.Services
 
                                 fs.Write(buffer, 0, bytesRead);
                                 totalRead += bytesRead;
+                                progress?.Invoke(totalRead, fileSize);
                             }
 
                             if (totalRead != fileSize)

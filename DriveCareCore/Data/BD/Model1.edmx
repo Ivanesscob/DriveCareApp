@@ -67,7 +67,7 @@
           <Property Name="CarId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Title" Type="nvarchar" MaxLength="200" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="500" />
-          <Property Name="PhotoPath" Type="nvarchar" MaxLength="255" />
+          <Property Name="PhotoPath" Type="nvarchar(max)" />
           <Property Name="CreatedAt" Type="datetime" />
         </EntityType>
         <EntityType Name="CarTypes">
@@ -251,9 +251,9 @@
           <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
           <Property Name="Email" Type="nvarchar" MaxLength="100" Nullable="false" />
-          <Property Name="Phone" Type="nvarchar" MaxLength="50" />
-          <Property Name="CreatedAt" Type="datetime" />
           <Property Name="BirthDate" Type="date" />
+          <Property Name="Phone" Type="nvarchar" MaxLength="50" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="WarehouseManagers">
           <Key>
@@ -923,7 +923,7 @@
           <NavigationProperty Name="UserRoles" Relationship="DriveCareDBModel.FK__UserRoles__UserI__151B244E" FromRole="Users" ToRole="UserRoles" />
           <NavigationProperty Name="UserCarSales" Relationship="DriveCareDBModel.FK__UserCarSa__UserI__1EA48E88" FromRole="Users" ToRole="UserCarSales" />
           <NavigationProperty Name="UserNotifications" Relationship="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" FromRole="Users" ToRole="UserNotifications" />
-          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" Nullable="false" />
           <Property Name="BirthDate" Type="DateTime" Precision="0" />
         </EntityType>
         <EntityType Name="WarehouseManagers">
@@ -1296,7 +1296,7 @@
           <Property Name="CarId" Type="Guid" Nullable="false" />
           <Property Name="Title" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
-          <Property Name="PhotoPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PhotoPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="CreatedAt" Type="DateTime" Precision="3" />
           <NavigationProperty Name="Cars" Relationship="DriveCareDBModel.FK__CarSales__CarId__1AD3FDA4" FromRole="CarSales" ToRole="Cars" />
           <NavigationProperty Name="CarSalePrices" Relationship="DriveCareDBModel.FK__CarSalePr__CarSa__245D67DE" FromRole="CarSales" ToRole="CarSalePrices" />

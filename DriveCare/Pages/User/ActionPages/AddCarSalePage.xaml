@@ -71,7 +71,7 @@
                              BorderThickness="1"
                              Padding="10,8"/>
 
-                    <TextBlock Text="Путь к фото (необязательно)" Foreground="#9AA0B0" Margin="0,14,0,6"/>
+                    <TextBlock Text="Фото объявления (можно несколько)" Foreground="#9AA0B0" Margin="0,14,0,6"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -88,7 +88,7 @@
                                  Padding="10,8"
                                  IsReadOnly="True"/>
                         <Button Grid.Column="2"
-                                Content="Выбрать фото"
+                                Content="Добавить фото"
                                 Height="36"
                                 Padding="14,0"
                                 Background="#222236"
@@ -98,6 +98,43 @@
                                 Cursor="Hand"
                                 Click="SelectPhoto_Click"/>
                     </Grid>
+
+                    <Border Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="8" Padding="8" Margin="0,10,0,0">
+                        <ListBox ItemsSource="{Binding SelectedPhotoPaths}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="White"
+                                 MaxHeight="140"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2,0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding}"
+                                                   Foreground="#D0D5E0"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"/>
+                                        <Button Grid.Column="1"
+                                                Width="24"
+                                                Height="24"
+                                                Margin="8,0,0,0"
+                                                Content="✕"
+                                                Tag="{Binding}"
+                                                Background="#2A2A42"
+                                                Foreground="White"
+                                                BorderBrush="#3A3A56"
+                                                BorderThickness="1"
+                                                Cursor="Hand"
+                                                Click="RemovePhoto_Click"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
 
                     <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                         <Button Content="Сохранить объявление"
