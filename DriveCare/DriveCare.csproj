@@ -320,8 +320,11 @@
     <Compile Include="CarDisplayItem.cs" />
     <Compile Include="CarDetailsWindow.cs" />
     <Compile Include="Data\AppState.cs" />
+    <Compile Include="Data\ServiceMaintenanceDtos.cs" />
     <Compile Include="Services\RegistrationMailHelper.cs" />
     <Compile Include="Services\ThemeService.cs" />
+    <Compile Include="Services\ServiceMaintenanceRepository.cs" />
+    <Compile Include="Services\MaintenanceRecommendationEngine.cs" />
     <Compile Include="Controls\TintedImage.xaml.cs">
       <DependentUpon>TintedImage.xaml</DependentUpon>
     </Compile>
@@ -411,6 +414,7 @@
     <Compile Include="Pages\User\ActionPages\ServiceCarPage.xaml.cs">
       <DependentUpon>ServiceCarPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\User\ActionPages\ServiceMaintenanceViewModel.cs" />
     <Compile Include="Pages\User\ActionPages\BuyCarPage.xaml.cs">
       <DependentUpon>BuyCarPage.xaml</DependentUpon>
     </Compile>

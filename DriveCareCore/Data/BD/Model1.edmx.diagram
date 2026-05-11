@@ -59,6 +59,15 @@
         <AssociationConnector Association="DriveCareDBModel.FK_Workshops_Address" />
         <AssociationConnector Association="DriveCareDBModel.FK_Workshops_Company" />
         <AssociationConnector Association="DriveCareDBModel.FK_Employees_Workshop" />
+        <EntityTypeShape EntityType="DriveCareDBModel.RepairCategories" Width="1.5" PointX="14.25" PointY="2.375" />
+        <EntityTypeShape EntityType="DriveCareDBModel.RepairHistory" Width="1.5" PointX="16.5" PointY="11.25" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Tasks" Width="1.5" PointX="15.5" PointY="20.25" />
+        <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Cars" />
+        <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Employees" />
+        <AssociationConnector Association="DriveCareDBModel.FK_Tasks_Employees" />
+        <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Categories" />
+        <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Statuses" />
+        <AssociationConnector Association="DriveCareDBModel.FK_Tasks_Statuses" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

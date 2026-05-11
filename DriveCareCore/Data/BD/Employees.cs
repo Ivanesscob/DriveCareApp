@@ -18,6 +18,8 @@ namespace DriveCareCore.Data.BD
         public Employees()
         {
             this.EmployeeRolesMap = new HashSet<EmployeeRolesMap>();
+            this.RepairHistory = new HashSet<RepairHistory>();
+            this.Tasks = new HashSet<Tasks>();
         }
     
         public System.Guid RowId { get; set; }
@@ -37,5 +39,9 @@ namespace DriveCareCore.Data.BD
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmployeeRolesMap> EmployeeRolesMap { get; set; }
         public virtual Workshops Workshops { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RepairHistory> RepairHistory { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Tasks> Tasks { get; set; }
     }
 }

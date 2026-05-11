@@ -24,6 +24,12 @@ namespace DriveCareCore.Data.BD
         public string Name { get; set; }
         public System.Guid BrandId { get; set; }
         public string Description { get; set; }
+        public Nullable<int> MaxSpeed { get; set; }
+        public Nullable<double> FuelConsumption { get; set; }
+        public string FuelType { get; set; }
+        public Nullable<int> HorsePower { get; set; }
+        public Nullable<double> EngineVolume { get; set; }
+        public Nullable<double> Acceleration { get; set; }
     
         public virtual Brands Brands { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -52,5 +52,8 @@ namespace DriveCareCore.Data.BD
         public virtual DbSet<Notifications> Notifications { get; set; }
         public virtual DbSet<UserNotifications> UserNotifications { get; set; }
         public virtual DbSet<Workshops> Workshops { get; set; }
+        public virtual DbSet<RepairCategories> RepairCategories { get; set; }
+        public virtual DbSet<RepairHistory> RepairHistory { get; set; }
+        public virtual DbSet<Tasks> Tasks { get; set; }
     }
 }

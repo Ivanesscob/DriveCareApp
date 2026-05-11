@@ -12,14 +12,12 @@ namespace DriveCareCore.Data.BD
     using System;
     using System.Collections.Generic;
     
-    public partial class Statuses
+    public partial class RepairCategories
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Statuses()
+        public RepairCategories()
         {
-            this.Parts = new HashSet<Parts>();
             this.RepairHistory = new HashSet<RepairHistory>();
-            this.Tasks = new HashSet<Tasks>();
         }
     
         public System.Guid RowId { get; set; }
@@ -27,10 +25,6 @@ namespace DriveCareCore.Data.BD
         public string Description { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Parts> Parts { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<RepairHistory> RepairHistory { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Tasks> Tasks { get; set; }
     }
 }
