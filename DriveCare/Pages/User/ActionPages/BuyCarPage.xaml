@@ -4,35 +4,8 @@
       Title="Покупка машины">
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <Style x:Key="LightComboBoxItemStyle" TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsHighlighted" Value="True">
-                    <Setter Property="Background" Value="#E9ECFF"/>
-                </Trigger>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#D9DEFF"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="LightComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="BorderBrush" Value="#A6A6A6"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="6,4"/>
-            <Setter Property="ItemContainerStyle" Value="{StaticResource LightComboBoxItemStyle}"/>
-        </Style>
-
-        <DataTemplate x:Key="LightComboItemTemplate">
-            <TextBlock Text="{Binding}" Foreground="Black"/>
-        </DataTemplate>
     </Page.Resources>
-    <Grid Background="#14141F">
+    <Grid Background="{DynamicResource App.Brush.Panel}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -45,13 +18,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="10" Padding="10,4">
+            <Border Grid.Column="0" Background="{DynamicResource App.Brush.Surface2}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" CornerRadius="10" Padding="10,4">
                 <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          Background="Transparent"
                          BorderThickness="0"
-                         Foreground="White"
+                         Foreground="{DynamicResource App.Brush.Foreground}"
                          FontSize="14"
-                         CaretBrush="White"
+                         CaretBrush="{DynamicResource App.Brush.Foreground}"
                          VerticalContentAlignment="Center"
                          ToolTip="Поиск по названию, марке, модели, цвету"/>
             </Border>
@@ -60,21 +33,11 @@
                 <Button Content="Мои объявления"
                         Height="40"
                         Margin="0,0,10,0"
-                        Padding="16,0"
-                        Background="#1A1A28"
-                        Foreground="White"
-                        BorderBrush="#2E2E44"
-                        BorderThickness="1"
-                        Cursor="Hand"
+                        Style="{StaticResource App.Button.Outline}"
                         Click="MyAds_Click"/>
                 <Button Content="Добавить объявление"
                         Height="40"
-                        Padding="16,0"
-                        Background="#7C6CF5"
-                        Foreground="White"
-                        BorderBrush="#7C6CF5"
-                        BorderThickness="1"
-                        Cursor="Hand"
+                        Style="{StaticResource App.Button.Outline}"
                         Click="AddAd_Click"/>
             </StackPanel>
         </Grid>
@@ -86,65 +49,53 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="14">
+            <Border Grid.Column="0" Background="{DynamicResource App.Brush.Surface2}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" CornerRadius="12" Padding="14">
                 <StackPanel>
-                    <TextBlock Text="Фильтры" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                    <TextBlock Text="Фильтры" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
 
-                    <TextBlock Text="Цена, ₽" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <TextBlock Text="Цена, ₽" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,6"/>
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding MinPriceText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
-                        <TextBox Grid.Column="2" Text="{Binding MaxPriceText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
+                        <TextBox Grid.Column="0" Text="{Binding MinPriceText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource App.FieldTextBox}"/>
+                        <TextBox Grid.Column="2" Text="{Binding MaxPriceText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource App.FieldTextBox}"/>
                     </Grid>
 
-                    <TextBlock Text="Марка" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <TextBlock Text="Марка" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,6"/>
                     <ComboBox ItemsSource="{Binding Brands}"
                               SelectedItem="{Binding SelectedBrand}"
-                              Margin="0,0,0,10"
-                              Style="{StaticResource LightComboBoxStyle}"
-                              Foreground="Black"
-                              Background="White"
-                              ItemTemplate="{StaticResource LightComboItemTemplate}"/>
+                              Margin="0,0,0,10"/>
 
-                    <TextBlock Text="Модель" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <TextBlock Text="Модель" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,6"/>
                     <ComboBox ItemsSource="{Binding Models}"
                               SelectedItem="{Binding SelectedModel}"
-                              Margin="0,0,0,10"
-                              Style="{StaticResource LightComboBoxStyle}"
-                              Foreground="Black"
-                              Background="White"
-                              ItemTemplate="{StaticResource LightComboItemTemplate}"/>
+                              Margin="0,0,0,10"/>
 
-                    <TextBlock Text="Год выпуска" Foreground="#9AA0B0" Margin="0,0,0,6"/>
+                    <TextBlock Text="Год выпуска" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,6"/>
                     <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding MinYearText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
-                        <TextBox Grid.Column="2" Text="{Binding MaxYearText, UpdateSourceTrigger=PropertyChanged}" Background="#14141F" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1" Padding="8,6"/>
+                        <TextBox Grid.Column="0" Text="{Binding MinYearText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource App.FieldTextBox}"/>
+                        <TextBox Grid.Column="2" Text="{Binding MaxYearText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource App.FieldTextBox}"/>
                     </Grid>
 
                     <Button Content="Сбросить фильтры"
                             Height="36"
-                            Background="#222236"
-                            Foreground="White"
-                            BorderBrush="#2E2E44"
-                            BorderThickness="1"
-                            Cursor="Hand"
+                            Style="{StaticResource App.Button.Outline}"
                             Click="ClearFilters_Click"/>
                 </StackPanel>
             </Border>
 
             <ListView Grid.Column="2"
                       ItemsSource="{Binding SalesItems}"
-                      Background="#14141F"
-                      BorderBrush="#2E2E44"
+                      Background="{DynamicResource App.Brush.Panel}"
+                      BorderBrush="{DynamicResource App.Brush.Border}"
                       BorderThickness="1"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -164,7 +115,7 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Border Width="260" Height="300" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                            <Border Width="260" Height="300" Background="{DynamicResource App.Brush.Surface2}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" CornerRadius="12" Padding="12">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="140"/>
@@ -173,11 +124,11 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
+                                    <Border Grid.Row="0" CornerRadius="10" Background="{DynamicResource App.Brush.PhotoMat}" ClipToBounds="True" Margin="0,0,0,10">
                                         <Grid>
                                             <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
                                             <Border VerticalAlignment="Bottom"
-                                                    Background="#CC1A1A28"
+                                                    Background="{DynamicResource App.Brush.OverlayScrim}"
                                                     Padding="6"
                                                     Visibility="{Binding IsPhotoLoading, Converter={StaticResource BoolToVis}}">
                                                 <ProgressBar Minimum="0"
@@ -189,30 +140,27 @@
                                     </Border>
 
                                     <StackPanel Grid.Row="1">
-                                        <TextBlock Text="{Binding CarLabel}" Foreground="White" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding SellerLabel}" Foreground="#9AA0B0" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding CarLabel}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding SellerLabel}" Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding ModelInfoLabel}"
-                                                   Foreground="#BFC5D6"
+                                                   Foreground="{DynamicResource App.Brush.TextDim}"
                                                    FontSize="12"
                                                    Margin="0,6,0,0"
                                                    TextWrapping="Wrap"
                                                    MaxHeight="48"/>
                                     </StackPanel>
 
-                                    <Border Grid.Row="2" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1" CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
-                                        <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
+                                    <Border Grid.Row="2" Background="{DynamicResource App.Brush.PriceChipBg}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" CornerRadius="10" Padding="12,6" HorizontalAlignment="Left" Margin="0,10,0,0">
+                                        <TextBlock Text="{Binding PriceLabel}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="15" FontWeight="SemiBold"/>
                                     </Border>
 
                                     <Button Grid.Row="3"
                                             Content="Подробнее"
                                             Height="34"
                                             Margin="0,10,0,0"
-                                            Background="#222236"
-                                            Foreground="White"
-                                            BorderBrush="#7C6CF5"
-                                            BorderThickness="1"
+                                            HorizontalAlignment="Stretch"
+                                            Style="{StaticResource App.Button.Outline}"
                                             FontWeight="SemiBold"
-                                            Cursor="Hand"
                                             Click="SaleDetails_Click"/>
                                 </Grid>
                                 <Border.Style>
@@ -232,12 +180,7 @@
                 Height="40"
                 Margin="0,0,0,16"
                 HorizontalAlignment="Center"
-                Background="#1A1A28"
-                Foreground="White"
-                BorderBrush="#2E2E44"
-                BorderThickness="1"
-                Cursor="Hand"
+                Style="{StaticResource App.Button.Outline}"
                 Click="Back_Click"/>
     </Grid>
 </Page>
-

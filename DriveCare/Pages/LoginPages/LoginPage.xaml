@@ -5,13 +5,13 @@
       Background="Transparent">
 
     <Page.Resources>
-        <SolidColorBrush x:Key="Brush.Surface" Color="#252538"/>
-        <SolidColorBrush x:Key="Brush.FieldBg" Color="#1B1B2A"/>
-        <SolidColorBrush x:Key="Brush.Border" Color="#3D3D55"/>
-        <SolidColorBrush x:Key="Brush.TextMuted" Color="#9AA0B0"/>
-        <SolidColorBrush x:Key="Brush.Accent" Color="#7C6CF5"/>
-        <SolidColorBrush x:Key="Brush.AccentHover" Color="#9488FF"/>
-        <SolidColorBrush x:Key="Brush.AccentSoft" Color="#332E55"/>
+        <SolidColorBrush x:Key="Brush.Surface" Color="{DynamicResource App.Color.LoginSurface}"/>
+        <SolidColorBrush x:Key="Brush.FieldBg" Color="{DynamicResource App.Color.LoginFieldBg}"/>
+        <SolidColorBrush x:Key="Brush.Border" Color="{DynamicResource App.Color.LoginBorder}"/>
+        <SolidColorBrush x:Key="Brush.TextMuted" Color="{DynamicResource App.Color.Muted}"/>
+        <SolidColorBrush x:Key="Brush.Accent" Color="{DynamicResource App.Color.Accent}"/>
+        <SolidColorBrush x:Key="Brush.AccentHover" Color="{DynamicResource App.Color.AccentHover}"/>
+        <SolidColorBrush x:Key="Brush.AccentSoft" Color="{DynamicResource App.Color.AccentSoft}"/>
 
         <Style x:Key="FieldBorder" TargetType="Border">
             <Setter Property="CornerRadius" Value="10"/>
@@ -22,8 +22,8 @@
         </Style>
 
         <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource App.Brush.LoginText}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -32,8 +32,8 @@
         </Style>
 
         <Style x:Key="DarkPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource App.Brush.LoginText}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -42,20 +42,13 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#0F0F1A" Offset="0"/>
-                <GradientStop Color="#151528" Offset="0.45"/>
-                <GradientStop Color="#1A1A32" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid Background="{DynamicResource App.Brush.LoginShellBackground}">
 
         <Ellipse Width="420" Height="420" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-120,-120,0"
                  IsHitTestVisible="False" Opacity="0.22">
             <Ellipse.Fill>
                 <RadialGradientBrush>
-                    <GradientStop Color="#7C6CF5" Offset="0"/>
+                    <GradientStop Color="{DynamicResource App.Color.LoginGlowA}" Offset="0"/>
                     <GradientStop Color="Transparent" Offset="1"/>
                 </RadialGradientBrush>
             </Ellipse.Fill>
@@ -64,7 +57,7 @@
                  IsHitTestVisible="False" Opacity="0.15">
             <Ellipse.Fill>
                 <RadialGradientBrush>
-                    <GradientStop Color="#4F8CFF" Offset="0"/>
+                    <GradientStop Color="{DynamicResource App.Color.LoginGlowB}" Offset="0"/>
                     <GradientStop Color="Transparent" Offset="1"/>
                 </RadialGradientBrush>
             </Ellipse.Fill>
@@ -81,14 +74,15 @@
                     <StackPanel>
                         <StackPanel HorizontalAlignment="Center" Margin="0,0,0,8">
                             <Border Width="56" Height="56" CornerRadius="16" Background="{StaticResource Brush.AccentSoft}"
-                                    BorderBrush="#5548C8" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,16"
+                                    BorderBrush="{DynamicResource App.Brush.AccentDim}" BorderThickness="1" HorizontalAlignment="Center" Margin="0,0,0,16"
                                     ClipToBounds="True" Padding="6">
                                 <Image Source="/DriveCareCore;component/Data/Pics/AppIcon.ico"
                                        Stretch="Uniform"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                             </Border>
-                            <TextBlock Text="Добро пожаловать" FontSize="26" FontWeight="SemiBold" Foreground="White"
+                            <TextBlock Text="Добро пожаловать" FontSize="26" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Foreground}"
                                        HorizontalAlignment="Center"/>
                             <TextBlock Text="Войдите в DriveCare" FontSize="15" Foreground="{StaticResource Brush.TextMuted}"
                                        HorizontalAlignment="Center" Margin="0,6,0,0"/>
@@ -113,7 +107,8 @@
                         <Button Content="Войти"
                                 Command="{Binding LoginCommand}"
                                 Height="50" FontSize="16" FontWeight="SemiBold"
-                                Foreground="White" Cursor="Hand" BorderThickness="0" Margin="0,0,0,12">
+                                Foreground="{DynamicResource App.Brush.LoginText}"
+                                Cursor="Hand" BorderThickness="0" Margin="0,0,0,12">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border x:Name="bd" CornerRadius="12" Background="{StaticResource Brush.Accent}" Padding="16,0">
@@ -136,7 +131,7 @@
                                 Height="48" FontSize="15" FontWeight="SemiBold"
                                 Foreground="{StaticResource Brush.Accent}"
                                 Cursor="Hand" BorderThickness="1"
-                                BorderBrush="#5548C8"
+                                BorderBrush="{DynamicResource App.Brush.AccentDim}"
                                 Background="Transparent">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
@@ -155,7 +150,7 @@
                         </Button>
 
                         <TextBlock Text="Нажимая «Войти», вы соглашаетесь с правилами использования приложения."
-                                   Foreground="#5C6370" FontSize="11" Margin="0,20,0,0"
+                                   Foreground="{DynamicResource App.Brush.Muted}" FontSize="11" Margin="0,20,0,0"
                                    TextWrapping="Wrap" TextAlignment="Center"/>
                     </StackPanel>
                 </Border>

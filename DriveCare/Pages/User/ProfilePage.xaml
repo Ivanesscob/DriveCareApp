@@ -1,15 +1,8 @@
 <Page x:Class="DriveCare.Pages.User.ProfilePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Профиль">
-
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A12" Offset="0"/>
-            <GradientStop Color="#12101C" Offset="0.5"/>
-            <GradientStop Color="#0F0F1A" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+      Title="Профиль"
+      Background="{DynamicResource App.Brush.PageBackground}">
 
     <Page.Resources>
         <Style x:Key="MenuButtonStyle" TargetType="Button">
@@ -17,9 +10,9 @@
             <Setter Property="Margin" Value="0,0,0,10"/>
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Foreground" Value="#D0D5E0"/>
-            <Setter Property="Background" Value="#1A1A28"/>
-            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.SecondaryText}"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.Surface2}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -36,8 +29,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="BorderBrush" Value="#7C6CF5"/>
-                                <Setter TargetName="bd" Property="Background" Value="#222236"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource App.Brush.Accent}"/>
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource App.Brush.MenuHover}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -54,9 +47,18 @@
         </Grid.ColumnDefinitions>
 
         <!-- Левое меню -->
-        <Border Grid.Column="0" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="16" Padding="14">
+        <Border Grid.Column="0"
+                Background="{DynamicResource App.Brush.Surface}"
+                BorderBrush="{DynamicResource App.Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="14">
             <StackPanel>
-                <TextBlock Text="Профиль" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="4,2,0,18"/>
+                <TextBlock Text="Профиль"
+                           Foreground="{DynamicResource App.Brush.Foreground}"
+                           FontSize="21"
+                           FontWeight="SemiBold"
+                           Margin="4,2,0,18"/>
 
                 <Button x:Name="BtnMainInfo" Style="{StaticResource MenuButtonStyle}" Click="BtnMainInfo_Click">
                     Основная информация
@@ -71,7 +73,7 @@
                     Настройки
                 </Button>
 
-                <Separator Margin="0,6,0,12" Background="#2E2E44"/>
+                <Separator Margin="0,6,0,12" Background="{DynamicResource App.Brush.Border}"/>
 
                 <Button Style="{StaticResource MenuButtonStyle}" Click="BackToHome_Click">
                     ← Назад на главную
@@ -80,37 +82,79 @@
         </Border>
 
         <!-- Правая область вкладок -->
-        <Border Grid.Column="2" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="16" Padding="18">
+        <Border Grid.Column="2"
+                Background="{DynamicResource App.Brush.Surface}"
+                BorderBrush="{DynamicResource App.Brush.Border}"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="18">
             <Grid>
                 <Border x:Name="TabMainInfo" Visibility="Visible">
                     <StackPanel>
-                        <TextBlock Text="Основная информация" Foreground="White" FontSize="24" FontWeight="SemiBold"/>
+                        <TextBlock Text="Основная информация"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"/>
                         <TextBlock Text="Здесь будет основная информация о пользователе."
-                                   Foreground="#9AA0B0" FontSize="14" Margin="0,10,0,18"/>
+                                   Foreground="{DynamicResource App.Brush.Muted}"
+                                   FontSize="14"
+                                   Margin="0,10,0,18"/>
 
                         <UniformGrid Columns="2" Margin="0,0,0,8">
-                            <Border Margin="0,0,10,10" Padding="12" CornerRadius="12" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1">
+                            <Border Margin="0,0,10,10"
+                                    Padding="12"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource App.Brush.Surface2}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}"
+                                    BorderThickness="1">
                                 <StackPanel>
-                                    <TextBlock Text="Логин" Foreground="#9AA0B0"/>
-                                    <TextBlock Text="{Binding CurrentUser.Login}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Логин" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                    <TextBlock Text="{Binding CurrentUser.Login}"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,0,10" Padding="12" CornerRadius="12" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1">
+                            <Border Margin="0,0,0,10"
+                                    Padding="12"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource App.Brush.Surface2}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}"
+                                    BorderThickness="1">
                                 <StackPanel>
-                                    <TextBlock Text="Email" Foreground="#9AA0B0"/>
-                                    <TextBlock Text="{Binding CurrentUser.Email}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Email" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                    <TextBlock Text="{Binding CurrentUser.Email}"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,10,10" Padding="12" CornerRadius="12" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1">
+                            <Border Margin="0,0,10,10"
+                                    Padding="12"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource App.Brush.Surface2}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}"
+                                    BorderThickness="1">
                                 <StackPanel>
-                                    <TextBlock Text="Телефон" Foreground="#9AA0B0"/>
-                                    <TextBlock Text="{Binding CurrentUser.Phone, TargetNullValue=—}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Телефон" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                    <TextBlock Text="{Binding CurrentUser.Phone, TargetNullValue=—}"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
-                            <Border Margin="0,0,0,10" Padding="12" CornerRadius="12" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1">
+                            <Border Margin="0,0,0,10"
+                                    Padding="12"
+                                    CornerRadius="12"
+                                    Background="{DynamicResource App.Brush.Surface2}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}"
+                                    BorderThickness="1">
                                 <StackPanel>
-                                    <TextBlock Text="Дата рождения" Foreground="#9AA0B0"/>
-                                    <TextBlock Text="{Binding CurrentUser.BirthDate, StringFormat=dd.MM.yyyy, TargetNullValue=—}" Foreground="White" FontSize="16" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Дата рождения" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                    <TextBlock Text="{Binding CurrentUser.BirthDate, StringFormat=dd.MM.yyyy, TargetNullValue=—}"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
@@ -119,29 +163,129 @@
 
                 <Border x:Name="TabCars" Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="Машины" Foreground="White" FontSize="24" FontWeight="SemiBold"/>
+                        <TextBlock Text="Машины"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"/>
                         <TextBlock Text="Список машин пользователя будет здесь."
-                                   Foreground="#9AA0B0" FontSize="14" Margin="0,10,0,18"/>
+                                   Foreground="{DynamicResource App.Brush.Muted}"
+                                   FontSize="14"
+                                   Margin="0,10,0,18"/>
                     </StackPanel>
                 </Border>
 
                 <Border x:Name="TabEdit" Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="Редактировать" Foreground="White" FontSize="24" FontWeight="SemiBold"/>
+                        <TextBlock Text="Редактировать"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"/>
                         <TextBlock Text="Вкладка для редактирования данных профиля."
-                                   Foreground="#9AA0B0" FontSize="14" Margin="0,10,0,18"/>
+                                   Foreground="{DynamicResource App.Brush.Muted}"
+                                   FontSize="14"
+                                   Margin="0,10,0,18"/>
                     </StackPanel>
                 </Border>
 
                 <Border x:Name="TabSettings" Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="Настройки" Foreground="White" FontSize="24" FontWeight="SemiBold"/>
-                        <TextBlock Text="Настройки аккаунта и приложения."
-                                   Foreground="#9AA0B0" FontSize="14" Margin="0,10,0,18"/>
+                        <TextBlock Text="Настройки"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"
+                                   FontSize="24"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text="Тема интерфейса и выход из аккаунта."
+                                   Foreground="{DynamicResource App.Brush.Muted}"
+                                   FontSize="14"
+                                   Margin="0,10,0,20"/>
+
+                        <!-- Тема -->
+                        <Border Padding="16"
+                                CornerRadius="12"
+                                Background="{DynamicResource App.Brush.Surface2}"
+                                BorderBrush="{DynamicResource App.Brush.Border}"
+                                BorderThickness="1"
+                                Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Тема оформления"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource App.Brush.Foreground}"
+                                           Margin="0,0,0,6"/>
+                                <TextBlock Text="Тёмная или светлая. Выбор сохраняется на этом компьютере."
+                                           FontSize="13"
+                                           Foreground="{DynamicResource App.Brush.Muted}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,12"/>
+
+                                <StackPanel>
+                                    <RadioButton x:Name="RbThemeDark"
+                                                 GroupName="UiThemeChoice"
+                                                 Content="Тёмная"
+                                                 Margin="0,0,0,8"
+                                                 Foreground="{DynamicResource App.Brush.Foreground}"
+                                                 Checked="RbThemeDark_Checked"/>
+                                    <RadioButton x:Name="RbThemeLight"
+                                                 GroupName="UiThemeChoice"
+                                                 Content="Светлая"
+                                                 Foreground="{DynamicResource App.Brush.Foreground}"
+                                                 Checked="RbThemeLight_Checked"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Выход -->
+                        <Border Padding="16"
+                                CornerRadius="12"
+                                Background="{DynamicResource App.Brush.Surface2}"
+                                BorderBrush="{DynamicResource App.Brush.Border}"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Аккаунт"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource App.Brush.Foreground}"
+                                           Margin="0,0,0,6"/>
+                                <TextBlock Text="Выйти из профиля и вернуться на экран входа. Данные на сервере не удаляются."
+                                           FontSize="13"
+                                           Foreground="{DynamicResource App.Brush.Muted}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,14"/>
+                                <Button x:Name="BtnSignOut"
+                                        Content="Выйти из аккаунта"
+                                        HorizontalAlignment="Left"
+                                        MinWidth="200"
+                                        Height="44"
+                                        Padding="16,0"
+                                        Cursor="Hand"
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource App.Brush.Foreground}"
+                                        Background="Transparent"
+                                        BorderBrush="{DynamicResource App.Brush.DangerBorder}"
+                                        BorderThickness="1"
+                                        Click="BtnSignOut_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bd"
+                                                    CornerRadius="10"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bd" Property="Background" Value="{DynamicResource App.Brush.DangerHover}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
     </Grid>
 </Page>
-

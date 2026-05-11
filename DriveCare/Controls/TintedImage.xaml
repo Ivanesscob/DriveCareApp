@@ -1,0 +1,15 @@
+<UserControl x:Class="DriveCare.Controls.TintedImage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             SnapsToDevicePixels="True">
+  <Viewbox Stretch="Uniform" StretchDirection="Both">
+    <Grid Width="24" Height="24">
+      <Rectangle x:Name="TintRect" Fill="{DynamicResource App.Brush.IconTint}">
+        <Rectangle.OpacityMask>
+          <ImageBrush x:Name="MaskBrush" Stretch="Uniform" AlignmentX="Center" AlignmentY="Center"/>
+        </Rectangle.OpacityMask>
+      </Rectangle>
+    </Grid>
+  </Viewbox>
+</UserControl>

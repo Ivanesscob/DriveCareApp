@@ -155,15 +155,9 @@ namespace DriveCare.Pages.User.ActionPages
 
         private static string CategoryImageUri(string category)
         {
-            switch (category)
-            {
-                case "Engine": return "pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/STO.png";
-                case "Transmission": return "pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/CarRepair.png";
-                case "Body": return "pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/SprayGun.png";
-                case "Tires": return "pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/BuyCar.png";
-                case "Accessories": return "pack://application:,,,/DriveCareCore;component/Data/Pics/MainMenu/Bascket.png";
-                default: return FallbackImagePath;
-            }
+            _ = category;
+            // MainMenu *.png under DriveCareCore were SVG mislabeled as PNG; use placeholder until real bitmaps exist.
+            return FallbackImagePath;
         }
 
         private static ImageSource LoadImageOrFallback(string localPath)

@@ -6,12 +6,12 @@
       Background="Transparent">
 
     <Page.Resources>
-        <SolidColorBrush x:Key="Brush.Surface" Color="#252538"/>
-        <SolidColorBrush x:Key="Brush.FieldBg" Color="#1B1B2A"/>
-        <SolidColorBrush x:Key="Brush.Border" Color="#3D3D55"/>
-        <SolidColorBrush x:Key="Brush.TextMuted" Color="#9AA0B0"/>
-        <SolidColorBrush x:Key="Brush.Accent" Color="#7C6CF5"/>
-        <SolidColorBrush x:Key="Brush.AccentHover" Color="#9488FF"/>
+        <SolidColorBrush x:Key="Brush.Surface" Color="{DynamicResource App.Color.LoginSurface}"/>
+        <SolidColorBrush x:Key="Brush.FieldBg" Color="{DynamicResource App.Color.LoginFieldBg}"/>
+        <SolidColorBrush x:Key="Brush.Border" Color="{DynamicResource App.Color.LoginBorder}"/>
+        <SolidColorBrush x:Key="Brush.TextMuted" Color="{DynamicResource App.Color.Muted}"/>
+        <SolidColorBrush x:Key="Brush.Accent" Color="{DynamicResource App.Color.Accent}"/>
+        <SolidColorBrush x:Key="Brush.AccentHover" Color="{DynamicResource App.Color.AccentHover}"/>
 
         <Style x:Key="FieldBorder" TargetType="Border">
             <Setter Property="CornerRadius" Value="10"/>
@@ -22,8 +22,8 @@
         </Style>
 
         <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource App.Brush.LoginText}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -32,8 +32,8 @@
         </Style>
 
         <Style x:Key="DarkPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource App.Brush.LoginText}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -42,16 +42,15 @@
         </Style>
 
         <Style x:Key="DarkCalendarStyle" TargetType="Calendar">
-            <Setter Property="Background" Value="#252538"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.LoginSurface}"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
         </Style>
 
-        <!-- TextBoxStyle на DatePicker в части окружений даёт XLS0431; стиль текстового поля задаём неявно в DatePicker.Resources -->
         <Style x:Key="DarkDatePicker" TargetType="DatePicker">
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Padding" Value="4,4,4,4"/>
-            <Setter Property="Background" Value="#1B1B2A"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.LoginFieldBg}"/>
             <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="CalendarStyle" Value="{StaticResource DarkCalendarStyle}"/>
@@ -59,14 +58,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid>
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#0F0F1A" Offset="0"/>
-                <GradientStop Color="#151528" Offset="0.5"/>
-                <GradientStop Color="#1A1A32" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid Background="{DynamicResource App.Brush.LoginShellBackground}">
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="24" VerticalAlignment="Center">
@@ -89,7 +81,8 @@
                                 Cursor="Hand"
                                 Focusable="False"/>
 
-                        <TextBlock Text="Создать аккаунт" FontSize="26" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="Создать аккаунт" FontSize="26" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
                         <TextBlock Text="Заполните данные и подтвердите почту кодом из письма."
                                    FontSize="14" Foreground="{StaticResource Brush.TextMuted}"
                                    Margin="0,6,0,20" TextWrapping="Wrap"/>
@@ -107,7 +100,7 @@
                                          Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
                             </Border>
                             <TextBlock Text="Формат: имя@домен.ru. Латиница, без пробелов."
-                                       Foreground="#6B7280" FontSize="11" Margin="0,0,0,14" TextWrapping="Wrap"/>
+                                       Foreground="{DynamicResource App.Brush.Muted}" FontSize="11" Margin="0,0,0,14" TextWrapping="Wrap"/>
 
                             <TextBlock Text="Телефон" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" Margin="0,0,0,6"/>
                             <Border Style="{StaticResource FieldBorder}" Margin="0,0,0,6">
@@ -115,7 +108,7 @@
                                          Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"/>
                             </Border>
                             <TextBlock Text="РФ: +7, 8 или 10 цифр с 9… Другие страны: 10–15 цифр (+ допускается)."
-                                       Foreground="#6B7280" FontSize="11" Margin="0,0,0,14" TextWrapping="Wrap"/>
+                                       Foreground="{DynamicResource App.Brush.Muted}" FontSize="11" Margin="0,0,0,14" TextWrapping="Wrap"/>
 
                             <TextBlock Text="Дата рождения (не моложе 18 лет)" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" Margin="0,0,0,6"/>
                             <Border Style="{StaticResource FieldBorder}" Margin="0,0,0,14" Padding="4,2,4,2">
@@ -124,17 +117,17 @@
                                             SelectedDate="{Binding BirthDate}">
                                     <DatePicker.Resources>
                                         <Style TargetType="{x:Type primitives:DatePickerTextBox}">
-                                            <Setter Property="Foreground" Value="White"/>
-                                            <Setter Property="CaretBrush" Value="White"/>
-                                            <Setter Property="Background" Value="#1B1B2A"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
+                                            <Setter Property="CaretBrush" Value="{DynamicResource App.Brush.LoginText}"/>
+                                            <Setter Property="Background" Value="{DynamicResource App.Brush.LoginFieldBg}"/>
                                             <Setter Property="BorderThickness" Value="0"/>
                                             <Setter Property="Padding" Value="4,2"/>
                                             <Setter Property="FontSize" Value="15"/>
                                         </Style>
                                         <Style TargetType="Button">
-                                            <Setter Property="Background" Value="#332E55"/>
-                                            <Setter Property="Foreground" Value="White"/>
-                                            <Setter Property="BorderBrush" Value="#5548C8"/>
+                                            <Setter Property="Background" Value="{DynamicResource App.Brush.AccentSoft}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource App.Brush.LoginText}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.AccentDim}"/>
                                             <Setter Property="BorderThickness" Value="1"/>
                                             <Setter Property="Padding" Value="8,4"/>
                                         </Style>
@@ -157,7 +150,7 @@
                             <Button Content="Готово — отправить код на почту"
                                     Command="{Binding SendCodeCommand}"
                                     Height="50" FontSize="15" FontWeight="SemiBold"
-                                    Foreground="White" Cursor="Hand" BorderThickness="0">
+                                    Foreground="{DynamicResource App.Brush.LoginText}" Cursor="Hand" BorderThickness="0">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd" CornerRadius="12" Background="{StaticResource Brush.Accent}" Padding="16,0">
@@ -177,9 +170,11 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,16,0,0" Visibility="{Binding VerificationStepVisibility}">
-                            <Border Background="#1B1B2A" CornerRadius="10" Padding="16" Margin="0,0,0,16" BorderBrush="#5548C8" BorderThickness="1">
+                            <Border Background="{DynamicResource App.Brush.LoginFieldBg}" CornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                    BorderBrush="{DynamicResource App.Brush.AccentDim}" BorderThickness="1">
                                 <StackPanel>
-                                    <TextBlock Text="Проверка почты" FontSize="18" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Проверка почты" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,0,0,8"/>
                                     <TextBlock TextWrapping="Wrap" Foreground="{StaticResource Brush.TextMuted}" FontSize="13"
                                                Text="На указанный email отправлено письмо с 5-значным кодом. Введите его ниже."/>
                                 </StackPanel>
@@ -195,7 +190,7 @@
                             <Button Content="Зарегистрироваться"
                                     Command="{Binding CompleteRegistrationCommand}"
                                     Height="50" FontSize="16" FontWeight="SemiBold"
-                                    Foreground="White" Cursor="Hand" BorderThickness="0">
+                                    Foreground="{DynamicResource App.Brush.LoginText}" Cursor="Hand" BorderThickness="0">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="bd2" CornerRadius="12" Background="{StaticResource Brush.Accent}" Padding="16,0">

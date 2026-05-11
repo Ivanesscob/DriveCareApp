@@ -26,5 +26,20 @@ namespace DriveCare.Properties
                 return defaultInstance;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Dark")]
+        public string UiTheme
+        {
+            get
+            {
+                return ((string)(this["UiTheme"]));
+            }
+            set
+            {
+                this["UiTheme"] = value;
+            }
+        }
     }
 }

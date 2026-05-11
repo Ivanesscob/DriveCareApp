@@ -1,0 +1,116 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Светлая тема: нейтральный slate + бирюзовый акцент (без фиолетового) -->
+  <Color x:Key="App.Color.Background">#FFF8FAFC</Color>
+  <Color x:Key="App.Color.Panel">#FFF1F5F9</Color>
+  <Color x:Key="App.Color.Surface">#FFFFFFFF</Color>
+  <Color x:Key="App.Color.Surface2">#FFE8EEF5</Color>
+  <Color x:Key="App.Color.SurfaceCard">#FFFFFFFF</Color>
+  <Color x:Key="App.Color.SurfaceElevated">#FFE2E8F0</Color>
+  <Color x:Key="App.Color.Border">#FFCBD5E1</Color>
+  <Color x:Key="App.Color.BorderStrong">#FF94A3B8</Color>
+  <Color x:Key="App.Color.Foreground">#FF0F172A</Color>
+  <Color x:Key="App.Color.Muted">#FF64748B</Color>
+  <Color x:Key="App.Color.SecondaryText">#FF334155</Color>
+  <Color x:Key="App.Color.TextDim">#FF475569</Color>
+  <Color x:Key="App.Color.Accent">#FF0D9488</Color>
+  <Color x:Key="App.Color.AccentDim">#FF0F766E</Color>
+  <Color x:Key="App.Color.AccentHover">#FF14B8A6</Color>
+  <Color x:Key="App.Color.AccentHeroMid">#FF5EEAD4</Color>
+  <Color x:Key="App.Color.AccentSoft">#FFCCFBF1</Color>
+  <Color x:Key="App.Color.PriceChipBg">#FFCCFBF1</Color>
+  <Color x:Key="App.Color.PhotoMat">#FFF1F5F9</Color>
+  <Color x:Key="App.Color.PhotoWellInner1">#FFE0F2FE</Color>
+  <Color x:Key="App.Color.PhotoWellInner2">#FFF8FAFC</Color>
+  <Color x:Key="App.Color.CarStripCard">#FFFFFFFF</Color>
+  <Color x:Key="App.Color.CarStripInner">#FFF1F5F9</Color>
+  <Color x:Key="App.Color.ListSelectionStart">#FF14B8A6</Color>
+  <Color x:Key="App.Color.ListSelectionEnd">#FF0D9488</Color>
+  <Color x:Key="App.Color.ListHover">#FFE2E8F0</Color>
+  <Color x:Key="App.Color.IconTint">#FF475569</Color>
+  <Color x:Key="App.Color.FooterMuted">#FF94A3B8</Color>
+  <Color x:Key="App.Color.HeroShadow">#FF64748B</Color>
+  <Color x:Key="App.Color.OverlayScrim">#CCF1F5F9</Color>
+
+  <Color x:Key="App.Color.LoginSurface">#FFFFFFFF</Color>
+  <Color x:Key="App.Color.LoginFieldBg">#FFF8FAFC</Color>
+  <Color x:Key="App.Color.LoginBorder">#FFCBD5E1</Color>
+  <Color x:Key="App.Color.LoginGlowA">#FF99F6E4</Color>
+  <Color x:Key="App.Color.LoginGlowB">#FF7DD3FC</Color>
+  <Color x:Key="App.Color.MenuBgActive">#FFCCFBF1</Color>
+  <Color x:Key="App.Color.MenuHover">#FFF0FDFA</Color>
+
+  <Color x:Key="App.Color.FieldInputBg">#FFFFFFFF</Color>
+  <Color x:Key="App.Color.FieldInputFg">#FF0F172A</Color>
+  <Color x:Key="App.Color.TextOnAccent">#FFFFFFFF</Color>
+  <Color x:Key="App.Color.DangerBorder">#FFDC2626</Color>
+  <Color x:Key="App.Color.DangerSoft">#33DC2626</Color>
+  <Color x:Key="App.Color.DangerPanel">#FFFEE2E2</Color>
+  <Color x:Key="App.Color.DangerAccentBorder">#FFEF4444</Color>
+  <Color x:Key="App.Color.DangerFg">#FF991B1B</Color>
+
+  <SolidColorBrush x:Key="App.Brush.Background" Color="{StaticResource App.Color.Background}"/>
+  <SolidColorBrush x:Key="App.Brush.Panel" Color="{StaticResource App.Color.Panel}"/>
+  <SolidColorBrush x:Key="App.Brush.Surface" Color="{StaticResource App.Color.Surface}"/>
+  <SolidColorBrush x:Key="App.Brush.Surface2" Color="{StaticResource App.Color.Surface2}"/>
+  <SolidColorBrush x:Key="App.Brush.SurfaceCard" Color="{StaticResource App.Color.SurfaceCard}"/>
+  <SolidColorBrush x:Key="App.Brush.SurfaceElevated" Color="{StaticResource App.Color.SurfaceElevated}"/>
+  <SolidColorBrush x:Key="App.Brush.Border" Color="{StaticResource App.Color.Border}"/>
+  <SolidColorBrush x:Key="App.Brush.BorderStrong" Color="{StaticResource App.Color.BorderStrong}"/>
+  <SolidColorBrush x:Key="App.Brush.Foreground" Color="{StaticResource App.Color.Foreground}"/>
+  <SolidColorBrush x:Key="App.Brush.Muted" Color="{StaticResource App.Color.Muted}"/>
+  <SolidColorBrush x:Key="App.Brush.SecondaryText" Color="{StaticResource App.Color.SecondaryText}"/>
+  <SolidColorBrush x:Key="App.Brush.TextDim" Color="{StaticResource App.Color.TextDim}"/>
+  <SolidColorBrush x:Key="App.Brush.Accent" Color="{StaticResource App.Color.Accent}"/>
+  <SolidColorBrush x:Key="App.Brush.AccentDim" Color="{StaticResource App.Color.AccentDim}"/>
+  <SolidColorBrush x:Key="App.Brush.IconTint" Color="{StaticResource App.Color.IconTint}"/>
+  <SolidColorBrush x:Key="App.Brush.FooterMuted" Color="{StaticResource App.Color.FooterMuted}"/>
+  <SolidColorBrush x:Key="App.Brush.PriceChipBg" Color="{StaticResource App.Color.PriceChipBg}"/>
+  <SolidColorBrush x:Key="App.Brush.PhotoMat" Color="{StaticResource App.Color.PhotoMat}"/>
+  <SolidColorBrush x:Key="App.Brush.PopupSurface" Color="{StaticResource App.Color.Surface}"/>
+  <SolidColorBrush x:Key="App.Brush.PopupBorder" Color="{StaticResource App.Color.Border}"/>
+  <SolidColorBrush x:Key="App.Brush.NotificationCardBg" Color="{StaticResource App.Color.Surface2}"/>
+  <SolidColorBrush x:Key="App.Brush.OverlayScrim" Color="{StaticResource App.Color.OverlayScrim}"/>
+  <SolidColorBrush x:Key="App.Brush.FieldInputBg" Color="{StaticResource App.Color.FieldInputBg}"/>
+  <SolidColorBrush x:Key="App.Brush.FieldInputFg" Color="{StaticResource App.Color.FieldInputFg}"/>
+  <SolidColorBrush x:Key="App.Brush.TextOnAccent" Color="{StaticResource App.Color.TextOnAccent}"/>
+  <SolidColorBrush x:Key="App.Brush.DangerBorder" Color="{StaticResource App.Color.DangerBorder}"/>
+  <SolidColorBrush x:Key="App.Brush.DangerHover" Color="{StaticResource App.Color.DangerSoft}"/>
+  <SolidColorBrush x:Key="App.Brush.DangerPanel" Color="{StaticResource App.Color.DangerPanel}"/>
+  <SolidColorBrush x:Key="App.Brush.DangerAccentBorder" Color="{StaticResource App.Color.DangerAccentBorder}"/>
+  <SolidColorBrush x:Key="App.Brush.DangerFg" Color="{StaticResource App.Color.DangerFg}"/>
+
+  <SolidColorBrush x:Key="App.Brush.LoginSurface" Color="{StaticResource App.Color.LoginSurface}"/>
+  <SolidColorBrush x:Key="App.Brush.LoginFieldBg" Color="{StaticResource App.Color.LoginFieldBg}"/>
+  <SolidColorBrush x:Key="App.Brush.LoginBorder" Color="{StaticResource App.Color.LoginBorder}"/>
+
+  <SolidColorBrush x:Key="App.Brush.LoginText" Color="{StaticResource App.Color.Foreground}"/>
+
+  <LinearGradientBrush x:Key="App.Brush.PageBackground" StartPoint="0,0" EndPoint="1,1">
+    <GradientStop Color="#FFF8FAFC" Offset="0"/>
+    <GradientStop Color="#FFF1F5F9" Offset="0.5"/>
+    <GradientStop Color="#FFEFF6FF" Offset="1"/>
+  </LinearGradientBrush>
+
+  <LinearGradientBrush x:Key="App.Brush.LoginShellBackground" StartPoint="0,0" EndPoint="1,1">
+    <GradientStop Color="#FFFFFFFF" Offset="0"/>
+    <GradientStop Color="#FFF0FDFA" Offset="0.45"/>
+    <GradientStop Color="#FFF0F9FF" Offset="1"/>
+  </LinearGradientBrush>
+
+  <SolidColorBrush x:Key="App.Brush.MenuBgActive" Color="{StaticResource App.Color.MenuBgActive}"/>
+  <SolidColorBrush x:Key="App.Brush.MenuHover" Color="{StaticResource App.Color.MenuHover}"/>
+
+  <SolidColorBrush x:Key="App.Brush.HeroNavBg" Color="#300F172A"/>
+  <SolidColorBrush x:Key="App.Brush.HeroNavBorder" Color="#500F172A"/>
+  <SolidColorBrush x:Key="App.Brush.HeroNavFg" Color="#FF0F172A"/>
+  <SolidColorBrush x:Key="App.Brush.HeroNavBgHover" Color="#500F172A"/>
+  <SolidColorBrush x:Key="App.Brush.HeroNavBgPressed" Color="#280F172A"/>
+
+  <SolidColorBrush x:Key="App.ComboBg" Color="{StaticResource App.Color.Surface}"/>
+  <SolidColorBrush x:Key="App.ComboBorder" Color="{StaticResource App.Color.Border}"/>
+  <SolidColorBrush x:Key="App.ComboFg" Color="{StaticResource App.Color.Foreground}"/>
+  <SolidColorBrush x:Key="App.ComboItemHover" Color="#FFE0F2FE"/>
+  <SolidColorBrush x:Key="App.ComboItemSelected" Color="{StaticResource App.Color.AccentSoft}"/>
+</ResourceDictionary>

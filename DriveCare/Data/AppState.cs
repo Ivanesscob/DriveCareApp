@@ -20,6 +20,16 @@ namespace DriveCare
 
         public static void SetFrame<T>() where T : Page, new() => MainFrame.Navigate(new T());
 
-        public static List<Roles> UserRoles { get; set; } 
+        public static List<Roles> UserRoles { get; set; }
+
+        /// <summary>
+        /// Сбрасывает сессию пользователя (выход из аккаунта).
+        /// </summary>
+        public static void SignOut()
+        {
+            CurrentUserId = Guid.Empty;
+            CurrentUser = null;
+            UserRoles = null;
+        }
     }
 }

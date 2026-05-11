@@ -5,9 +5,9 @@
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <Style x:Key="QuickActionButton" TargetType="Button">
-            <Setter Property="Background" Value="#14141F"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#2E2E44"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.Surface}"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.Foreground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Width" Value="92"/>
@@ -17,7 +17,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid Background="#14141F">
+    <Grid Background="{DynamicResource App.Brush.Panel}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -25,7 +25,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,24,0,8" HorizontalAlignment="Center">
-            <TextBlock Text="Магазин инструментов" Foreground="White" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Магазин инструментов" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
         </StackPanel>
 
         <Grid Grid.Row="1" Margin="24,0,24,12">
@@ -43,17 +43,17 @@
                 </Grid.RowDefinitions>
 
                 <WrapPanel Grid.Row="0" HorizontalAlignment="Center">
-                    <Button Style="{StaticResource QuickActionButton}" Tag="Engine" Click="Category_Click"><TextBlock Text="Двигатель" Foreground="White" TextAlignment="Center"/></Button>
-                    <Button Style="{StaticResource QuickActionButton}" Tag="Transmission" Click="Category_Click"><TextBlock Text="Трансмиссия" Foreground="White" TextAlignment="Center"/></Button>
-                    <Button Style="{StaticResource QuickActionButton}" Tag="Body" Click="Category_Click"><TextBlock Text="Кузов" Foreground="White" TextAlignment="Center"/></Button>
-                    <Button Style="{StaticResource QuickActionButton}" Tag="Tires" Click="Category_Click"><TextBlock Text="Шины" Foreground="White" TextAlignment="Center"/></Button>
-                    <Button Style="{StaticResource QuickActionButton}" Tag="Accessories" Click="Category_Click"><TextBlock Text="Аксессуары" Foreground="White" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Engine" Click="Category_Click"><TextBlock Text="Двигатель" Foreground="{DynamicResource App.Brush.Foreground}" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Transmission" Click="Category_Click"><TextBlock Text="Трансмиссия" Foreground="{DynamicResource App.Brush.Foreground}" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Body" Click="Category_Click"><TextBlock Text="Кузов" Foreground="{DynamicResource App.Brush.Foreground}" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Tires" Click="Category_Click"><TextBlock Text="Шины" Foreground="{DynamicResource App.Brush.Foreground}" TextAlignment="Center"/></Button>
+                    <Button Style="{StaticResource QuickActionButton}" Tag="Accessories" Click="Category_Click"><TextBlock Text="Аксессуары" Foreground="{DynamicResource App.Brush.Foreground}" TextAlignment="Center"/></Button>
                 </WrapPanel>
 
                 <ListView Grid.Row="2"
                           ItemsSource="{Binding VisibleProducts}"
-                          Background="#14141F"
-                          BorderBrush="#2E2E44"
+                          Background="{DynamicResource App.Brush.Panel}"
+                          BorderBrush="{DynamicResource App.Brush.Border}"
                           BorderThickness="1"
                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ScrollViewer.CanContentScroll="False">
@@ -72,7 +72,7 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Border Width="240" Height="290" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+                            <Border Width="240" Height="290" Background="{DynamicResource App.Brush.Surface2}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" CornerRadius="12" Padding="12">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="130"/>
@@ -80,18 +80,18 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <Border Grid.Row="0" CornerRadius="10" Background="#101018" ClipToBounds="True" Margin="0,0,0,10">
+                                    <Border Grid.Row="0" CornerRadius="10" Background="{DynamicResource App.Brush.PhotoMat}" ClipToBounds="True" Margin="0,0,0,10">
                                         <Grid>
                                             <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
-                                            <Border VerticalAlignment="Bottom" Background="#CC1A1A28" Padding="6" Visibility="{Binding IsPhotoLoading, Converter={StaticResource BoolToVis}}">
+                                            <Border VerticalAlignment="Bottom" Background="{DynamicResource App.Brush.OverlayScrim}" Padding="6" Visibility="{Binding IsPhotoLoading, Converter={StaticResource BoolToVis}}">
                                                 <ProgressBar Minimum="0" Maximum="100" Value="{Binding PhotoLoadProgressPercent}" Height="6"/>
                                             </Border>
                                         </Grid>
                                     </Border>
 
                                     <StackPanel Grid.Row="1">
-                                        <TextBlock Text="{Binding Name}" Foreground="White" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Description}" Foreground="#9AA0B0" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="42"/>
+                                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Description}" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="42"/>
                                     </StackPanel>
 
                                     <Grid Grid.Row="2" Margin="0,10,0,0">
@@ -99,11 +99,11 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Background="#2A2250" BorderBrush="#7C6CF5" BorderThickness="1" CornerRadius="10" Padding="10,6">
-                                            <TextBlock Text="{Binding PriceLabel}" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                                        <Border Grid.Column="0" Background="{DynamicResource App.Brush.PriceChipBg}" BorderBrush="{DynamicResource App.Brush.Accent}" BorderThickness="1" CornerRadius="10" Padding="10,6">
+                                            <TextBlock Text="{Binding PriceLabel}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="14" FontWeight="SemiBold"/>
                                         </Border>
                                         <Button Grid.Column="1" Content="В корзину" Margin="8,0,0,0" Padding="10,6" Tag="{Binding}" Click="AddToCart_Click"
-                                                Background="#222236" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1"/>
+                                                Style="{StaticResource App.Button.Outline}"/>
                                     </Grid>
                                 </Grid>
                             </Border>
@@ -112,26 +112,26 @@
                 </ListView>
             </Grid>
 
-            <Border Grid.Column="2" Background="#1A1A28" BorderBrush="#2E2E44" BorderThickness="1" CornerRadius="12" Padding="12">
+            <Border Grid.Column="2" Background="{DynamicResource App.Brush.Surface2}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" CornerRadius="12" Padding="12">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="{Binding CartTitle}" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
-                    <ListView Grid.Row="1" Margin="0,10,0,10" ItemsSource="{Binding CartItems}" Background="#14141F" BorderBrush="#2E2E44" BorderThickness="1">
+                    <TextBlock Text="{Binding CartTitle}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="18" FontWeight="SemiBold"/>
+                    <ListView Grid.Row="1" Margin="0,10,0,10" ItemsSource="{Binding CartItems}" Background="{DynamicResource App.Brush.Panel}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <DockPanel Margin="6,4">
                                     <Button DockPanel.Dock="Right" Content="−" Width="24" Height="24" Tag="{Binding}" Click="RemoveFromCart_Click"
-                                            Background="#222236" Foreground="White" BorderBrush="#2E2E44" BorderThickness="1"/>
-                                    <TextBlock Text="{Binding DisplayText}" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                            Style="{StaticResource App.Button.Outline}" Padding="0"/>
+                                    <TextBlock Text="{Binding DisplayText}" Foreground="{DynamicResource App.Brush.Foreground}" VerticalAlignment="Center" TextWrapping="Wrap"/>
                                 </DockPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <TextBlock Grid.Row="2" Text="{Binding CartTotalText}" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                    <TextBlock Grid.Row="2" Text="{Binding CartTotalText}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="14" FontWeight="SemiBold"/>
                 </Grid>
             </Border>
         </Grid>
@@ -142,12 +142,7 @@
                 Height="40"
                 Margin="0,0,0,16"
                 HorizontalAlignment="Center"
-                Background="#1A1A28"
-                Foreground="White"
-                BorderBrush="#2E2E44"
-                BorderThickness="1"
-                Cursor="Hand"
+                Style="{StaticResource App.Button.Outline}"
                 Click="Back_Click"/>
     </Grid>
 </Page>
-
