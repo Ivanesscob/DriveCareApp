@@ -136,7 +136,8 @@ SELECT
     c.[Year] AS CarYear,
     clr.Name AS ColorName,
     ISNULL(lastPrice.Price, 0) AS LastPrice,
-    cs.PhotoPath
+    cs.PhotoPath,
+    cs.StatusId AS StatusId
 FROM CarSales cs
 INNER JOIN UserCarSales ucs ON ucs.CarSaleId = cs.RowId AND ucs.UserId = @p0
 INNER JOIN Cars c ON c.RowId = cs.CarId
@@ -182,6 +183,8 @@ OUTER APPLY (
                         ModelInfoLabel = string.IsNullOrWhiteSpace(row.ModelDescription) ? "Характеристики модели не указаны" : row.ModelDescription.Trim(),
                         PriceLabel = string.Format("{0:0} ₽", row.LastPrice),
                         SellerLabel = Safe(row.SaleTitle, "Объявление"),
+                        ModerationStatus = CarSaleModerationStatuses.FormatModerationStatusDisplay(
+                            AppConnect.model1, row.StatusId),
                         Photo = fallback,
                         IsPhotoLoading = true,
                         PhotoLoadProgressPercent = 0,
@@ -566,6 +569,14 @@ OUTER APPLY (
             var now = DateTime.Now;
             sale.Description = (EditableDescription ?? string.Empty).Trim();
             sale.PhotoPath = BuildPhotoPathForSave();
+
+            var returnedId = CarSaleModerationStatuses.ResolveCarSaleStatusIdByName(AppConnect.model1, CarSaleModerationStatuses.ReturnedForCorrection);
+            if (returnedId.HasValue && sale.StatusId == returnedId)
+            {
+                sale.StatusId = CarSaleModerationStatuses.ResolveCarSaleStatusIdByName(AppConnect.model1, CarSaleModerationStatuses.SentForModeration)
+                    ?? CarSaleModerationStatuses.ResolveCarSaleStatusIdByName(AppConnect.model1, CarSaleModerationStatuses.AwaitingModeration)
+                    ?? CarSaleModerationStatuses.AwaitingModerationStatusGuid;
+            }
 
             var activePrices = AppConnect.model1.CarSalePrices
                 .Where(p => p.CarSaleId == SelectedSale.SaleId && p.EndDate == null)

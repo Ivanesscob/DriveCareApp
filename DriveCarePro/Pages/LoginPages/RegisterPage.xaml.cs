@@ -1,5 +1,6 @@
 using DriveCareCore;
 using DriveCareCore.Dialogs;
+using DriveCarePro;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;

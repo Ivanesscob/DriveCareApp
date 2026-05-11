@@ -1,0 +1,34 @@
+<Page x:Class="DriveCarePro.Pages.Admin.AdminBroadcastPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Уведомления">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,24">
+        <StackPanel MaxWidth="640">
+            <TextBlock Text="Рассылка уведомлений" FontSize="22" FontWeight="SemiBold"
+                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+            <TextBlock Text="Черновик массового сообщения пользователям или сотрудникам. Отправка в БД пока не подключена — не нажимайте «Отправить», если не готовы доработать серверную часть."
+                       FontSize="13" Margin="0,6,0,20" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
+
+            <TextBlock Text="Заголовок" FontSize="12" Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+            <TextBox x:Name="TitleBox" Margin="0,6,0,16" MinHeight="40" Padding="10,8"
+                     Background="{DynamicResource App.Brush.SurfaceCard}"
+                     Foreground="{DynamicResource App.Brush.Foreground}"
+                     BorderBrush="{DynamicResource App.Brush.Border}"/>
+
+            <TextBlock Text="Текст" FontSize="12" Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+            <TextBox x:Name="BodyBox" Margin="0,6,0,20" MinHeight="140" AcceptsReturn="True" TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto" Padding="10,8"
+                     Background="{DynamicResource App.Brush.SurfaceCard}"
+                     Foreground="{DynamicResource App.Brush.Foreground}"
+                     BorderBrush="{DynamicResource App.Brush.Border}"/>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Очистить" Style="{StaticResource App.Button.Outline}" Height="40" MinWidth="120"
+                        Click="Clear_Click"/>
+                <Button Content="Отправить (заглушка)" Style="{StaticResource App.Button.Primary}" Margin="12,0,0,0"
+                        Height="40" MinWidth="200" Click="SendStub_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

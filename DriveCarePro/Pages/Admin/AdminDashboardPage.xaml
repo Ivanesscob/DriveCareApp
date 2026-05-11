@@ -1,0 +1,71 @@
+<Page x:Class="DriveCarePro.Pages.Admin.AdminDashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Обзор">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,24">
+        <StackPanel MaxWidth="960">
+            <TextBlock Text="Обзор системы" FontSize="22" FontWeight="SemiBold"
+                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+            <TextBlock Text="Ключевые счётчики по базе данных (только чтение)."
+                       FontSize="13" Margin="0,6,0,20" Foreground="{DynamicResource App.Brush.Muted}"/>
+
+            <UniformGrid Columns="2" Rows="3" Margin="0,0,0,16">
+                <Border Margin="0,0,12,12" Padding="18,16" CornerRadius="14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Пользователи" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                        <TextBlock x:Name="CntUsers" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Margin="12,0,0,12" Padding="18,16" CornerRadius="14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Сотрудники Pro" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                        <TextBlock x:Name="CntEmployees" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Margin="0,0,12,12" Padding="18,16" CornerRadius="14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Объявления авто" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                        <TextBlock x:Name="CntCarSales" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Margin="12,0,0,12" Padding="18,16" CornerRadius="14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Запчасти" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                        <TextBlock x:Name="CntParts" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Margin="0,0,12,0" Padding="18,16" CornerRadius="14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Компании" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                        <TextBlock x:Name="CntCompanies" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Margin="12,0,0,0" Padding="18,16" CornerRadius="14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Автомобили" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                        <TextBlock x:Name="CntCars" FontSize="28" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

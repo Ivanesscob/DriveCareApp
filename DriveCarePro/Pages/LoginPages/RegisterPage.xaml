@@ -5,55 +5,32 @@
       Background="Transparent">
 
     <Page.Resources>
-        <SolidColorBrush x:Key="Brush.Surface" Color="#252538"/>
-        <SolidColorBrush x:Key="Brush.FieldBg" Color="#1B1B2A"/>
-        <SolidColorBrush x:Key="Brush.Border" Color="#3D3D55"/>
-        <SolidColorBrush x:Key="Brush.TextMuted" Color="#9AA0B0"/>
-        <SolidColorBrush x:Key="Brush.Accent" Color="#7C6CF5"/>
-        <SolidColorBrush x:Key="Brush.AccentHover" Color="#9488FF"/>
-
-        <Style x:Key="FieldBorder" TargetType="Border">
+        <Style x:Key="LoginFieldBorder" TargetType="Border">
             <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.LoginBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="{StaticResource Brush.FieldBg}"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.LoginFieldBg}"/>
             <Setter Property="Padding" Value="2"/>
         </Style>
-
-        <Style x:Key="DarkTextBox" TargetType="TextBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="Padding" Value="12,10"/>
+        <Style x:Key="LoginInnerTextBox" TargetType="TextBox" BasedOn="{StaticResource App.FieldTextBox}">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="15"/>
         </Style>
-
-        <Style x:Key="DarkPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="CaretBrush" Value="White"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="Padding" Value="12,10"/>
+        <Style x:Key="LoginInnerPasswordBox" TargetType="PasswordBox" BasedOn="{StaticResource App.FieldPasswordBox}">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="15"/>
         </Style>
     </Page.Resources>
 
-    <Grid>
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#0F0F1A" Offset="0"/>
-                <GradientStop Color="#151528" Offset="0.5"/>
-                <GradientStop Color="#1A1A32" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.Background>
-
+    <Grid Background="{DynamicResource App.Brush.LoginShellBackground}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="24" VerticalAlignment="Center">
                 <Border MaxWidth="460" HorizontalAlignment="Center" Padding="36,32" CornerRadius="20"
-                        Background="{StaticResource Brush.Surface}">
+                        Background="{DynamicResource App.Brush.LoginSurface}">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="32" ShadowDepth="0" Opacity="0.45" Color="#000000"/>
                     </Border.Effect>
@@ -66,54 +43,39 @@
                                 Padding="0"
                                 Background="Transparent"
                                 BorderThickness="0"
-                                Foreground="{StaticResource Brush.Accent}"
+                                Foreground="{DynamicResource App.Brush.Accent}"
                                 FontSize="14"
                                 Cursor="Hand"
                                 Focusable="False"/>
 
-                        <TextBlock Text="Создать аккаунт" FontSize="26" FontWeight="SemiBold" Foreground="White"/>
+                        <TextBlock Text="Создать аккаунт" FontSize="26" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
                         <TextBlock Text="Заполните поля для регистрации в DriveCare Pro"
-                                   FontSize="14" Foreground="{StaticResource Brush.TextMuted}"
+                                   FontSize="14" Foreground="{DynamicResource App.Brush.Muted}"
                                    Margin="0,6,0,28" TextWrapping="Wrap"/>
 
-                        <TextBlock Text="Email" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" Margin="0,0,0,6"/>
-                        <Border Style="{StaticResource FieldBorder}" Margin="0,0,0,16">
-                            <TextBox Style="{StaticResource DarkTextBox}"
+                        <TextBlock Text="Email" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,0,6"/>
+                        <Border Style="{StaticResource LoginFieldBorder}" Margin="0,0,0,16">
+                            <TextBox Style="{StaticResource LoginInnerTextBox}"
                                      Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
                         </Border>
 
-                        <TextBlock Text="Логин" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" Margin="0,0,0,6"/>
-                        <Border Style="{StaticResource FieldBorder}" Margin="0,0,0,16">
-                            <TextBox Style="{StaticResource DarkTextBox}"
+                        <TextBlock Text="Логин" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,0,6"/>
+                        <Border Style="{StaticResource LoginFieldBorder}" Margin="0,0,0,16">
+                            <TextBox Style="{StaticResource LoginInnerTextBox}"
                                      Text="{Binding UserLogin, UpdateSourceTrigger=PropertyChanged}"/>
                         </Border>
 
-                        <TextBlock Text="Пароль" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" Margin="0,0,0,6"/>
-                        <Border Style="{StaticResource FieldBorder}" Margin="0,0,0,24">
+                        <TextBlock Text="Пароль" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,0,6"/>
+                        <Border Style="{StaticResource LoginFieldBorder}" Margin="0,0,0,24">
                             <PasswordBox x:Name="PasswordInput"
-                                         Style="{StaticResource DarkPasswordBox}"/>
+                                         Style="{StaticResource LoginInnerPasswordBox}"/>
                         </Border>
 
                         <Button Content="Зарегистрироваться"
                                 Command="{Binding RegisterCommand}"
-                                Height="50" FontSize="16" FontWeight="SemiBold"
-                                Foreground="White" Cursor="Hand" BorderThickness="0">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="bd" CornerRadius="12" Background="{StaticResource Brush.Accent}" Padding="16,0">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="bd" Property="Background" Value="{StaticResource Brush.AccentHover}"/>
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter TargetName="bd" Property="Opacity" Value="0.45"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                                Style="{StaticResource App.Button.Primary}"
+                                Height="50" FontSize="16" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Border>
             </Grid>

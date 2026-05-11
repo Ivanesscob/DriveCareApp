@@ -69,6 +69,7 @@
           <Property Name="Description" Type="nvarchar" MaxLength="500" />
           <Property Name="PhotoPath" Type="nvarchar(max)" />
           <Property Name="CreatedAt" Type="datetime" />
+          <Property Name="StatusId" Type="uniqueidentifier" />
         </EntityType>
         <EntityType Name="CarTypes">
           <Key>
@@ -250,6 +251,10 @@
           <Property Name="EndDate" Type="datetime" />
           <Property Name="Deadline" Type="datetime" />
           <Property Name="IsCompleted" Type="bit" Nullable="false" />
+          <Property Name="CarId" Type="uniqueidentifier" />
+          <Property Name="ClientUserId" Type="uniqueidentifier" />
+          <Property Name="ReportText" Type="nvarchar(max)" />
+          <Property Name="WorkHours" Type="decimal" Precision="9" Scale="2" />
         </EntityType>
         <EntityType Name="UserCars">
           <Key>
@@ -1479,6 +1484,7 @@
           <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
           <Property Name="PhotoPath" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="StatusId" Type="Guid" />
           <NavigationProperty Name="Cars" Relationship="DriveCareDBModel.FK__CarSales__CarId__1AD3FDA4" FromRole="CarSales" ToRole="Cars" />
           <NavigationProperty Name="CarSalePrices" Relationship="DriveCareDBModel.FK__CarSalePr__CarSa__245D67DE" FromRole="CarSales" ToRole="CarSalePrices" />
           <NavigationProperty Name="UserCarSales" Relationship="DriveCareDBModel.FK__UserCarSa__CarSa__1F98B2C1" FromRole="CarSales" ToRole="UserCarSales" />
@@ -1768,6 +1774,10 @@
           <Property Name="EndDate" Type="DateTime" Precision="3" />
           <Property Name="Deadline" Type="DateTime" Precision="3" />
           <Property Name="IsCompleted" Type="Boolean" Nullable="false" />
+          <Property Name="CarId" Type="Guid" />
+          <Property Name="ClientUserId" Type="Guid" />
+          <Property Name="ReportText" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="WorkHours" Type="Decimal" Precision="9" Scale="2" />
           <NavigationProperty Name="Employees" Relationship="DriveCareDBModel.FK_Tasks_Employees" FromRole="Tasks" ToRole="Employees" />
           <NavigationProperty Name="Statuses" Relationship="DriveCareDBModel.FK_Tasks_Statuses" FromRole="Tasks" ToRole="Statuses" />
         </EntityType>
@@ -2063,6 +2073,7 @@
           <EntitySetMapping Name="CarSales">
             <EntityTypeMapping TypeName="DriveCareDBModel.CarSales">
               <MappingFragment StoreEntitySet="CarSales">
+                <ScalarProperty Name="StatusId" ColumnName="StatusId" />
                 <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
                 <ScalarProperty Name="PhotoPath" ColumnName="PhotoPath" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
@@ -2184,6 +2195,10 @@
           <EntitySetMapping Name="Tasks">
             <EntityTypeMapping TypeName="DriveCareDBModel.Tasks">
               <MappingFragment StoreEntitySet="Tasks">
+                <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
+                <ScalarProperty Name="ReportText" ColumnName="ReportText" />
+                <ScalarProperty Name="ClientUserId" ColumnName="ClientUserId" />
+                <ScalarProperty Name="CarId" ColumnName="CarId" />
                 <ScalarProperty Name="IsCompleted" ColumnName="IsCompleted" />
                 <ScalarProperty Name="Deadline" ColumnName="Deadline" />
                 <ScalarProperty Name="EndDate" ColumnName="EndDate" />

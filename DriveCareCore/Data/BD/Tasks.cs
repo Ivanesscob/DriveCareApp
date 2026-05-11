@@ -24,6 +24,10 @@ namespace DriveCareCore.Data.BD
         public Nullable<System.DateTime> EndDate { get; set; }
         public Nullable<System.DateTime> Deadline { get; set; }
         public bool IsCompleted { get; set; }
+        public Nullable<System.Guid> CarId { get; set; }
+        public Nullable<System.Guid> ClientUserId { get; set; }
+        public string ReportText { get; set; }
+        public Nullable<decimal> WorkHours { get; set; }
     
         public virtual Employees Employees { get; set; }
         public virtual Statuses Statuses { get; set; }

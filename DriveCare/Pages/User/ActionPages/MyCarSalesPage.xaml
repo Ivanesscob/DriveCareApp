@@ -134,6 +134,7 @@
                                     <StackPanel Grid.Row="1">
                                         <TextBlock Text="{Binding CarLabel}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding SellerLabel}" Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding ModerationStatus}" Foreground="{DynamicResource App.Brush.Accent}" FontSize="12" FontWeight="SemiBold" Margin="0,6,0,0" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding ModelInfoLabel}"
                                                    Foreground="{DynamicResource App.Brush.TextDim}"
                                                    FontSize="12"

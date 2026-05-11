@@ -1,0 +1,1 @@
+-- Устарело: статус объявления хранится в CarSales.StatusId (см. CarSales_EnsureModerationColumns.sql).

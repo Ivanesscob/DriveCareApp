@@ -82,6 +82,8 @@ namespace DriveCare.Pages.User.ActionPages
             var fallback = LoadImageOrFallback(null);
             try
             {
+                var db = AppConnect.model1;
+                var approvedId = CarSaleModerationStatuses.ResolveCarSaleStatusIdByName(db, CarSaleModerationStatuses.ApprovedModeration);
                 const string sql = @"
 SELECT
     cs.RowId AS SaleId,
@@ -112,9 +114,12 @@ OUTER APPLY (
     WHERE p.CarSaleId = cs.RowId
       AND p.EndDate IS NULL
     ORDER BY p.StartDate DESC
-) lastPrice;";
+) lastPrice
+WHERE cs.StatusId = @p0";
 
-                var rows = AppConnect.model1.Database.SqlQuery<BuyCarSqlRow>(sql).ToList();
+                var rows = approvedId.HasValue
+                    ? db.Database.SqlQuery<BuyCarSqlRow>(sql, approvedId.Value).ToList()
+                    : new List<BuyCarSqlRow>();
                 foreach (var row in rows)
                 {
                     var brand = Safe(row.BrandName, "Марка");
@@ -444,6 +449,8 @@ OUTER APPLY (
         public string ModelInfoLabel { get; set; }
         public string PriceLabel { get; set; }
         public string SellerLabel { get; set; }
+        /// <summary>Текст статуса модерации (для «Мои объявления»).</summary>
+        public string ModerationStatus { get; set; }
         public string PhotoPathRaw { get; set; }
         private bool _isPhotoLoading;
         private double _photoLoadProgressPercent;
@@ -497,6 +504,7 @@ OUTER APPLY (
         public int? CarYear { get; set; }
         public decimal LastPrice { get; set; }
         public string PhotoPath { get; set; }
+        public Guid? StatusId { get; set; }
     }
 }
 

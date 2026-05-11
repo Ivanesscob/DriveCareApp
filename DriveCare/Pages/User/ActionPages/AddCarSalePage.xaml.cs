@@ -1,4 +1,5 @@
 using DriveCareCore.Data.BD;
+using DriveCareCore.Data.Services;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
@@ -114,7 +115,8 @@ namespace DriveCare.Pages.User.ActionPages
                 Title = title,
                 Description = (SaleDescription ?? string.Empty).Trim(),
                 PhotoPath = savedPhotoPath,
-                CreatedAt = now
+                CreatedAt = now,
+                StatusId = CarSaleModerationStatuses.ResolveStatusIdForNewCarSale(AppConnect.model1)
             };
 
             var salePrice = new CarSalePrices
@@ -148,7 +150,7 @@ namespace DriveCare.Pages.User.ActionPages
                 return;
             }
 
-            MessageBox.Show("Объявление добавлено.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Объявление отправлено на модерацию. После проверки администратором оно появится в каталоге.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
             AppState.SetFrame<BuyCarPage>();
         }
 

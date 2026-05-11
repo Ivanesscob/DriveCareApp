@@ -315,6 +315,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppState.cs" />
+    <Compile Include="Services\ThemeService.cs" />
+    <Compile Include="Services\EmployeeSettingsStore.cs" />
+    <Compile Include="Services\AppearanceStore.cs" />
     <Page Include="Pages\LoginPages\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -324,6 +327,62 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\ProHomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\EmployeeTaskCardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\ProfileProPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminHubPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminDashboardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminTableBrowserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminOrganizationsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminBroadcastPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminCarSaleModerationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminCarSaleReviewPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\ModerationHubPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminPartsModerationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Dark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Light.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\AppStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -345,6 +404,39 @@
     </Compile>
     <Compile Include="Pages\ProHomePage.xaml.cs">
       <DependentUpon>ProHomePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\EmployeeTaskCardPage.xaml.cs">
+      <DependentUpon>EmployeeTaskCardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ProfileProPage.xaml.cs">
+      <DependentUpon>ProfileProPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminHubPage.xaml.cs">
+      <DependentUpon>AdminHubPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminDashboardPage.xaml.cs">
+      <DependentUpon>AdminDashboardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminTableBrowserPage.xaml.cs">
+      <DependentUpon>AdminTableBrowserPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminOrganizationsPage.xaml.cs">
+      <DependentUpon>AdminOrganizationsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminBroadcastPage.xaml.cs">
+      <DependentUpon>AdminBroadcastPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminCarSaleModerationPage.xaml.cs">
+      <DependentUpon>AdminCarSaleModerationPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminCarSaleReviewPage.xaml.cs">
+      <DependentUpon>AdminCarSaleReviewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\ModerationHubPage.xaml.cs">
+      <DependentUpon>ModerationHubPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminPartsModerationPage.xaml.cs">
+      <DependentUpon>AdminPartsModerationPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

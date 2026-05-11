@@ -1,0 +1,92 @@
+<Page x:Class="DriveCarePro.Pages.EmployeeTaskCardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Задание">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,16">
+            <Button DockPanel.Dock="Left" Content="← Назад" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="120" Click="Back_Click"/>
+        </DockPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="720">
+                <TextBlock x:Name="TitleText" FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource App.Brush.Foreground}" TextWrapping="Wrap"/>
+
+                <Border Margin="0,16,0,0" CornerRadius="12" Padding="16,14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Что сделать" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock x:Name="TaskDescriptionText" Margin="0,8,0,0" FontSize="14" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Margin="0,12,0,0" CornerRadius="12" Padding="16,14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Автомобиль" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock x:Name="CarInfoText" Margin="0,8,0,0" FontSize="14" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Margin="0,12,0,0" CornerRadius="12" Padding="16,14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Клиент" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock x:Name="ClientInfoText" Margin="0,8,0,0" FontSize="14" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Margin="0,12,0,0" CornerRadius="12" Padding="16,14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Отчёт" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock Text="Опишите выполненные работы и материалы. Покупки по заданию будут добавляться сюда из раздела «Магазин»."
+                                   FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap" Margin="0,4,0,8"/>
+                        <TextBox x:Name="ReportTextBox" Style="{StaticResource App.FieldTextBox}" MinHeight="120"
+                                 AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                    <Button x:Name="ShopButton" Content="Магазин" Style="{StaticResource App.Button.Outline}"
+                            Height="40" MinWidth="140" Click="Shop_Click"/>
+                </StackPanel>
+
+                <Border Margin="0,16,0,0" CornerRadius="12" Padding="16,14"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Завершение ремонта" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Часы работы:" VerticalAlignment="Center" Margin="0,0,12,0"
+                                       Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                            <ComboBox x:Name="HoursCombo" Width="100" Height="36" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                        <Button x:Name="CompleteButton" Content="Завершить задание" Style="{StaticResource App.Button.Primary}"
+                                Height="44" MinWidth="220" HorizontalAlignment="Left" Margin="0,16,0,0"
+                                Click="Complete_Click"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

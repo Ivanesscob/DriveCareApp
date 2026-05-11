@@ -1,0 +1,39 @@
+<Page x:Class="DriveCarePro.Pages.Admin.ModerationHubPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Модерация">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{DynamicResource App.Brush.Surface2}"
+                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="0,0,1,0" Padding="16,20">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                    <TextBlock Text="Модерация" FontSize="18" FontWeight="SemiBold"
+                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                    <TextBlock Text="Контент и объявления" FontSize="12" Margin="0,4,0,0"
+                               Foreground="{DynamicResource App.Brush.Muted}"/>
+                </StackPanel>
+
+                <Button DockPanel.Dock="Bottom" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+                        Height="40" Margin="0,12,0,0" Click="Home_Click"/>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Button x:Name="NavCars" Content="Машины" Style="{StaticResource App.Button.Primary}"
+                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavCars_Click"/>
+                        <Button x:Name="NavParts" Content="Запчасти" Style="{StaticResource App.Button.Outline}"
+                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavParts_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <Frame x:Name="ModerationContent" Grid.Column="1" NavigationUIVisibility="Hidden"
+               Background="{DynamicResource App.Brush.Panel}"/>
+    </Grid>
+</Page>

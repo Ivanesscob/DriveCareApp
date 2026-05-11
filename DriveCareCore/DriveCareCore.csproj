@@ -419,6 +419,9 @@
     <Compile Include="Data\DelegateCommand.cs" />
     <Compile Include="Data\Services\CarTypeImageHelper.cs" />
     <Compile Include="Data\Services\PhotoTcpStorageService.cs" />
+    <Compile Include="Data\Services\CarSaleModerationStatuses.cs" />
+    <Compile Include="Data\Services\CarSaleModerationNotifier.cs" />
+    <Compile Include="Data\Services\CarSalePhotoUiHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dialogs\AppMessageBox.cs" />

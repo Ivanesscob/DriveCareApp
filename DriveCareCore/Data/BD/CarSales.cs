@@ -27,6 +27,7 @@ namespace DriveCareCore.Data.BD
         public string Description { get; set; }
         public string PhotoPath { get; set; }
         public Nullable<System.DateTime> CreatedAt { get; set; }
+        public Nullable<System.Guid> StatusId { get; set; }
     
         public virtual Cars Cars { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

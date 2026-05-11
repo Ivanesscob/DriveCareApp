@@ -1,0 +1,46 @@
+<Page x:Class="DriveCarePro.Pages.Admin.AdminCarSaleModerationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Модерация объявлений">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
+            <Button Content="Обновить" Style="{StaticResource App.Button.Outline}" Height="40" MinWidth="120"
+                    Margin="0,0,12,0" Click="Refresh_Click"/>
+            <Button Content="Открыть карточку" Style="{StaticResource App.Button.Primary}" Height="40" MinWidth="160"
+                    Click="OpenCard_Click"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" CornerRadius="12" Padding="16,14" Background="{DynamicResource App.Brush.SurfaceCard}"
+                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="HintText" Grid.Row="0" FontSize="13" Margin="0,0,0,12" TextWrapping="Wrap"
+                           Foreground="{DynamicResource App.Brush.Muted}"/>
+                <DataGrid x:Name="QueueGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                          MinHeight="200"
+                          CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
+                          AlternatingRowBackground="{DynamicResource App.Brush.Surface2}"
+                          Foreground="{DynamicResource App.Brush.Foreground}" RowHeight="36"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          MouseDoubleClick="QueueGrid_MouseDoubleClick">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Объявление" Binding="{Binding Title, Mode=OneWay}" Width="2*" MinWidth="160"/>
+                        <DataGridTextColumn Header="Дата подачи" Binding="{Binding CreatedAtDisplay, Mode=OneWay}" Width="130"/>
+                        <DataGridTextColumn Header="Статус" Binding="{Binding ModerationStatus, Mode=OneWay}" Width="*" MinWidth="140"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

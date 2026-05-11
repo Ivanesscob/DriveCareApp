@@ -1,7 +1,9 @@
 using DriveCareCore;
 using DriveCareCore.Data.BD;
 using DriveCareCore.Dialogs;
+using DriveCarePro;
 using DriveCarePro.Pages;
+using DriveCarePro.Services;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -52,6 +54,7 @@ namespace DriveCarePro.Pages.LoginPages
                     .Where(er => er.EmployeeId == user.RowId)
                     .Select(er => er.Roles)
                     .ToList();
+                ThemeService.LoadForCurrentEmployee();
                 AppState.SetFrame<ProHomePage>();
             }
             else
