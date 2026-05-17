@@ -3,8 +3,9 @@ using DriveCareCore.Data.BD;
 using DriveCareCore.Dialogs;
 using DriveCarePro;
 using DriveCarePro.Pages;
+using DriveCarePro.Services;
 using System.ComponentModel;
-using System.Linq;
+using System.Data.Entity;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,9 +20,23 @@ namespace DriveCarePro.Pages.LoginPages
         {
             InitializeComponent();
             DataContext = this;
+            Loaded += LoginPage_Loaded;
 
-            LoginCommand = new DelegateCommand(_ => LoginExecute());
+            LoginCommand = new DelegateCommand(async _ => await LoginExecuteAsync());
             RegisterCommand = new DelegateCommand(_ => RegisterExecute());
+        }
+
+        private void LoginPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            var dbError = AppState.TakeConnectionErrorMessage();
+            if (string.IsNullOrWhiteSpace(dbError))
+            {
+                ConnectionErrorBanner.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            ConnectionErrorText.Text = dbError;
+            ConnectionErrorBanner.Visibility = Visibility.Visible;
         }
 
         public string Username
@@ -33,7 +48,7 @@ namespace DriveCarePro.Pages.LoginPages
         public DelegateCommand LoginCommand { get; }
         public DelegateCommand RegisterCommand { get; }
 
-        private void LoginExecute()
+        private async System.Threading.Tasks.Task LoginExecuteAsync()
         {
             var password = PasswordInput?.Password ?? string.Empty;
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
@@ -42,17 +57,45 @@ namespace DriveCarePro.Pages.LoginPages
                 return;
             }
 
-            var user = AppConnect.model1.Employees.FirstOrDefault(u =>
-                u.Login == Username && u.Password == password);
+            var login = Username.Trim();
+            IsBusy = true;
+            try
+            {
+                var user = await DatabaseExecutor.WithDbAsync(db =>
+                    db.Employees.FirstOrDefaultAsync(u =>
+                        u.Login == login && u.Password == password)).ConfigureAwait(true);
 
-            if (user != null)
-            {
-                AppState.SignInEmployee(user);
-                AppState.SetFrame<ProHomePage>();
+                if (user != null)
+                {
+                    await AppState.SignInEmployeeAsync(user).ConfigureAwait(true);
+                    AppState.SetFrame<ProHomePage>();
+                }
+                else
+                {
+                    AppMessageBox.Show("Неверный логин или пароль.", "DriveCare Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-            else
+            catch (System.Exception ex) when (AppState.IsDatabaseConnectionError(ex))
             {
-                AppMessageBox.Show("Неверный логин или пароль.", "DriveCare Pro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ConnectionErrorText.Text = AppState.BuildConnectionErrorMessage(ex);
+                ConnectionErrorBanner.Visibility = Visibility.Visible;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private bool _isBusy;
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                if (_isBusy == value)
+                    return;
+                _isBusy = value;
+                OnPropertyChanged();
             }
         }
 

@@ -4,7 +4,8 @@
       Title="Таблицы БД">
 
     <DockPanel Margin="28,24" LastChildFill="True">
-        <Button DockPanel.Dock="Top" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+        <Button x:Name="BackHomeButton" DockPanel.Dock="Top" Content="← На главную"
+                Style="{StaticResource App.Button.Outline}"
                 Height="36" MinWidth="140" HorizontalAlignment="Left" Margin="0,0,0,14"
                 Click="BackHome_Click"/>
         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
@@ -12,7 +13,7 @@
                        Foreground="{DynamicResource App.Brush.Foreground}"/>
             <TextBlock Text="Выберите таблицу из белого списка и нажмите «Загрузить». До 300 строк, только чтение. Для правок используйте SSMS или отдельные формы."
                        FontSize="13" Margin="0,6,0,0" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
-            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+            <StackPanel x:Name="PickerPanel" Orientation="Horizontal" Margin="0,16,0,0">
                 <ComboBox x:Name="TablePicker" Width="280" MinHeight="40" VerticalAlignment="Center"/>
                 <Button Content="Загрузить" Style="{StaticResource App.Button.Primary}" Margin="12,0,0,0"
                         Height="40" MinWidth="120" Click="Load_Click"/>

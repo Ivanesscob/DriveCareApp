@@ -11,11 +11,17 @@ namespace DriveCarePro
         public MainWindow()
         {
             InitializeComponent();
-            if (!AppState.TryRestoreSession())
-                AppState.SetFrame<Pages.LoginPages.LoginPage>();
-            else
-                AppState.SetFrame<Pages.ProHomePage>();
+            Loaded += MainWindow_Loaded;
             DataContext = this;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= MainWindow_Loaded;
+            if (await AppState.TryRestoreSessionAsync().ConfigureAwait(true))
+                AppState.SetFrame<Pages.ProHomePage>();
+            else
+                AppState.SetFrame<Pages.LoginPages.LoginPage>();
         }
     }
 }

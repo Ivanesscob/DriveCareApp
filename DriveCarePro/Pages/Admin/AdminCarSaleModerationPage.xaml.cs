@@ -1,8 +1,10 @@
-using DriveCareCore.Data.BD;
 using DriveCareCore.Data.Services;
 using DriveCarePro;
 using DriveCarePro.Pages;
+using DriveCarePro.Services;
 using System;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,59 +17,64 @@ namespace DriveCarePro.Pages.Admin
         public AdminCarSaleModerationPage()
         {
             InitializeComponent();
-            Loaded += (_, __) =>
+            Loaded += async (_, __) =>
             {
                 if (!AppState.IsCurrentEmployeeProAdmin)
                 {
                     AppState.Navigate(new ProHomePage());
                     return;
                 }
-                RefreshQueue();
+                await RefreshQueueAsync().ConfigureAwait(true);
             };
         }
 
         private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
 
-        private void Refresh_Click(object sender, RoutedEventArgs e) => RefreshQueue();
+        private async void Refresh_Click(object sender, RoutedEventArgs e) =>
+            await RefreshQueueAsync().ConfigureAwait(true);
 
         private void OpenCard_Click(object sender, RoutedEventArgs e) => OpenSelected();
 
         private void QueueGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e) => OpenSelected();
 
-        private void RefreshQueue()
+        private async System.Threading.Tasks.Task RefreshQueueAsync()
         {
             if (!AppState.IsCurrentEmployeeProAdmin)
                 return;
+
             try
             {
-                var db = AppConnect.model1;
-                var statusNames = db.Statuses
-                    .ToList()
-                    .GroupBy(s => s.RowId)
-                    .ToDictionary(g => g.Key, g => (g.First().Name ?? string.Empty).Trim());
+                var list = await DatabaseExecutor.WithDbAsync(async db =>
+                {
+                    var statuses = await db.Statuses.ToListAsync().ConfigureAwait(false);
+                    var statusNames = statuses
+                        .GroupBy(s => s.RowId)
+                        .ToDictionary(g => g.Key, g => (g.First().Name ?? string.Empty).Trim());
 
-                var raw = db.CarSales
-                    .OrderByDescending(c => c.CreatedAt)
-                    .Take(3000)
-                    .ToList();
+                    var raw = await db.CarSales
+                        .OrderByDescending(c => c.CreatedAt)
+                        .Take(3000)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
 
-                var list = raw
-                    .Where(c => CarSaleModerationStatuses.IsInModerationQueue(db, c.StatusId))
-                    .Take(200)
-                    .Select(c =>
-                    {
-                        var title = (c.Title ?? string.Empty).Trim();
-                        return new ModerationQueueRow
+                    return raw
+                        .Where(c => CarSaleModerationStatuses.IsInModerationQueue(db, c.StatusId))
+                        .Take(200)
+                        .Select(c =>
                         {
-                            RowId = c.RowId,
-                            Title = title.Length == 0 ? "—" : title,
-                            CreatedAtDisplay = c.CreatedAt.HasValue
-                                ? c.CreatedAt.Value.ToString("dd.MM.yyyy HH:mm")
-                                : "—",
-                            ModerationStatus = CarSaleModerationStatuses.FormatModerationStatusDisplay(statusNames, c.StatusId)
-                        };
-                    })
-                    .ToList();
+                            var title = (c.Title ?? string.Empty).Trim();
+                            return new ModerationQueueRow
+                            {
+                                RowId = c.RowId,
+                                Title = title.Length == 0 ? "—" : title,
+                                CreatedAtDisplay = c.CreatedAt.HasValue
+                                    ? c.CreatedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                                    : "—",
+                                ModerationStatus = CarSaleModerationStatuses.FormatModerationStatusDisplay(statusNames, c.StatusId)
+                            };
+                        })
+                        .ToList();
+                }).ConfigureAwait(true);
 
                 QueueGrid.ItemsSource = list;
                 HintText.Text = list.Count == 0

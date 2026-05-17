@@ -1,0 +1,50 @@
+<Page x:Class="DriveCarePro.Pages.WorkshopCarSelectionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Автомобиль клиента">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Button Content="← Назад" Style="{StaticResource App.Button.Outline}"
+                HorizontalAlignment="Left" Height="40" MinWidth="100" Margin="0,0,0,16"
+                Click="Back_Click"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Border CornerRadius="12" Padding="20,16" MaxWidth="640" HorizontalAlignment="Center"
+                    Background="{DynamicResource App.Brush.SurfaceCard}"
+                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock x:Name="ClientInfoText" FontSize="14" TextWrapping="Wrap" TextAlignment="Center"
+                               Margin="0,0,0,12"
+                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                    <TextBlock Text="Выберите автомобиль клиента или добавьте новый."
+                               FontSize="12" TextAlignment="Center"
+                               Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,10"/>
+                    <ListBox x:Name="CarsList" MinHeight="200" MaxHeight="320"
+                             DisplayMemberPath="DisplayName"
+                             SelectionChanged="CarsList_SelectionChanged"/>
+                    <TextBlock x:Name="NoCarsText" Visibility="Collapsed" Margin="0,8,0,0"
+                               TextAlignment="Center"
+                               Text="У клиента пока нет машин в системе."
+                               Foreground="{DynamicResource App.Brush.Muted}"/>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+
+        <WrapPanel Grid.Row="2" Margin="0,16,0,0" HorizontalAlignment="Center">
+            <Button x:Name="BtnSelect" Content="Выбрать машину" Style="{StaticResource App.Button.Primary}"
+                    Height="40" MinWidth="160" Margin="0,0,10,10" Click="Select_Click"/>
+            <Button Content="Добавить другую машину" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="200" Margin="0,0,10,10" Click="AddCar_Click"/>
+            <Button Content="Без привязки к аккаунту" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="190" Margin="0,0,10,10" Click="GuestCar_Click"/>
+            <Button Content="Далее →" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="120" Click="Continue_Click"/>
+        </WrapPanel>
+    </Grid>
+</Page>

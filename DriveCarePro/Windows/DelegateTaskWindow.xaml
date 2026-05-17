@@ -1,0 +1,43 @@
+<Window x:Class="DriveCarePro.Windows.DelegateTaskWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Передать поручение"
+        Width="520" Height="420" MinWidth="460" MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource App.Brush.Panel}"
+        ResizeMode="CanResizeWithGrip">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Передать поручение сотруднику" FontSize="16" FontWeight="SemiBold"
+                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+            <TextBlock Text="У вас задание останется. У сотрудника появится копия со ссылкой на ваше. Он тоже сможет передать дальше. Когда исполнитель завершит — у вас строка станет зелёной."
+                       FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+        </StackPanel>
+
+        <DataGrid x:Name="EmployeesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                  SelectionMode="Single" HeadersVisibility="Column"
+                  AlternatingRowBackground="{DynamicResource App.Brush.Surface2}"
+                  Foreground="{DynamicResource App.Brush.Foreground}" RowHeight="36"
+                  Background="{DynamicResource App.Brush.SurfaceCard}"
+                  BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Сотрудник" Binding="{Binding DisplayName}" Width="2*" MinWidth="160"/>
+                <DataGridTextColumn Header="Салон" Binding="{Binding WorkshopName}" Width="*" MinWidth="120"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="Отмена" Style="{StaticResource App.Button.Outline}" MinWidth="110" Height="40" Margin="0,0,10,0"
+                    Click="Cancel_Click"/>
+            <Button Content="Передать" Style="{StaticResource App.Button.Primary}" MinWidth="120" Height="40"
+                    Click="Confirm_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

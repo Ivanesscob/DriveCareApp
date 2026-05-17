@@ -1,0 +1,40 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DriveCareCore", "DriveCareCore\DriveCareCore.csproj", "{B14239ED-F8A7-4EEA-9FC6-12024F9C647D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DriveCarePro", "DriveCarePro\DriveCarePro.csproj", "{E70BAAEF-5801-4DAF-9435-F1A00D552256}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B14239ED-F8A7-4EEA-9FC6-12024F9C647D} = {B14239ED-F8A7-4EEA-9FC6-12024F9C647D}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DriveCare", "DriveCare\DriveCare.csproj", "{5EDB5F45-9F3A-43A7-974B-539B83C71C77}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B14239ED-F8A7-4EEA-9FC6-12024F9C647D} = {B14239ED-F8A7-4EEA-9FC6-12024F9C647D}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B14239ED-F8A7-4EEA-9FC6-12024F9C647D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B14239ED-F8A7-4EEA-9FC6-12024F9C647D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B14239ED-F8A7-4EEA-9FC6-12024F9C647D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B14239ED-F8A7-4EEA-9FC6-12024F9C647D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E70BAAEF-5801-4DAF-9435-F1A00D552256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E70BAAEF-5801-4DAF-9435-F1A00D552256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E70BAAEF-5801-4DAF-9435-F1A00D552256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E70BAAEF-5801-4DAF-9435-F1A00D552256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EDB5F45-9F3A-43A7-974B-539B83C71C77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EDB5F45-9F3A-43A7-974B-539B83C71C77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EDB5F45-9F3A-43A7-974B-539B83C71C77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EDB5F45-9F3A-43A7-974B-539B83C71C77}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

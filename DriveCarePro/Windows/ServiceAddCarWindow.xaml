@@ -1,0 +1,27 @@
+<Window x:Class="DriveCarePro.Windows.ServiceAddCarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Добавить автомобиль" SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" MinWidth="440">
+
+    <Border Padding="24,20" Background="{DynamicResource App.Brush.SurfaceCard}">
+        <StackPanel HorizontalAlignment="Center" MinWidth="380" MaxWidth="420">
+            <TextBlock Text="Данные автомобиля" FontSize="16" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,0,0,12"/>
+            <TextBlock Text="Марка и модель" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="CarDescriptionBox" MinHeight="34" Margin="0,0,0,10"/>
+            <TextBlock Text="VIN" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="VinBox" MinHeight="34" Margin="0,0,0,10"/>
+            <TextBlock Text="Гос. номер" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="PlateBox" MinHeight="34" Margin="0,0,0,10"/>
+            <TextBlock Text="Год" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="YearBox" MinHeight="34" Margin="0,0,0,10"/>
+            <TextBlock Text="Цвет" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="ColorBox" MinHeight="34" Margin="0,0,0,16"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Отмена" Style="{StaticResource App.Button.Outline}" MinWidth="110" Height="36" Margin="0,0,10,0" Click="Cancel_Click"/>
+                <Button Content="Сохранить" Style="{StaticResource App.Button.Primary}" MinWidth="120" Height="36" Click="Save_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

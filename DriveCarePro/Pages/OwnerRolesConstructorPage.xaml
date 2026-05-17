@@ -11,7 +11,8 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
-            <Button DockPanel.Dock="Left" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+            <Button x:Name="BackHomeButton" DockPanel.Dock="Left" Content="← На главную"
+                    Style="{StaticResource App.Button.Outline}"
                     Height="40" MinWidth="130" Click="Back_Click"/>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Content="Создать роль" Style="{StaticResource App.Button.Primary}"
@@ -23,8 +24,18 @@
             </StackPanel>
         </DockPanel>
 
-        <TextBlock x:Name="HintText" Grid.Row="1" FontSize="12" Margin="0,0,0,8" TextWrapping="Wrap"
-                   Foreground="{DynamicResource App.Brush.Muted}"/>
+        <Grid Grid.Row="1" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="240"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="HintText" Grid.Column="0" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                       Foreground="{DynamicResource App.Brush.Muted}"/>
+            <TextBox x:Name="RoleSearchBox" Grid.Column="1" Style="{StaticResource App.FieldTextBox}"
+                     MinHeight="36" Margin="12,0,0,0"
+                     ToolTip="Поиск по названию роли"
+                     TextChanged="RoleSearchBox_TextChanged"/>
+        </Grid>
 
         <Border Grid.Row="2" CornerRadius="12" Padding="12,10"
                 Background="{DynamicResource App.Brush.SurfaceCard}"

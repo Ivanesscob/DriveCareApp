@@ -1,0 +1,102 @@
+<Page x:Class="DriveCarePro.Pages.Admin.AdminPermissionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Разрешения">
+
+    <DockPanel Margin="28,24" LastChildFill="True">
+        <Button x:Name="BackHomeButton" DockPanel.Dock="Top" Content="← На главную"
+                Style="{StaticResource App.Button.Outline}"
+                Height="36" MinWidth="140" HorizontalAlignment="Left" Margin="0,0,0,14"
+                Click="BackHome_Click"/>
+
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Разрешения" FontSize="22" FontWeight="SemiBold"
+                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+            <TextBlock Text="Группы и коды разрешений для ролей. Поиск, правый клик — изменить или удалить."
+                       FontSize="13" Margin="0,6,0,0" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
+
+            <Border x:Name="AddFormPanel" Margin="0,14,0,0" Padding="14,12" CornerRadius="12"
+                    Background="{DynamicResource App.Brush.SurfaceCard}"
+                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0">
+                        <TextBlock Text="Группа" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}"/>
+                        <ComboBox x:Name="GroupPicker" MinHeight="36" Margin="0,4,0,0"
+                                  DisplayMemberPath="Name"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2">
+                        <TextBlock Text="Код" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}"/>
+                        <TextBox x:Name="CodeBox" MinHeight="36" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="0">
+                        <TextBlock Text="Название" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}"/>
+                        <TextBox x:Name="NameBox" MinHeight="36" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="2">
+                        <TextBlock Text="Описание" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}"/>
+                        <TextBox x:Name="DescriptionBox" MinHeight="36" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
+                        <Button Content="Сохранить разрешение" Style="{StaticResource App.Button.Primary}"
+                                Height="36" MinWidth="180" Margin="0,0,10,0" Click="SavePermission_Click"/>
+                        <Button Content="Обновить список" Style="{StaticResource App.Button.Outline}"
+                                Height="36" MinWidth="150" Click="Refresh_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock x:Name="StatusText" Margin="0,10,0,0" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.SecondaryText}" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBox x:Name="SearchBox" Grid.Row="0" Style="{StaticResource App.FieldTextBox}"
+                     MinHeight="36" Margin="0,0,0,8"
+                     ToolTip="Поиск по коду, названию, группе или описанию"
+                     TextChanged="SearchBox_TextChanged"/>
+
+            <DataGrid x:Name="PermissionsGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      AlternatingRowBackground="{DynamicResource App.Brush.Surface2}"
+                      Background="{DynamicResource App.Brush.SurfaceCard}"
+                      BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                      Foreground="{DynamicResource App.Brush.Foreground}"
+                      MouseDoubleClick="PermissionsGrid_MouseDoubleClick"
+                      PreviewMouseRightButtonDown="PermissionsGrid_PreviewMouseRightButtonDown">
+                <DataGrid.ContextMenu>
+                    <ContextMenu Opened="PermissionsContextMenu_Opened">
+                        <MenuItem x:Name="CtxOpenItem" Header="Открыть" Click="EditPermission_Click"/>
+                        <MenuItem x:Name="CtxEditItem" Header="Изменить" Click="EditPermission_Click"/>
+                        <MenuItem x:Name="CtxDeleteItem" Header="Удалить" Click="DeletePermission_Click"/>
+                        <Separator/>
+                        <MenuItem Header="Обновить список" Click="Refresh_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Код" Binding="{Binding Code}" Width="160"/>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*" MinWidth="140"/>
+                    <DataGridTextColumn Header="Группа" Binding="{Binding GroupName}" Width="160"/>
+                    <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="200"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </DockPanel>
+</Page>

@@ -1,0 +1,101 @@
+<Page x:Class="DriveCarePro.Pages.WorkshopBookServicePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Запись на сервис">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="130" Click="Back_Click"/>
+            <Button x:Name="BtnDownloadEmpty" DockPanel.Dock="Right" Content="Пустой заказ-наряд"
+                    Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="170" Margin="8,0,0,0" Click="DownloadEmpty_Click"/>
+        </DockPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Border CornerRadius="12" Padding="24,20" MaxWidth="720" HorizontalAlignment="Center"
+                    Background="{DynamicResource App.Brush.SurfaceCard}"
+                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock x:Name="TitleText" FontSize="18" FontWeight="SemiBold"
+                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                    <TextBlock x:Name="HintText" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,16"
+                               Foreground="{DynamicResource App.Brush.Muted}"/>
+
+                    <TextBlock Text="Компания (в заказ-наряд)" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource App.Brush.Accent}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Название" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="CompanyNameBox" MinHeight="36" Margin="0,0,0,10" IsReadOnly="True"/>
+                    <TextBlock Text="Адрес" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="CompanyAddressBox" MinHeight="36" Margin="0,0,0,10" IsReadOnly="True"/>
+                    <TextBlock Text="Телефон сервиса" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="CompanyPhoneBox" MinHeight="36" Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Клиент и автомобиль" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource App.Brush.Accent}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Потребитель" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ClientNameBox" MinHeight="36" Margin="0,0,0,10"/>
+                    <TextBlock Text="Адрес клиента" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ClientAddressBox" MinHeight="36" Margin="0,0,0,10"/>
+                    <TextBlock Text="Телефон клиента" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ClientPhoneBox" MinHeight="36" Margin="0,0,0,10"/>
+                    <TextBlock Text="Автомобиль (марка, модель)" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="CarDescriptionBox" MinHeight="36" Margin="0,0,0,10"/>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="VIN" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                            <TextBox x:Name="VinBox" MinHeight="36"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Гос. номер" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                            <TextBox x:Name="PlateNumberBox" MinHeight="36"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Год выпуска" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                            <TextBox x:Name="YearBox" MinHeight="36"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Пробег, км" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                            <TextBox x:Name="MileageBox" MinHeight="36"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Text="Цвет" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ColorBox" MinHeight="36" Margin="0,0,0,10"/>
+                    <TextBlock Text="Причина обращения" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Работы и запчасти в заказ-наряде заполняются позже (в Word или в системе)."
+                               FontSize="11" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,6"/>
+                    <TextBox x:Name="VisitReasonBox" MinHeight="80" Margin="0,0,0,10"
+                             TextWrapping="Wrap" AcceptsReturn="True"/>
+                    <TextBlock Text="Особые данные и рекомендации" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="SpecialNotesBox" MinHeight="56" Margin="0,0,0,16"
+                             TextWrapping="Wrap" AcceptsReturn="True"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="BtnSave" Content="Записать и создать задание"
+                                Style="{StaticResource App.Button.Primary}"
+                                Height="42" MinWidth="240" Margin="0,0,10,0" Click="Save_Click"/>
+                        <Button Content="Отмена" Style="{StaticResource App.Button.Outline}"
+                                Height="42" MinWidth="120" Click="Back_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</Page>

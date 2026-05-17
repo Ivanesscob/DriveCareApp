@@ -78,11 +78,27 @@
                         </Border>
                         <TextBlock Text="Поиск и добавление:" Style="{StaticResource FieldLabel}"/>
                         <TextBox x:Name="PermissionSearchBox" Style="{StaticResource App.FieldTextBox}"
-                                 Margin="0,0,0,8" TextChanged="PermissionSearchBox_TextChanged"/>
-                        <ListBox x:Name="PermissionPickerList" MaxHeight="140" MinHeight="72"
+                                 Margin="0,0,0,4" TextChanged="PermissionSearchBox_TextChanged"/>
+                        <TextBlock x:Name="PermissionSearchHint" FontSize="11" Margin="0,0,0,6"
+                                   Foreground="{DynamicResource App.Brush.Muted}"
+                                   Text="Поиск по названию, коду, группе или описанию"/>
+                        <TextBlock x:Name="PermissionSearchStatus" FontSize="11" Margin="0,0,0,6"
+                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                        <ListBox x:Name="PermissionPickerList" MaxHeight="180" MinHeight="96"
                                  BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
                                  Background="{DynamicResource App.Brush.FieldInputBg}"
                                  MouseDoubleClick="PermissionPickerList_MouseDoubleClick">
+                            <ListBox.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12"
+                                                       Foreground="{DynamicResource App.Brush.Accent}"
+                                                       Margin="4,8,4,4"/>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ListBox.GroupStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="4,2">

@@ -301,9 +301,22 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Document.NET, Version=5.2.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Document.NET.5.2.26166.7850\lib\net40\Xceed.Document.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Drawing.NET, Version=1.0.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Drawing.NET.1.0.26166.7850\lib\net40\Xceed.Drawing.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Pdf, Version=5.2.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Pdf.5.2.26166.7850\lib\net40\Xceed.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Words.NET, Version=5.2.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Words.NET.5.2.26166.7850\lib\net40\Xceed.Words.NET.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\AppState.cs" />
+    <Compile Include="Shop\ToolsStoreCatalog.cs" />
     <Compile Include="Data\BD\Address.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -409,6 +422,8 @@
     <Compile Include="Data\BD\UserCar.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BD\WorkshopServiceClient.cs" />
+    <Compile Include="Data\BD\WorkshopGuestCar.cs" />
     <Compile Include="Data\BD\UserCarSale.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

@@ -9,11 +9,19 @@ namespace DriveCarePro.Pages.Admin
 {
     public partial class AdminOrganizationsPage : Page
     {
-        public AdminOrganizationsPage()
+        public AdminOrganizationsPage() : this(embeddedInHub: false)
+        {
+        }
+
+        public AdminOrganizationsPage(bool embeddedInHub)
         {
             InitializeComponent();
+            if (embeddedInHub)
+                BackHomeButton.Visibility = Visibility.Collapsed;
             Loaded += (_, __) => LoadGrids();
         }
+
+        public void ReloadGrids() => LoadGrids();
 
         private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
 

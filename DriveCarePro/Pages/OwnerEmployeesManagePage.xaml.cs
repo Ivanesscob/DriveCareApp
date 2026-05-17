@@ -1,216 +1,535 @@
-using DriveCareCore.Data.BD;
+using DriveCarePro.Services;
+
+using DriveCarePro.Windows;
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
+
+
 using System.Windows;
+
 using System.Windows.Controls;
 
+using System.Windows.Input;
+
+using System.Windows.Media;
+
+
+
 namespace DriveCarePro.Pages
+
 {
+
     public partial class OwnerEmployeesManagePage : Page
+
     {
-        private Guid? _companyId;
-        private List<Guid> _allowedWorkshopIds = new List<Guid>();
+
+        private OwnerOrganizationScope _scope;
+
         private Guid? _selectedEmployeeId;
 
+        private bool _isLoading;
+
+
+
         public OwnerEmployeesManagePage()
+
         {
+
             InitializeComponent();
-            Loaded += (_, __) =>
-            {
-                if (!AppState.CanManageOrganizationEmployees)
-                {
-                    MessageBox.Show("Управление сотрудниками доступно только владельцу.", "Доступ",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-                    AppState.Navigate(new ProHomePage());
-                    return;
-                }
-                if (!TryResolveOwnerScope())
-                    return;
-                Refresh();
-            };
+
+            Loaded += OwnerEmployeesManagePage_Loaded;
+
         }
 
-        private bool TryResolveOwnerScope()
+
+
+        private async void OwnerEmployeesManagePage_Loaded(object sender, RoutedEventArgs e)
+
         {
-            var owner = AppState.CurrentEmployee;
-            if (owner == null || !owner.WorkshopId.HasValue)
+
+            if (!AppState.CanManageOrganizationEmployees)
+
             {
-                HintText.Text = "У вас не указана мастерская. Назначьте WorkshopId владельцу в БД.";
+
+                MessageBox.Show("Нет разрешения на управление сотрудниками.", "Доступ",
+
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                AppState.Navigate(new ProHomePage());
+
+                return;
+
+            }
+
+
+
+            ApplyPermissionButtons();
+
+
+
+            var resolved = await OwnerOrganizationScope.TryResolveAsync().ConfigureAwait(true);
+
+            if (!resolved.ok)
+
+            {
+
+                HintText.Text = resolved.error;
+
                 Grid.ItemsSource = null;
-                return false;
+
+                SetToolbarEnabled(false);
+
+                return;
+
             }
 
-            var db = AppConnect.model1;
-            var ownerWorkshop = db.Workshops.FirstOrDefault(w => w.RowId == owner.WorkshopId.Value);
-            if (ownerWorkshop == null)
-            {
-                HintText.Text = "Мастерская владельца не найдена в базе.";
-                return false;
-            }
 
-            _companyId = ownerWorkshop.CompanyId;
-            _allowedWorkshopIds = db.Workshops
-                .Where(w => w.CompanyId == _companyId)
-                .Select(w => w.RowId)
-                .ToList();
 
-            var workshops = db.Workshops
-                .Where(w => w.CompanyId == _companyId)
-                .OrderBy(w => w.Name)
-                .Select(w => new { w.RowId, w.Name })
-                .ToList()
-                .Select(w => new WorkshopItem
-                {
-                    RowId = w.RowId,
-                    Name = string.IsNullOrWhiteSpace(w.Name) ? "—" : w.Name.Trim()
-                })
-                .ToList();
-            WorkshopCombo.ItemsSource = workshops;
+            _scope = resolved.scope;
 
-            var companyName = db.Companies.Where(c => c.RowId == _companyId).Select(c => c.Name).FirstOrDefault() ?? "—";
-            HintText.Text = $"Организация: {companyName.Trim()}. Сотрудники мастерских вашей компании.";
-            return true;
+            HintText.Text = $"Организация: {_scope.CompanyName}. Правый щелчок по таблице — меню. Двойной щелчок — редактирование.";
+
+            SetToolbarEnabled(true);
+
+            await RefreshAsync().ConfigureAwait(true);
+
         }
+
+
+
+        private void ApplyPermissionButtons()
+
+        {
+
+            AppState.SetControlVisible(BtnAdd, AppState.HasPermission(ProPermissions.CreateEmployees));
+
+            AppState.SetControlVisible(BtnEdit, AppState.HasPermission(ProPermissions.EditEmployees));
+
+            AppState.SetControlVisible(BtnDelete, AppState.HasPermission(ProPermissions.DeleteEmployees));
+
+            AppState.SetControlVisible(BtnAssignRoles, AppState.HasPermission(ProPermissions.EditEmployees));
+
+        }
+
+
+
+        private void SetToolbarEnabled(bool enabled)
+
+        {
+
+            BtnAdd.IsEnabled = BtnEdit.IsEnabled = BtnRefresh.IsEnabled =
+
+                BtnAssignRoles.IsEnabled = enabled && !_isLoading;
+
+            if (!enabled)
+
+            {
+
+                BtnDelete.IsEnabled = false;
+
+                return;
+
+            }
+
+            UpdateDeleteAvailability(Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm);
+
+        }
+
+
 
         private void Back_Click(object sender, RoutedEventArgs e) =>
+
             AppState.Navigate(new ProHomePage());
 
-        private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();
 
-        private void Refresh()
+
+        private async void Refresh_Click(object sender, RoutedEventArgs e) =>
+
+            await RefreshAsync().ConfigureAwait(true);
+
+
+
+        private async System.Threading.Tasks.Task RefreshAsync()
+
         {
-            if (_allowedWorkshopIds.Count == 0)
+
+            if (_scope == null || _isLoading)
+
                 return;
 
+
+
+            _isLoading = true;
+
+            SetToolbarEnabled(true);
+
+
+
             try
+
             {
-                var db = AppConnect.model1;
-                var workshopNames = db.Workshops
-                    .Where(w => _allowedWorkshopIds.Contains(w.RowId))
-                    .ToDictionary(w => w.RowId, w => (w.Name ?? string.Empty).Trim());
-                var roleMaps = db.EmployeeRolesMaps.ToList();
-                var roles = db.Roles.ToDictionary(r => r.RowId, r => (r.Name ?? string.Empty).Trim());
 
-                var employees = db.Employees
-                    .Where(e => e.WorkshopId.HasValue && _allowedWorkshopIds.Contains(e.WorkshopId.Value))
-                    .OrderBy(e => e.LastName).ThenBy(e => e.FirstName)
-                    .ToList();
-
-                var list = employees.Select(e =>
-                {
-                    var roleIds = roleMaps.Where(m => m.EmployeeId == e.RowId).Select(m => m.RoleId).ToList();
-                    var roleText = roleIds.Count == 0
-                        ? "—"
-                        : string.Join(", ", roleIds.Select(id => roles.TryGetValue(id, out var n) ? n : "—").Where(s => s != "—"));
-                    var ws = e.WorkshopId.HasValue && workshopNames.TryGetValue(e.WorkshopId.Value, out var wn) ? wn : "—";
-
-                    return new EmployeeRowVm
-                    {
-                        EmployeeId = e.RowId,
-                        FullName = AppState.FormatEmployeeDisplayName(e),
-                        Login = string.IsNullOrWhiteSpace(e.Login) ? "—" : e.Login.Trim(),
-                        WorkshopName = string.IsNullOrWhiteSpace(ws) ? "—" : ws,
-                        RolesDisplay = string.IsNullOrWhiteSpace(roleText) ? "—" : roleText,
-                        ActiveDisplay = e.IsActive == false ? "Нет" : "Да"
-                    };
-                }).ToList();
+                var list = await OwnerEmployeesDataService.LoadGridAsync(_scope).ConfigureAwait(true);
 
                 Grid.ItemsSource = list;
-                if (list.Count == 0)
-                    HintText.Text += " Сотрудников не найдено.";
+
             }
-            catch (Exception ex)
+
+            catch (Exception ex) when (AppState.IsDatabaseConnectionError(ex))
+
             {
+
                 Grid.ItemsSource = null;
-                HintText.Text = "Ошибка загрузки: " + ex.Message;
+
+                HintText.Text = AppState.BuildConnectionErrorMessage(ex);
+
             }
+
+            catch (Exception ex)
+
+            {
+
+                Grid.ItemsSource = null;
+
+                HintText.Text = "Ошибка загрузки: " + ex.Message;
+
+            }
+
+            finally
+
+            {
+
+                _isLoading = false;
+
+                SetToolbarEnabled(_scope != null);
+
+            }
+
         }
+
+
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+
+        {
+
+            if (!AppState.HasPermission(ProPermissions.CreateEmployees) || _scope == null)
+
+                return;
+
+
+
+            var owner = Window.GetWindow(this);
+
+            if (EmployeeEditWindow.ShowCreate(owner, _scope) == true)
+
+                _ = RefreshAsync();
+
+        }
+
+
+
+        private void Edit_Click(object sender, RoutedEventArgs e)
+
+        {
+
+            if (!AppState.HasPermission(ProPermissions.EditEmployees))
+
+                return;
+
+
+
+            if (!TryGetSelectedEmployeeId(out var id))
+
+                return;
+
+
+
+            var owner = Window.GetWindow(this);
+
+            if (EmployeeEditWindow.ShowEdit(owner, _scope, id) == true)
+
+                _ = RefreshAsync();
+
+        }
+
+
+
+        private void AssignRoles_Click(object sender, RoutedEventArgs e)
+
+        {
+
+            if (!AppState.HasPermission(ProPermissions.EditEmployees) || _scope == null)
+
+                return;
+
+
+
+            if (!TryGetSelectedEmployeeId(out var id))
+
+                return;
+
+
+
+            if (!(Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm row))
+
+                return;
+
+
+
+            var owner = Window.GetWindow(this);
+
+            if (EmployeeRolesWindow.Show(owner, _scope, id, row.FullName) == true)
+
+                _ = RefreshAsync();
+
+        }
+
+
+
+        private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+
+        {
+
+            if (AppState.HasPermission(ProPermissions.EditEmployees))
+
+                Edit_Click(sender, e);
+
+        }
+
+
+
+        private void Grid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+
+        {
+
+            var dep = e.OriginalSource as DependencyObject;
+
+            while (dep != null && dep != Grid)
+
+            {
+
+                if (dep is DataGridRow gridRow)
+
+                {
+
+                    gridRow.IsSelected = true;
+
+                    Grid.SelectedItem = gridRow.Item;
+
+                    break;
+
+                }
+
+                dep = VisualTreeHelper.GetParent(dep);
+
+            }
+
+        }
+
+
+
+        private void GridContextMenu_Opened(object sender, RoutedEventArgs e)
+
+        {
+
+            var hasRow = Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm;
+
+            CtxAddItem.IsEnabled = AppState.HasPermission(ProPermissions.CreateEmployees);
+
+            CtxEditItem.IsEnabled = hasRow && AppState.HasPermission(ProPermissions.EditEmployees);
+
+            CtxAssignRolesItem.IsEnabled = hasRow && AppState.HasPermission(ProPermissions.EditEmployees);
+
+            UpdateDeleteAvailability(hasRow);
+
+        }
+
+
 
         private void Grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
         {
-            if (!(Grid.SelectedItem is EmployeeRowVm row))
-            {
-                EditPanel.Visibility = Visibility.Collapsed;
-                _selectedEmployeeId = null;
-                return;
-            }
 
-            _selectedEmployeeId = row.EmployeeId;
-            var db = AppConnect.model1;
-            var emp = db.Employees.FirstOrDefault(x => x.RowId == row.EmployeeId);
-            if (emp == null)
-            {
-                EditPanel.Visibility = Visibility.Collapsed;
-                return;
-            }
+            if (Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm row)
 
-            LastNameBox.Text = emp.LastName ?? string.Empty;
-            FirstNameBox.Text = emp.FirstName ?? string.Empty;
-            MidNameBox.Text = emp.MidName ?? string.Empty;
-            LoginBox.Text = emp.Login ?? string.Empty;
-            EmailBox.Text = emp.Email ?? string.Empty;
-            PhoneBox.Text = emp.Phone ?? string.Empty;
-            IsActiveCheck.IsChecked = emp.IsActive != false;
-            WorkshopCombo.SelectedValue = emp.WorkshopId;
+                _selectedEmployeeId = row.EmployeeId;
 
-            EditPanel.Visibility = Visibility.Visible;
+            UpdateDeleteAvailability(Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm);
+
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+
+
+        private void UpdateDeleteAvailability(bool hasRow)
+
         {
-            if (!_selectedEmployeeId.HasValue)
-                return;
 
-            var db = AppConnect.model1;
-            var emp = db.Employees.FirstOrDefault(x => x.RowId == _selectedEmployeeId.Value);
-            if (emp == null)
-                return;
+            var canDelete = hasRow &&
 
-            if (!(WorkshopCombo.SelectedValue is Guid wsId) || !_allowedWorkshopIds.Contains(wsId))
+                            AppState.HasPermission(ProPermissions.DeleteEmployees) &&
+
+                            !IsSelectedCurrentEmployee() &&
+
+                            !IsSelectedOrganizationOwner();
+
+            BtnDelete.IsEnabled = canDelete && _scope != null && !_isLoading;
+
+            CtxDeleteItem.IsEnabled = canDelete;
+
+        }
+
+
+
+        private static bool IsSelectedCurrentEmployee(Guid employeeId) =>
+
+            AppState.IsLoggedInEmployee(employeeId);
+
+
+
+        private bool IsSelectedCurrentEmployee()
+
+        {
+
+            if (Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm row)
+
+                return IsSelectedCurrentEmployee(row.EmployeeId);
+
+            return _selectedEmployeeId.HasValue && IsSelectedCurrentEmployee(_selectedEmployeeId.Value);
+
+        }
+
+
+
+        private bool IsSelectedOrganizationOwner()
+
+        {
+
+            if (Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm row)
+
+                return row.IsOrganizationOwner;
+
+            return false;
+
+        }
+
+
+
+        private bool TryGetSelectedEmployeeId(out Guid employeeId)
+
+        {
+
+            employeeId = Guid.Empty;
+
+            if (Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm row)
+
             {
-                MessageBox.Show("Выберите мастерскую вашей организации.", "Сохранение",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+
+                employeeId = row.EmployeeId;
+
+                _selectedEmployeeId = row.EmployeeId;
+
+                return true;
+
             }
 
-            emp.LastName = (LastNameBox.Text ?? string.Empty).Trim();
-            emp.FirstName = (FirstNameBox.Text ?? string.Empty).Trim();
-            emp.MidName = (MidNameBox.Text ?? string.Empty).Trim();
-            emp.Login = (LoginBox.Text ?? string.Empty).Trim();
-            emp.Email = (EmailBox.Text ?? string.Empty).Trim();
-            emp.Phone = (PhoneBox.Text ?? string.Empty).Trim();
-            emp.WorkshopId = wsId;
-            emp.IsActive = IsActiveCheck.IsChecked == true;
 
-            try
+
+            if (_selectedEmployeeId.HasValue)
+
             {
-                db.SaveChanges();
-                MessageBox.Show("Данные сотрудника сохранены.", "Управление сотрудниками",
+
+                employeeId = _selectedEmployeeId.Value;
+
+                return true;
+
+            }
+
+
+
+            MessageBox.Show("Выберите сотрудника в списке.", "Управление сотрудниками",
+
+                MessageBoxButton.OK, MessageBoxImage.Information);
+
+            return false;
+
+        }
+
+
+
+        private async void Delete_Click(object sender, RoutedEventArgs e)
+
+        {
+
+            if (!AppState.HasPermission(ProPermissions.DeleteEmployees) || _scope == null)
+
+                return;
+
+
+
+            if (!TryGetSelectedEmployeeId(out var id))
+
+                return;
+
+
+
+            if (IsSelectedCurrentEmployee(id))
+
+            {
+
+                MessageBox.Show("Нельзя удалить свою учётную запись.", "Удаление",
+
                     MessageBoxButton.OK, MessageBoxImage.Information);
-                Refresh();
+
+                return;
+
             }
-            catch (Exception ex)
+
+
+
+            if (Grid.SelectedItem is OwnerEmployeesDataService.EmployeeRowVm selectedRow && selectedRow.IsOrganizationOwner)
+
             {
-                MessageBox.Show("Не удалось сохранить: " + ex.Message, "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+
+                MessageBox.Show("Нельзя удалить сотрудника с ролью владельца.", "Удаление",
+
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                return;
+
             }
+
+
+
+            if (MessageBox.Show("Удалить выбранного сотрудника?", "Удаление",
+
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+
+                return;
+
+
+
+            var err = await EmployeeManagementService.TryDeleteAsync(id, _scope).ConfigureAwait(true);
+
+            if (err != null)
+
+            {
+
+                MessageBox.Show(err, "Удаление", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                return;
+
+            }
+
+
+
+            _selectedEmployeeId = null;
+
+            await RefreshAsync().ConfigureAwait(true);
+
         }
 
-        private sealed class WorkshopItem
-        {
-            public Guid RowId { get; set; }
-            public string Name { get; set; }
-        }
-
-        private sealed class EmployeeRowVm
-        {
-            public Guid EmployeeId { get; set; }
-            public string FullName { get; set; }
-            public string Login { get; set; }
-            public string WorkshopName { get; set; }
-            public string RolesDisplay { get; set; }
-            public string ActiveDisplay { get; set; }
-        }
     }
+
 }
+

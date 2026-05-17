@@ -257,6 +257,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.IO.Pipelines, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Pipelines.10.0.7\lib\net462\System.IO.Pipelines.dll</HintPath>
     </Reference>
@@ -300,6 +302,18 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Document.NET, Version=5.2.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Document.NET.5.2.26166.7850\lib\net40\Xceed.Document.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Drawing.NET, Version=1.0.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Drawing.NET.1.0.26166.7850\lib\net40\Xceed.Drawing.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Pdf, Version=5.2.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Pdf.5.2.26166.7850\lib\net40\Xceed.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Words.NET, Version=5.2.26166.7850, Culture=neutral, PublicKeyToken=ba83ff368b7563c6, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xceed.Words.NET.5.2.26166.7850\lib\net40\Xceed.Words.NET.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -320,7 +334,47 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\EmployeeEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\EmployeeRolesWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\RoleEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ServiceRegisterUserWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ServiceAddCarWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ServiceManualClientWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\WorkshopServiceEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\WorkshopServiceUnitEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\PermissionEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\DelegateTaskWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\RequestPurchaseWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -340,11 +394,35 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\ProTaskShopPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\WorkshopRepairCarsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\WorkshopBookServicePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\WorkshopClientLookupPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\WorkshopCarSelectionPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\WorkshopEmployeesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\WorkshopServicesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\CompletedTasksPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -369,6 +447,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\Admin\AdminOrganizationsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminDirectoriesHubPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminPermissionsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -417,14 +503,73 @@
     <Compile Include="Windows\CreateCompanyWindow.xaml.cs">
       <DependentUpon>CreateCompanyWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\EmployeeEditWindow.xaml.cs">
+      <DependentUpon>EmployeeEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EmployeeRolesWindow.xaml.cs">
+      <DependentUpon>EmployeeRolesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\RoleEditWindow.xaml.cs">
       <DependentUpon>RoleEditWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ServiceRegisterUserWindow.xaml.cs">
+      <DependentUpon>ServiceRegisterUserWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ServiceAddCarWindow.xaml.cs">
+      <DependentUpon>ServiceAddCarWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ServiceManualClientWindow.xaml.cs">
+      <DependentUpon>ServiceManualClientWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\WorkshopServiceEditWindow.xaml.cs">
+      <DependentUpon>WorkshopServiceEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\WorkshopServiceUnitEditWindow.xaml.cs">
+      <DependentUpon>WorkshopServiceUnitEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\PermissionEditWindow.xaml.cs">
+      <DependentUpon>PermissionEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\DelegateTaskWindow.xaml.cs">
+      <DependentUpon>DelegateTaskWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\RequestPurchaseWindow.xaml.cs">
+      <DependentUpon>RequestPurchaseWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\RoleEditorService.cs" />
+    <Compile Include="Services\ProPermissions.cs" />
+    <Compile Include="Services\PermissionAdminService.cs" />
+    <Compile Include="Services\EmployeePermissionService.cs" />
     <Compile Include="Services\GeoapifyAutocompleteService.cs" />
     <Compile Include="Services\ContactValidation.cs" />
     <Compile Include="Services\CompanyCreationService.cs" />
+    <Compile Include="Services\DatabaseExecutor.cs" />
+    <Compile Include="Services\EmployeeManagementService.cs" />
+    <Compile Include="Services\OwnerEmployeesDataService.cs" />
     <Compile Include="Services\OwnerOrganizationScope.cs" />
+    <Compile Include="Services\ProHomeDataService.cs" />
+    <Compile Include="Services\CarDisplayHelper.cs" />
+    <Compile Include="Services\CompletedTasksDataService.cs" />
+    <Compile Include="Services\TaskDelegationService.cs" />
+    <Compile Include="Services\TaskPurchaseRequestService.cs" />
+    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderDataService.cs" />
+    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderModel.cs" />
+    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderWorkLine.cs" />
+    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderPrintService.cs" />
+    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderTokens.cs" />
+    <Compile Include="Services\ServiceBooking\ServiceBookingContext.cs" />
+    <Compile Include="Services\ServiceBooking\ServiceClientLookupService.cs" />
+    <Compile Include="Services\ServiceBooking\ServiceBookingPersistenceService.cs" />
+    <Compile Include="Services\ServiceBooking\ServiceBookingTaskService.cs" />
+    <Compile Include="Services\ServiceBooking\ServiceBookingWorkOrderBuilder.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopServiceCatalogService.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopPartCatalogService.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopPartModels.cs" />
+    <Compile Include="Services\WorkshopServices\TaskPartShopSession.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopServiceUnitsService.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopServiceModels.cs" />
+    <Compile Include="Services\WorkshopServices\TaskReportService.cs" />
+    <Compile Include="Services\WorkshopServices\TaskReportLineVm.cs" />
     <Compile Include="AppState.cs" />
     <Compile Include="ProNavigation.cs" />
     <Compile Include="Services\ThemeService.cs" />
@@ -443,11 +588,29 @@
     <Compile Include="Pages\EmployeeTaskCardPage.xaml.cs">
       <DependentUpon>EmployeeTaskCardPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\ProTaskShopPage.xaml.cs">
+      <DependentUpon>ProTaskShopPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\WorkshopRepairCarsPage.xaml.cs">
       <DependentUpon>WorkshopRepairCarsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\WorkshopBookServicePage.xaml.cs">
+      <DependentUpon>WorkshopBookServicePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopClientLookupPage.xaml.cs">
+      <DependentUpon>WorkshopClientLookupPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopCarSelectionPage.xaml.cs">
+      <DependentUpon>WorkshopCarSelectionPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\WorkshopEmployeesPage.xaml.cs">
       <DependentUpon>WorkshopEmployeesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopServicesPage.xaml.cs">
+      <DependentUpon>WorkshopServicesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\CompletedTasksPage.xaml.cs">
+      <DependentUpon>CompletedTasksPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\OwnerEmployeesManagePage.xaml.cs">
       <DependentUpon>OwnerEmployeesManagePage.xaml</DependentUpon>
@@ -467,6 +630,13 @@
     <Compile Include="Pages\Admin\AdminOrganizationsPage.xaml.cs">
       <DependentUpon>AdminOrganizationsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Admin\AdminDirectoriesHubPage.xaml.cs">
+      <DependentUpon>AdminDirectoriesHubPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminPermissionsPage.xaml.cs">
+      <DependentUpon>AdminPermissionsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminReferenceTables.cs" />
     <Compile Include="Pages\Admin\AdminBroadcastPage.xaml.cs">
       <DependentUpon>AdminBroadcastPage.xaml</DependentUpon>
     </Compile>
@@ -519,6 +689,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Entypo-license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Words\shablon.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Words\shablon_tokens.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -74,7 +74,14 @@
 
                         <TextBlock Text="Забыли пароль? Свяжитесь с администратором."
                                    Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"
-                                   Margin="0,0,0,24" TextWrapping="Wrap" HorizontalAlignment="Right"/>
+                                   Margin="0,0,0,12" TextWrapping="Wrap" HorizontalAlignment="Right"/>
+
+                        <Border x:Name="ConnectionErrorBanner" Margin="0,0,0,12" Padding="12,10"
+                                CornerRadius="10" Background="#33E57373"
+                                BorderBrush="#E57373" BorderThickness="1" Visibility="Collapsed">
+                            <TextBlock x:Name="ConnectionErrorText" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="#FFCDD2"/>
+                        </Border>
 
                         <Button Content="Войти"
                                 Command="{Binding LoginCommand}"

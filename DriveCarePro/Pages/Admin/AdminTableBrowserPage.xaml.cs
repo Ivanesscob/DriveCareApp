@@ -11,19 +11,20 @@ namespace DriveCarePro.Pages.Admin
 {
     public partial class AdminTableBrowserPage : Page
     {
-        private static readonly string[] AllowedTables =
-        {
-            "Users", "Employees", "Companies", "Workshops", "Cars", "CarSales", "Parts",
-            "Roles", "Notifications", "UserRoles", "EmployeeRolesMap", "UserCars",
-            "Addresses", "Brands", "Models", "CarTypes", "Countries", "UserCarSales",
-            "CarSalePrices", "RepairHistory", "Tasks", "CarColors", "Colors", "FuelTypes",
-            "PartManufacturers", "WarehouseManagers", "RepairCategories", "Statuses",
-            "UserNotifications"
-        };
+        private static readonly string[] AllowedTables = AdminReferenceTables.Allowed;
 
-        public AdminTableBrowserPage()
+        public AdminTableBrowserPage() : this(embeddedInHub: false)
+        {
+        }
+
+        public AdminTableBrowserPage(bool embeddedInHub)
         {
             InitializeComponent();
+            if (embeddedInHub)
+            {
+                BackHomeButton.Visibility = Visibility.Collapsed;
+                PickerPanel.Visibility = Visibility.Collapsed;
+            }
             Loaded += (_, __) =>
             {
                 if (!AppState.IsCurrentEmployeeProAdmin)
@@ -36,6 +37,18 @@ namespace DriveCarePro.Pages.Admin
 
         private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
 
+        public void SelectTableAndLoad(string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+                return;
+            var match = AllowedTables.FirstOrDefault(t =>
+                string.Equals(t, tableName.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (match == null)
+                return;
+            TablePicker.SelectedItem = match;
+            LoadTable(match);
+        }
+
         private void Load_Click(object sender, RoutedEventArgs e)
         {
             if (!AppState.IsCurrentEmployeeProAdmin)
@@ -46,7 +59,11 @@ namespace DriveCarePro.Pages.Admin
                 StatusText.Text = "Выберите таблицу.";
                 return;
             }
+            LoadTable(name);
+        }
 
+        private void LoadTable(string name)
+        {
             if (!AllowedTables.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
                 StatusText.Text = "Таблица не разрешена.";

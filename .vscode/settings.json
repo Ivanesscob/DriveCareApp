@@ -1,0 +1,6 @@
+{
+  "dotnet.defaultSolution": "DriveCareApp.sln",
+  "omnisharp.useModernNet": false,
+  "omnisharp.enableMsBuildLoadProjectsOnDemand": false,
+  "omnisharp.projectLoadTimeout": 120
+}

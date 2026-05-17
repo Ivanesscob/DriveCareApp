@@ -5,7 +5,7 @@ using DriveCarePro.Services;
 using DriveCarePro.Windows;
 
 using System;
-
+using System.Collections.Generic;
 using System.Linq;
 
 using System.Windows;
@@ -27,6 +27,8 @@ namespace DriveCarePro.Pages
 
         private OwnerOrganizationScope _scope;
 
+        private List<RoleRowVm> _allRoleRows = new List<RoleRowVm>();
+
 
 
         public OwnerRolesConstructorPage() : this(systemRolesMode: false)
@@ -37,16 +39,17 @@ namespace DriveCarePro.Pages
 
 
 
-        public OwnerRolesConstructorPage(bool systemRolesMode)
-
+        public OwnerRolesConstructorPage(bool systemRolesMode) : this(systemRolesMode, embeddedInHub: false)
         {
+        }
 
+        public OwnerRolesConstructorPage(bool systemRolesMode, bool embeddedInHub)
+        {
             _systemRolesMode = systemRolesMode;
-
             InitializeComponent();
-
+            if (embeddedInHub)
+                BackHomeButton.Visibility = Visibility.Collapsed;
             Loaded += OwnerRolesConstructorPage_Loaded;
-
         }
 
 
@@ -132,6 +135,8 @@ namespace DriveCarePro.Pages
 
 
         private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();
+
+        private void RoleSearchBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyRoleSearch();
 
 
 
@@ -433,11 +438,25 @@ namespace DriveCarePro.Pages
 
 
 
-            RolesGrid.ItemsSource = list;
+            _allRoleRows = list;
+            ApplyRoleSearch();
 
         }
 
+        private void ApplyRoleSearch()
+        {
+            var q = (RoleSearchBox?.Text ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(q))
+            {
+                RolesGrid.ItemsSource = _allRoleRows;
+                return;
+            }
 
+            RolesGrid.ItemsSource = _allRoleRows
+                .Where(r => !string.IsNullOrEmpty(r.Name) &&
+                            r.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+        }
 
         private sealed class RoleRowVm
 

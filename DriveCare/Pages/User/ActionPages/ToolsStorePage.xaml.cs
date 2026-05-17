@@ -1,3 +1,4 @@
+using DriveCareCore.Shop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -52,7 +53,17 @@ namespace DriveCare.Pages.User.ActionPages
 
         private async Task LoadCategoryAsync(string category)
         {
-            var all = BuildMockProducts(category);
+            var all = ToolsStoreCatalog.ListByCategory(category)
+                .Select(p => new ShopProductVm
+                {
+                    ProductId = p.ProductId,
+                    Category = p.Category,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    PriceLabel = p.PriceLabel
+                })
+                .ToList();
             var fallback = LoadImageOrFallback(null);
             VisibleProducts.Clear();
             foreach (var p in all)
@@ -92,42 +103,6 @@ namespace DriveCare.Pages.User.ActionPages
             }).ToArray();
 
             await Task.WhenAll(tasks);
-        }
-
-        private static List<ShopProductVm> BuildMockProducts(string category)
-        {
-            var names = new[]
-            {
-                "Стандарт", "Премиум", "Pro", "Sport", "Comfort", "Eco"
-            };
-            var result = new List<ShopProductVm>();
-            for (var i = 0; i < names.Length; i++)
-            {
-                var price = 3500 + i * 1200 + (category?.Length ?? 0) * 100;
-                result.Add(new ShopProductVm
-                {
-                    ProductId = Guid.NewGuid(),
-                    Category = category,
-                    Name = $"{CategoryRu(category)} {names[i]}",
-                    Description = $"Категория: {CategoryRu(category)}",
-                    Price = price,
-                    PriceLabel = $"{price:0} ₽"
-                });
-            }
-            return result;
-        }
-
-        private static string CategoryRu(string category)
-        {
-            switch (category)
-            {
-                case "Engine": return "Деталь двигателя";
-                case "Transmission": return "Деталь трансмиссии";
-                case "Body": return "Кузовной элемент";
-                case "Tires": return "Шина";
-                case "Accessories": return "Аксессуар";
-                default: return "Товар";
-            }
         }
 
         private static ImageSource ResolveCategoryImage(string category, Action<double> progress)
