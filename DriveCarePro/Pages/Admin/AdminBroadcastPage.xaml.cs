@@ -11,6 +11,8 @@ namespace DriveCarePro.Pages.Admin
             InitializeComponent();
         }
 
+        private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
+
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             TitleBox.Text = string.Empty;

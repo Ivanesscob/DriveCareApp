@@ -59,7 +59,7 @@ namespace DriveCare.Pages.LoginPages
                     AppState.CurrentUser = user;
                     AppState.UserRoles = AppConnect.model1.UserRoles
                         .Where(u => u.UserId == AppState.CurrentUserId)
-                        .Select(u => u.Roles)
+                        .Select(u => u.Role)
                         .ToList();
                 AppState.SetFrame<UserHomePage>();
                 }

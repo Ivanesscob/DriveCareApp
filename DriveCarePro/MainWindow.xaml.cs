@@ -11,7 +11,10 @@ namespace DriveCarePro
         public MainWindow()
         {
             InitializeComponent();
-            AppState.SetFrame<Pages.LoginPages.LoginPage>();
+            if (!AppState.TryRestoreSession())
+                AppState.SetFrame<Pages.LoginPages.LoginPage>();
+            else
+                AppState.SetFrame<Pages.ProHomePage>();
             DataContext = this;
         }
     }

@@ -14,10 +14,15 @@ namespace DriveCarePro.Pages.Admin
             Loaded += (_, __) =>
             {
                 if (!AppState.IsCurrentEmployeeProAdmin)
+                {
+                    ProNavigation.GoHome();
                     return;
+                }
                 LoadGrid();
             };
         }
+
+        private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
 
         private void Refresh_Click(object sender, RoutedEventArgs e) => LoadGrid();
 
@@ -34,7 +39,7 @@ namespace DriveCarePro.Pages.Admin
                         p.RowId,
                         p.Name,
                         p.Article,
-                        Статус = p.Statuses != null ? p.Statuses.Name : "",
+                        Статус = p.Status != null ? p.Status.Name : "",
                         p.Description
                     })
                     .ToList();

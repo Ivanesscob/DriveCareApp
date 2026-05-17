@@ -34,6 +34,8 @@ namespace DriveCarePro.Pages.Admin
             };
         }
 
+        private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
+
         private void Load_Click(object sender, RoutedEventArgs e)
         {
             if (!AppState.IsCurrentEmployeeProAdmin)

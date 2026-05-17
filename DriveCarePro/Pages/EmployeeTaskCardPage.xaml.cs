@@ -39,9 +39,9 @@ namespace DriveCarePro.Pages
                 return;
             }
 
-            if (!AppState.IsCurrentEmployeeWorkshopWorker)
+            if (!AppState.CanAccessEmployeeTasks)
             {
-                MessageBox.Show("Карточки заданий доступны только работникам мастерской.", "Задание",
+                MessageBox.Show("Карточки заданий доступны работникам сервиса и главе автосалона.", "Задание",
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 AppState.Navigate(new ProHomePage());
                 return;
@@ -114,7 +114,7 @@ namespace DriveCarePro.Pages
         private void Complete_Click(object sender, RoutedEventArgs e)
         {
             var emp = AppState.CurrentEmployee;
-            if (emp == null || !AppState.IsCurrentEmployeeWorkshopWorker)
+            if (emp == null || !AppState.CanAccessEmployeeTasks)
                 return;
 
             var db = AppConnect.model1;

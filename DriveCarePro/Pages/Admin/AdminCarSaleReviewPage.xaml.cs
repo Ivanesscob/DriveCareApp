@@ -152,7 +152,7 @@ WHERE cs.RowId = @p0;";
         }
 
         private void GoBackToQueue() =>
-            AppState.Navigate(new ModerationHubPage());
+            AppState.Navigate(new AdminCarSaleModerationPage());
 
         private bool TryCommitModeration(bool approve)
         {

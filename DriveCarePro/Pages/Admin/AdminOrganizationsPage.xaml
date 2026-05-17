@@ -4,6 +4,9 @@
       Title="Организации">
 
     <DockPanel Margin="28,24" LastChildFill="True">
+        <Button DockPanel.Dock="Top" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+                Height="36" MinWidth="140" HorizontalAlignment="Left" Margin="0,0,0,14"
+                Click="BackHome_Click"/>
         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
             <TextBlock Text="Организации и точки" FontSize="22" FontWeight="SemiBold"
                        Foreground="{DynamicResource App.Brush.Foreground}"/>
@@ -17,8 +20,12 @@
                                Foreground="{DynamicResource App.Brush.Foreground}"/>
                     <TextBlock Text="Нет записей в очереди (таблица заявок не подключена к модели)."
                                FontSize="13" Margin="0,6,0,0" Foreground="{DynamicResource App.Brush.SecondaryText}"/>
-                    <Button Content="Обновить списки" Style="{StaticResource App.Button.Outline}" Margin="0,12,0,0"
-                            Height="36" MinWidth="160" HorizontalAlignment="Left" Click="Refresh_Click"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="Создать компанию" Style="{StaticResource App.Button.Primary}"
+                                Height="36" MinWidth="170" Margin="0,0,10,0" Click="CreateCompany_Click"/>
+                        <Button Content="Обновить списки" Style="{StaticResource App.Button.Outline}"
+                                Height="36" MinWidth="160" Click="Refresh_Click"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </StackPanel>

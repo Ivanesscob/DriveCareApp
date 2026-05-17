@@ -26,6 +26,8 @@ namespace DriveCarePro.Pages.Admin
             };
         }
 
+        private void BackHome_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
+
         private void Refresh_Click(object sender, RoutedEventArgs e) => RefreshQueue();
 
         private void OpenCard_Click(object sender, RoutedEventArgs e) => OpenSelected();

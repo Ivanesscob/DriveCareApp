@@ -19,7 +19,7 @@ namespace DriveCare.Pages.User
             Loaded += (_, __) => SyncThemeRadios();
         }
 
-        public DriveCareCore.Data.BD.Users CurrentUser => AppState.CurrentUser;
+        public DriveCareCore.Data.BD.User CurrentUser => AppState.CurrentUser;
 
         private enum Tab
         {

@@ -15,6 +15,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <StartupObject>DriveCarePro.App</StartupObject>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -218,6 +219,9 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OxyPlot, Version=2.2.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
       <HintPath>..\packages\OxyPlot.Core.2.2.0\lib\net462\OxyPlot.dll</HintPath>
     </Reference>
@@ -302,22 +306,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AppState.cs" />
-    <Compile Include="Services\ThemeService.cs" />
-    <Compile Include="Services\EmployeeSettingsStore.cs" />
-    <Compile Include="Services\AppearanceStore.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\CreateCompanyWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\RoleEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\LoginPages\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -334,11 +340,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\ProfileProPage.xaml">
+    <Page Include="Pages\WorkshopRepairCarsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\Admin\AdminHubPage.xaml">
+    <Page Include="Pages\WorkshopEmployeesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\OwnerEmployeesManagePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\OwnerRolesConstructorPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\ProfileProPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -363,10 +381,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\Admin\AdminCarSaleReviewPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Pages\Admin\ModerationHubPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -396,6 +410,27 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Windows\CreateCompanyWindow.xaml.cs">
+      <DependentUpon>CreateCompanyWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\RoleEditWindow.xaml.cs">
+      <DependentUpon>RoleEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Services\RoleEditorService.cs" />
+    <Compile Include="Services\GeoapifyAutocompleteService.cs" />
+    <Compile Include="Services\ContactValidation.cs" />
+    <Compile Include="Services\CompanyCreationService.cs" />
+    <Compile Include="Services\OwnerOrganizationScope.cs" />
+    <Compile Include="AppState.cs" />
+    <Compile Include="ProNavigation.cs" />
+    <Compile Include="Services\ThemeService.cs" />
+    <Compile Include="Services\EmployeeSettingsStore.cs" />
+    <Compile Include="Services\ProSessionStore.cs" />
+    <Compile Include="Services\AppearanceStore.cs" />
     <Compile Include="Pages\LoginPages\LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
@@ -408,11 +443,20 @@
     <Compile Include="Pages\EmployeeTaskCardPage.xaml.cs">
       <DependentUpon>EmployeeTaskCardPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\WorkshopRepairCarsPage.xaml.cs">
+      <DependentUpon>WorkshopRepairCarsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopEmployeesPage.xaml.cs">
+      <DependentUpon>WorkshopEmployeesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\OwnerEmployeesManagePage.xaml.cs">
+      <DependentUpon>OwnerEmployeesManagePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\OwnerRolesConstructorPage.xaml.cs">
+      <DependentUpon>OwnerRolesConstructorPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\ProfileProPage.xaml.cs">
       <DependentUpon>ProfileProPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Admin\AdminHubPage.xaml.cs">
-      <DependentUpon>AdminHubPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\AdminDashboardPage.xaml.cs">
       <DependentUpon>AdminDashboardPage.xaml</DependentUpon>
@@ -431,9 +475,6 @@
     </Compile>
     <Compile Include="Pages\Admin\AdminCarSaleReviewPage.xaml.cs">
       <DependentUpon>AdminCarSaleReviewPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Admin\ModerationHubPage.xaml.cs">
-      <DependentUpon>ModerationHubPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\AdminPartsModerationPage.xaml.cs">
       <DependentUpon>AdminPartsModerationPage.xaml</DependentUpon>

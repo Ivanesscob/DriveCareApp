@@ -14,13 +14,13 @@ namespace DriveCare
 
         public static Guid CurrentUserId { get; set; }
 
-        public static Users CurrentUser { get; set; }
+        public static User CurrentUser { get; set; }
 
         public static void Navigate(Page page) => MainFrame.Navigate(page);
 
         public static void SetFrame<T>() where T : Page, new() => MainFrame.Navigate(new T());
 
-        public static List<Roles> UserRoles { get; set; }
+        public static List<Role> UserRoles { get; set; }
 
         /// <summary>
         /// Сбрасывает сессию пользователя (выход из аккаунта).

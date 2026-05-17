@@ -19,7 +19,7 @@ namespace DriveCareCore.Data.BD
         public System.Guid RoleId { get; set; }
         public string Description { get; set; }
     
-        public virtual Employees Employees { get; set; }
-        public virtual Roles Roles { get; set; }
+        public virtual Employee Employee { get; set; }
+        public virtual Role Role { get; set; }
     }
 }

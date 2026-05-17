@@ -27,9 +27,9 @@ namespace DriveCareCore.Data.BD
         public System.DateTime CreatedAt { get; set; }
         public Nullable<System.Guid> CategoryId { get; set; }
     
-        public virtual Cars Cars { get; set; }
-        public virtual Employees Employees { get; set; }
-        public virtual RepairCategories RepairCategories { get; set; }
-        public virtual Statuses Statuses { get; set; }
+        public virtual Car Car { get; set; }
+        public virtual Employee Employee { get; set; }
+        public virtual RepairCategory RepairCategory { get; set; }
+        public virtual Status Status { get; set; }
     }
 }

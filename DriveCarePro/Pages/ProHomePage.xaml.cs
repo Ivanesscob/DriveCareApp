@@ -15,26 +15,86 @@ namespace DriveCarePro.Pages
         public ProHomePage()
         {
             InitializeComponent();
-            Loaded += (_, __) =>
-            {
-                RefreshSubtitle();
-                var isAdmin = AppState.IsCurrentEmployeeProAdmin;
-                ModerationButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-                AdminPanelButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-                var workshop = AppState.IsCurrentEmployeeWorkshopWorker;
-                WorkshopTasksSection.Visibility = workshop ? Visibility.Visible : Visibility.Collapsed;
-                DeskHintText.Text = workshop
-                    ? "Ниже — ваши задания мастерской. Дважды щёлкните по строке, чтобы открыть карточку: описание работ, авто, клиент, отчёт и завершение с указанием часов."
-                    : "Задания и таблица ниже доступны только сотрудникам, привязанным к мастерской (в карточке сотрудника должна быть указана мастерская).";
-                LoadTasksGrid();
-            };
+            Loaded += (_, __) => ApplyRoleLayout();
         }
+
+        private void ApplyRoleLayout()
+        {
+            RefreshSubtitle();
+
+            var isAdmin = AppState.IsCurrentEmployeeProAdmin;
+            var isService = AppState.IsCurrentEmployeeServiceWorker;
+            var isDealership = AppState.IsCurrentEmployeeDealershipHead;
+            var isOwner = AppState.IsCurrentEmployeeOwner;
+            var canTasks = AppState.CanAccessEmployeeTasks;
+
+            NavAdminBlock.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            NavOwnerBlock.Visibility = isOwner ? Visibility.Visible : Visibility.Collapsed;
+            EmployeeTasksSection.Visibility = canTasks ? Visibility.Visible : Visibility.Collapsed;
+
+            if (isAdmin)
+                LoadAdminStats();
+
+            if (isDealership && !isService)
+                TasksSectionTitle.Text = "Задания автосалона";
+            else if (isService && !isDealership)
+                TasksSectionTitle.Text = "Задания сервиса";
+            else if (canTasks)
+                TasksSectionTitle.Text = "Мои задания";
+
+            NavRoleHintText.Text = BuildNavRoleHint(isAdmin, isService, isDealership, isOwner);
+            DeskHintText.Text = BuildDeskHint(isAdmin, canTasks, isOwner);
+
+            LoadTasksGrid();
+        }
+
+        private static string BuildNavRoleHint(bool isAdmin, bool isService, bool isDealership, bool isOwner)
+        {
+            var parts = new List<string>();
+            if (isAdmin) parts.Add("администратор");
+            if (isOwner) parts.Add("владелец");
+            if (isService) parts.Add("работник сервиса");
+            if (isDealership) parts.Add("глава автосалона");
+            if (parts.Count == 0)
+                return "Разделы справочников доступны всем сотрудникам Pro.";
+            return "Ваши роли: " + string.Join(", ", parts) + ".";
+        }
+
+        private static string BuildDeskHint(bool isAdmin, bool canTasks, bool isOwner)
+        {
+            if (isOwner)
+                return "Панель разделов: управление сотрудниками вашей организации и справочники. Ниже — задания, если назначена соответствующая роль.";
+            if (canTasks)
+                return "Панель разделов — справочники и администрирование. Ниже — ваши задания (двойной щелчок или пункт контекстного меню).";
+            if (isAdmin)
+                return "Ниже — обзор системы и все административные разделы. Справочники — в блоке «Справочники и сервис».";
+            return "Панель разделов — автомобили в ремонте и сотрудники. Задания — при роли сервиса или главы автосалона.";
+        }
+
+        private void ManageEmployees_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new OwnerEmployeesManagePage());
+
+        private void RolesConstructor_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new OwnerRolesConstructorPage(systemRolesMode: false));
+
+        private void AdminSystemRoles_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new OwnerRolesConstructorPage(systemRolesMode: true));
+
+        private void RepairCars_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new WorkshopRepairCarsPage());
+
+        private void EmployeesInfo_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new WorkshopEmployeesPage());
+
+        private void RefreshTasks_Click(object sender, RoutedEventArgs e) => LoadTasksGrid();
+
+        private void OpenTaskFromMenu_Click(object sender, RoutedEventArgs e) => OpenSelectedTask();
 
         private void LoadTasksGrid()
         {
             try
             {
-                if (!AppState.IsCurrentEmployeeWorkshopWorker)
+                if (!AppState.CanAccessEmployeeTasks)
                 {
                     TasksGrid.ItemsSource = null;
                     return;
@@ -71,7 +131,9 @@ namespace DriveCarePro.Pages
             }
         }
 
-        private void TasksGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void TasksGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e) => OpenSelectedTask();
+
+        private void OpenSelectedTask()
         {
             if (TasksGrid.SelectedItem is EmployeeTaskRowVm row)
                 AppState.Navigate(new EmployeeTaskCardPage(row.TaskId));
@@ -90,17 +152,42 @@ namespace DriveCarePro.Pages
                 : $"{name} · {rolePart}";
         }
 
-        private void Moderation_Click(object sender, RoutedEventArgs e) =>
-            AppState.Navigate(new ModerationHubPage());
+        private void LoadAdminStats()
+        {
+            try
+            {
+                var db = AppConnect.model1;
+                CntUsers.Text = db.Users.Count().ToString("N0");
+                CntEmployees.Text = db.Employees.Count().ToString("N0");
+                CntCarSales.Text = db.CarSales.Count().ToString("N0");
+                CntParts.Text = db.Parts.Count().ToString("N0");
+                CntCompanies.Text = db.Companies.Count().ToString("N0");
+                CntCars.Text = db.Cars.Count().ToString("N0");
+            }
+            catch
+            {
+                CntUsers.Text = CntEmployees.Text = CntCarSales.Text =
+                    CntParts.Text = CntCompanies.Text = CntCars.Text = "—";
+            }
+        }
 
-        private void AdminPanel_Click(object sender, RoutedEventArgs e) =>
-            AppState.Navigate(new AdminHubPage());
+        private void ModerationCars_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new AdminCarSaleModerationPage());
+
+        private void ModerationParts_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new AdminPartsModerationPage());
+
+        private void AdminOrganizations_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new AdminOrganizationsPage());
+
+        private void AdminTables_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new AdminTableBrowserPage());
+
+        private void AdminBroadcast_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new AdminBroadcastPage());
 
         private void Profile_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new ProfileProPage());
-
-        private void Logout_Click(object sender, RoutedEventArgs e) =>
-            AppState.SignOutToLogin();
 
         public sealed class EmployeeTaskRowVm
         {

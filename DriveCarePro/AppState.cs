@@ -1,4 +1,5 @@
 using DriveCareCore.Data.BD;
+using DriveCarePro.Pages;
 using DriveCarePro.Pages.LoginPages;
 using DriveCarePro.Services;
 using System;
@@ -14,30 +15,63 @@ namespace DriveCarePro
 
         public static Guid CurrentUserId { get; set; }
 
-        public static Users CurrentUser { get; set; }
-        public static Employees CurrentEmployee { get; set; }
+        public static User CurrentUser { get; set; }
+        public static Employee CurrentEmployee { get; set; }
 
         public static void Navigate(Page page) => MainFrame.Navigate(page);
 
         public static void SetFrame<T>() where T : Page, new() => MainFrame.Navigate(new T());
 
-        public static List<Roles> UserRoles { get; set; }
+        public static List<Role> UserRoles { get; set; }
 
         /// <summary>Доступ к панели Pro-администратора (роль по имени содержит «админ» или «admin»).</summary>
         public static bool IsCurrentEmployeeProAdmin =>
             UserRoles != null &&
             UserRoles.Any(r => r != null && IsAdminRoleName(r.Name));
 
-        /// <summary>Задания мастерской: сотрудник привязан к записи Workshops (WorkshopId задан).</summary>
-        public static bool IsCurrentEmployeeWorkshopWorker
+        /// <summary>Задания сервиса: роль с «сервис» или «service» в названии.</summary>
+        public static bool IsCurrentEmployeeServiceWorker =>
+            UserRoles != null && UserRoles.Any(r => r != null && IsServiceRoleName(r.Name));
+
+        /// <summary>Задания автосалона: роль главы автосалона («автосалон», «глава»+«салон», dealership и т.п.).</summary>
+        public static bool IsCurrentEmployeeDealershipHead =>
+            UserRoles != null && UserRoles.Any(r => r != null && IsDealershipHeadRoleName(r.Name));
+
+        /// <summary>Владелец: роль с «владелец» или «owner» в названии.</summary>
+        public static bool IsCurrentEmployeeOwner =>
+            UserRoles != null && UserRoles.Any(r => r != null && IsOwnerRoleName(r.Name));
+
+        /// <summary>Управление сотрудниками своей организации.</summary>
+        public static bool CanManageOrganizationEmployees => IsCurrentEmployeeOwner;
+
+        /// <summary>Таблица и карточки заданий на главной Pro.</summary>
+        public static bool CanAccessEmployeeTasks =>
+            IsCurrentEmployeeServiceWorker || IsCurrentEmployeeDealershipHead;
+
+        private static bool IsServiceRoleName(string name)
         {
-            get
-            {
-                var e = CurrentEmployee;
-                if (e == null)
-                    return false;
-                return e.WorkshopId.HasValue && e.WorkshopId.Value != Guid.Empty;
-            }
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+            var n = name.Trim().ToLowerInvariant();
+            return n.Contains("сервис") || n.Contains("service");
+        }
+
+        private static bool IsDealershipHeadRoleName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+            var n = name.Trim().ToLowerInvariant();
+            if (n.Contains("автосалон") || n.Contains("dealership") || n.Contains("car showroom"))
+                return true;
+            return n.Contains("глава") && (n.Contains("салон") || n.Contains("авто"));
+        }
+
+        private static bool IsOwnerRoleName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+            var n = name.Trim().ToLowerInvariant();
+            return n.Contains("владелец") || n.Contains("owner");
         }
 
         private static bool IsAdminRoleName(string name)
@@ -48,7 +82,7 @@ namespace DriveCarePro
             return n.Contains("админ") || n.Contains("admin");
         }
 
-        public static string FormatEmployeeDisplayName(Employees e)
+        public static string FormatEmployeeDisplayName(Employee e)
         {
             if (e == null)
                 return "Сотрудник";
@@ -61,12 +95,47 @@ namespace DriveCarePro
             return string.IsNullOrWhiteSpace(e.Login) ? "Сотрудник" : e.Login.Trim();
         }
 
+        /// <summary>Вход сотрудника: состояние приложения + сохранение сессии.</summary>
+        public static void SignInEmployee(Employee employee)
+        {
+            if (employee == null)
+                return;
+
+            var db = AppConnect.model1;
+            CurrentUserId = employee.RowId;
+            CurrentEmployee = employee;
+            UserRoles = db.EmployeeRolesMaps
+                .Where(er => er.EmployeeId == employee.RowId)
+                .Select(er => er.Role)
+                .ToList();
+            ProSessionStore.Save(employee.RowId);
+            ThemeService.LoadForCurrentEmployee();
+        }
+
+        /// <summary>Восстановить вход после перезапуска приложения.</summary>
+        public static bool TryRestoreSession()
+        {
+            if (!ProSessionStore.TryLoad(out var employeeId))
+                return false;
+
+            var employee = AppConnect.model1.Employees.FirstOrDefault(e => e.RowId == employeeId);
+            if (employee == null)
+            {
+                ProSessionStore.Clear();
+                return false;
+            }
+
+            SignInEmployee(employee);
+            return true;
+        }
+
         public static void SignOutToLogin()
         {
             CurrentUserId = Guid.Empty;
             CurrentUser = null;
             CurrentEmployee = null;
             UserRoles = null;
+            ProSessionStore.Clear();
             ThemeService.Initialize();
             SetFrame<LoginPage>();
         }

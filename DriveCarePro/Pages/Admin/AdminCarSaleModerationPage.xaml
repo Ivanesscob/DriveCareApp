@@ -9,12 +9,16 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
-            <Button Content="Обновить" Style="{StaticResource App.Button.Outline}" Height="40" MinWidth="120"
-                    Margin="0,0,12,0" Click="Refresh_Click"/>
-            <Button Content="Открыть карточку" Style="{StaticResource App.Button.Primary}" Height="40" MinWidth="160"
-                    Click="OpenCard_Click"/>
-        </StackPanel>
+        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="True">
+            <Button DockPanel.Dock="Left" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="140" Margin="0,0,12,0" Click="BackHome_Click"/>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Обновить" Style="{StaticResource App.Button.Outline}" Height="40" MinWidth="120"
+                        Margin="0,0,12,0" Click="Refresh_Click"/>
+                <Button Content="Открыть карточку" Style="{StaticResource App.Button.Primary}" Height="40" MinWidth="160"
+                        Click="OpenCard_Click"/>
+            </StackPanel>
+        </DockPanel>
 
         <Border Grid.Row="1" CornerRadius="12" Padding="16,14" Background="{DynamicResource App.Brush.SurfaceCard}"
                 BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">

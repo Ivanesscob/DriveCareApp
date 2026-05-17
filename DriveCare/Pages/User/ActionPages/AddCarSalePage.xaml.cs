@@ -56,19 +56,19 @@ namespace DriveCare.Pages.User.ActionPages
                 return;
 
             var rows = AppConnect.model1.UserCars
-                .Include("Cars")
-                .Include("Cars.Models")
-                .Include("Cars.Models.Brands")
+                .Include("Car")
+                .Include("Car.Model")
+                .Include("Car.Model.Brand")
                 .Where(uc => uc.UserId == AppState.CurrentUserId)
                 .ToList();
 
             foreach (var uc in rows)
             {
-                if (uc.Cars == null)
+                if (uc.Car == null)
                     continue;
-                var brand = uc.Cars.Models?.Brands?.Name?.Trim();
-                var model = uc.Cars.Models?.Name?.Trim();
-                var year = uc.Cars.Year.HasValue ? " " + uc.Cars.Year.Value : string.Empty;
+                var brand = uc.Car.Model?.Brand?.Name?.Trim();
+                var model = uc.Car.Model?.Name?.Trim();
+                var year = uc.Car.Year.HasValue ? " " + uc.Car.Year.Value : string.Empty;
                 var display = (string.IsNullOrWhiteSpace(brand) ? "Марка" : brand) + " " +
                               (string.IsNullOrWhiteSpace(model) ? "Модель" : model) + year;
 
@@ -108,7 +108,7 @@ namespace DriveCare.Pages.User.ActionPages
             var saleId = Guid.NewGuid();
             var now = DateTime.Now;
             var savedPhotoPath = ResolvePhotoPathForStorage();
-            var sale = new CarSales
+            var sale = new CarSale
             {
                 RowId = saleId,
                 CarId = SelectedUserCar.CarId,
@@ -119,7 +119,7 @@ namespace DriveCare.Pages.User.ActionPages
                 StatusId = CarSaleModerationStatuses.ResolveStatusIdForNewCarSale(AppConnect.model1)
             };
 
-            var salePrice = new CarSalePrices
+            var salePrice = new CarSalePrice
             {
                 RowId = Guid.NewGuid(),
                 CarSaleId = saleId,
@@ -129,7 +129,7 @@ namespace DriveCare.Pages.User.ActionPages
                 Description = "Стартовая цена"
             };
 
-            var userSale = new UserCarSales
+            var userSale = new UserCarSale
             {
                 RowId = Guid.NewGuid(),
                 UserId = AppState.CurrentUserId,

@@ -3,7 +3,6 @@ using DriveCareCore.Data.BD;
 using DriveCareCore.Dialogs;
 using DriveCarePro;
 using DriveCarePro.Pages;
-using DriveCarePro.Services;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -48,13 +47,7 @@ namespace DriveCarePro.Pages.LoginPages
 
             if (user != null)
             {
-                AppState.CurrentUserId = user.RowId;
-                AppState.CurrentEmployee = user;
-                AppState.UserRoles = AppConnect.model1.EmployeeRolesMap
-                    .Where(er => er.EmployeeId == user.RowId)
-                    .Select(er => er.Roles)
-                    .ToList();
-                ThemeService.LoadForCurrentEmployee();
+                AppState.SignInEmployee(user);
                 AppState.SetFrame<ProHomePage>();
             }
             else

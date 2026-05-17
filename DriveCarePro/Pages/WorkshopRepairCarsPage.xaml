@@ -1,0 +1,45 @@
+<Page x:Class="DriveCarePro.Pages.WorkshopRepairCarsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Автомобили в ремонте">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,16" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="130" Click="Back_Click"/>
+            <Button DockPanel.Dock="Right" Content="Обновить" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="120" Click="Refresh_Click"/>
+        </DockPanel>
+
+        <Border Grid.Row="1" CornerRadius="12" Padding="16,14"
+                Background="{DynamicResource App.Brush.SurfaceCard}"
+                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="HintText" Grid.Row="0" FontSize="13" Margin="0,0,0,10" TextWrapping="Wrap"
+                           Foreground="{DynamicResource App.Brush.Muted}"/>
+                <DataGrid x:Name="Grid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                          SelectionMode="Single" HeadersVisibility="Column" MinHeight="280"
+                          AlternatingRowBackground="{DynamicResource App.Brush.Surface2}"
+                          Foreground="{DynamicResource App.Brush.Foreground}" RowHeight="36"
+                          Background="Transparent" BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Автомобиль" Binding="{Binding CarDisplay}" Width="2*" MinWidth="180"/>
+                        <DataGridTextColumn Header="Работа" Binding="{Binding Title}" Width="*" MinWidth="140"/>
+                        <DataGridTextColumn Header="Статус" Binding="{Binding StatusDisplay}" Width="120"/>
+                        <DataGridTextColumn Header="Начало" Binding="{Binding RepairDateDisplay}" Width="120"/>
+                        <DataGridTextColumn Header="Мастер" Binding="{Binding EmployeeDisplay}" Width="*" MinWidth="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

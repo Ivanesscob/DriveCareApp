@@ -13,10 +13,10 @@ namespace DriveCareCore.Data.BD
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class DriveCareDBEntities : DbContext
+    public partial class DriveCareDBEntities2 : DbContext
     {
-        public DriveCareDBEntities()
-            : base("name=DriveCareDBEntities")
+        public DriveCareDBEntities2()
+            : base("name=DriveCareDBEntities2")
         {
         }
     
@@ -25,35 +25,39 @@ namespace DriveCareCore.Data.BD
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<Addresses> Addresses { get; set; }
-        public virtual DbSet<Brands> Brands { get; set; }
-        public virtual DbSet<CarColors> CarColors { get; set; }
-        public virtual DbSet<Cars> Cars { get; set; }
-        public virtual DbSet<CarTypes> CarTypes { get; set; }
-        public virtual DbSet<Colors> Colors { get; set; }
-        public virtual DbSet<Countries> Countries { get; set; }
-        public virtual DbSet<FuelTypes> FuelTypes { get; set; }
-        public virtual DbSet<Models> Models { get; set; }
-        public virtual DbSet<PartManufacturers> PartManufacturers { get; set; }
-        public virtual DbSet<Parts> Parts { get; set; }
-        public virtual DbSet<Statuses> Statuses { get; set; }
-        public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
-        public virtual DbSet<UserCars> UserCars { get; set; }
-        public virtual DbSet<Users> Users { get; set; }
-        public virtual DbSet<WarehouseManagers> WarehouseManagers { get; set; }
-        public virtual DbSet<Roles> Roles { get; set; }
-        public virtual DbSet<UserRoles> UserRoles { get; set; }
-        public virtual DbSet<CarSalePrices> CarSalePrices { get; set; }
-        public virtual DbSet<CarSales> CarSales { get; set; }
-        public virtual DbSet<UserCarSales> UserCarSales { get; set; }
-        public virtual DbSet<Companies> Companies { get; set; }
-        public virtual DbSet<EmployeeRolesMap> EmployeeRolesMap { get; set; }
-        public virtual DbSet<Employees> Employees { get; set; }
-        public virtual DbSet<Notifications> Notifications { get; set; }
-        public virtual DbSet<UserNotifications> UserNotifications { get; set; }
-        public virtual DbSet<Workshops> Workshops { get; set; }
-        public virtual DbSet<RepairCategories> RepairCategories { get; set; }
-        public virtual DbSet<RepairHistory> RepairHistory { get; set; }
-        public virtual DbSet<Tasks> Tasks { get; set; }
+        public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<Brand> Brands { get; set; }
+        public virtual DbSet<BusinessType> BusinessTypes { get; set; }
+        public virtual DbSet<CarColor> CarColors { get; set; }
+        public virtual DbSet<Car> Cars { get; set; }
+        public virtual DbSet<CarSalePrice> CarSalePrices { get; set; }
+        public virtual DbSet<CarSale> CarSales { get; set; }
+        public virtual DbSet<CarType> CarTypes { get; set; }
+        public virtual DbSet<Color> Colors { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
+        public virtual DbSet<EmployeeRolesMap> EmployeeRolesMaps { get; set; }
+        public virtual DbSet<Employee> Employees { get; set; }
+        public virtual DbSet<FuelType> FuelTypes { get; set; }
+        public virtual DbSet<Model> Models { get; set; }
+        public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<PartManufacturer> PartManufacturers { get; set; }
+        public virtual DbSet<Part> Parts { get; set; }
+        public virtual DbSet<PermissionGroup> PermissionGroups { get; set; }
+        public virtual DbSet<Permission> Permissions { get; set; }
+        public virtual DbSet<RepairCategory> RepairCategories { get; set; }
+        public virtual DbSet<RepairHistory> RepairHistories { get; set; }
+        public virtual DbSet<RolePermissionsMap> RolePermissionsMaps { get; set; }
+        public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Status> Statuses { get; set; }
+        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
+        public virtual DbSet<Task> Tasks { get; set; }
+        public virtual DbSet<UserCar> UserCars { get; set; }
+        public virtual DbSet<UserCarSale> UserCarSales { get; set; }
+        public virtual DbSet<UserNotification> UserNotifications { get; set; }
+        public virtual DbSet<UserRole> UserRoles { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<WarehouseManager> WarehouseManagers { get; set; }
+        public virtual DbSet<Workshop> Workshops { get; set; }
     }
 }

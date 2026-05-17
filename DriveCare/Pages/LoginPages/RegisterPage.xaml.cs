@@ -10,6 +10,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
+using DbUser = DriveCareCore.Data.BD.User;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -412,7 +414,7 @@ namespace DriveCare.Pages.LoginPages
 
             var phoneTrim = Phone.Trim();
 
-            var user = new Users
+            var user = new DbUser
             {
                 RowId = Guid.NewGuid(),
                 Login = loginTrim,

@@ -12,7 +12,7 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -584,7 +584,7 @@ OUTER APPLY (
             foreach (var p in activePrices)
                 p.EndDate = now;
 
-            AppConnect.model1.CarSalePrices.Add(new CarSalePrices
+            AppConnect.model1.CarSalePrices.Add(new CarSalePrice
             {
                 RowId = Guid.NewGuid(),
                 CarSaleId = SelectedSale.SaleId,

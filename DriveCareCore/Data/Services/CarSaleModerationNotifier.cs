@@ -15,7 +15,7 @@ namespace DriveCareCore.Data.Services
                 return;
             var carId = db.CarSales.Where(c => c.RowId == carSaleId).Select(c => (Guid?)c.CarId).FirstOrDefault();
 
-            var notification = new Notifications
+            var notification = new Notification
             {
                 RowId = Guid.NewGuid(),
                 Title = title ?? string.Empty,
@@ -25,7 +25,7 @@ namespace DriveCareCore.Data.Services
                 CreatedAt = DateTime.Now
             };
             db.Notifications.Add(notification);
-            db.UserNotifications.Add(new UserNotifications
+            db.UserNotifications.Add(new UserNotification
             {
                 RowId = Guid.NewGuid(),
                 UserId = link.UserId,

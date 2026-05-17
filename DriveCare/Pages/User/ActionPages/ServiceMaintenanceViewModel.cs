@@ -125,24 +125,24 @@ namespace DriveCare.Pages.User.ActionPages
                 {
                     var uid = AppState.CurrentUserId;
                     var rows = AppConnect.model1.UserCars
-                        .Include("Cars")
-                        .Include("Cars.CarTypes")
-                        .Include("Cars.Models")
-                        .Include("Cars.Models.Brands")
+                        .Include("Car")
+                        .Include("Car.CarType")
+                        .Include("Car.Model")
+                        .Include("Car.Model.Brand")
                         .Where(uc => uc.UserId == uid)
                         .ToList();
 
                     var seenCarIds = new HashSet<Guid>();
-                    foreach (var uc in rows.Where(uc => uc.Cars != null))
+                    foreach (var uc in rows.Where(uc => uc.Car != null))
                     {
                         if (seenCarIds.Contains(uc.CarId))
                             continue;
                         seenCarIds.Add(uc.CarId);
 
-                        var car = uc.Cars;
-                        var photo = CarTypeImageHelper.GetImageForCarTypeName(car.CarTypes?.Name);
-                        var brand = car.Models?.Brands?.Name?.Trim();
-                        var model = car.Models?.Name?.Trim();
+                        var car = uc.Car;
+                        var photo = CarTypeImageHelper.GetImageForCarTypeName(car.CarType?.Name);
+                        var brand = car.Model?.Brand?.Name?.Trim();
+                        var model = car.Model?.Name?.Trim();
                         string name;
                         if (!string.IsNullOrEmpty(brand) && !string.IsNullOrEmpty(model))
                             name = $"{brand} {model}";

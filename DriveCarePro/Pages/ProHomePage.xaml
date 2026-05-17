@@ -17,20 +17,14 @@
                            Foreground="{DynamicResource App.Brush.Muted}"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button x:Name="ModerationButton" Content="Модерация" Style="{StaticResource App.Button.Primary}"
-                        Height="40" MinWidth="130" Margin="0,0,12,0" VerticalAlignment="Center"
-                        Visibility="Collapsed" Click="Moderation_Click"/>
-                <Button x:Name="AdminPanelButton" Content="Админ-панель" Style="{StaticResource App.Button.Outline}"
-                        Height="40" MinWidth="150" Margin="0,0,12,0" VerticalAlignment="Center"
-                        Visibility="Collapsed" Click="AdminPanel_Click"/>
                 <Button Content="Профиль" Style="{StaticResource App.Button.Outline}"
-                        Height="40" MinWidth="120" VerticalAlignment="Center"
+                        Height="40" MinWidth="120"
                         Click="Profile_Click"/>
             </StackPanel>
         </DockPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                      Padding="0,0,0,24">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled" Padding="0,0,0,24">
             <StackPanel MaxWidth="960" Margin="24,0,24,0" HorizontalAlignment="Center">
 
                 <Border CornerRadius="16" Padding="28,24" Background="{DynamicResource App.Brush.SurfaceCard}"
@@ -39,19 +33,117 @@
                         <TextBlock Text="Рабочий стол" FontSize="18" FontWeight="SemiBold"
                                    Foreground="{DynamicResource App.Brush.Foreground}"/>
                         <TextBlock x:Name="DeskHintText" FontSize="14" Foreground="{DynamicResource App.Brush.SecondaryText}"
-                                   TextWrapping="Wrap" Margin="0,10,0,16"/>
-                        <Button Content="Выйти из аккаунта" Style="{StaticResource App.Button.Primary}"
-                                Height="44" MinWidth="200" HorizontalAlignment="Left" Click="Logout_Click"/>
+                                   TextWrapping="Wrap" Margin="0,10,0,0"/>
                     </StackPanel>
                 </Border>
 
-                <Border x:Name="WorkshopTasksSection" Margin="0,16,0,0" CornerRadius="16" Padding="20,16"
+                <Border Margin="0,16,0,0" CornerRadius="16" Padding="24,20"
                         Background="{DynamicResource App.Brush.SurfaceCard}"
                         BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
                     <StackPanel>
-                        <TextBlock Text="Мои задания" FontSize="16" FontWeight="SemiBold"
+                        <TextBlock Text="Панель разделов" FontSize="16" FontWeight="SemiBold"
                                    Foreground="{DynamicResource App.Brush.Foreground}"/>
-                        <TextBlock Text="Двойной щелчок — открыть карточку задания."
+                        <TextBlock x:Name="NavRoleHintText" FontSize="12" Foreground="{DynamicResource App.Brush.Muted}"
+                                   TextWrapping="Wrap" Margin="0,4,0,16"/>
+
+                        <StackPanel x:Name="NavAdminBlock" Margin="0,0,0,14" Visibility="Collapsed">
+                            <TextBlock Text="Администратор" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Accent}" Margin="0,0,0,10"/>
+
+                            <Border x:Name="AdminStatsBlock" Margin="0,0,0,14" Padding="14,12" CornerRadius="12"
+                                    Background="{DynamicResource App.Brush.Surface2}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                                <UniformGrid Columns="3" Rows="2">
+                                    <StackPanel Margin="0,0,8,10">
+                                        <TextBlock Text="Пользователи" FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock x:Name="CntUsers" FontSize="22" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,8,10">
+                                        <TextBlock Text="Сотрудники" FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock x:Name="CntEmployees" FontSize="22" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,0,10">
+                                        <TextBlock Text="Объявления" FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock x:Name="CntCarSales" FontSize="22" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,8,0">
+                                        <TextBlock Text="Запчасти" FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock x:Name="CntParts" FontSize="22" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,8,0">
+                                        <TextBlock Text="Компании" FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock x:Name="CntCompanies" FontSize="22" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="Автомобили" FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock x:Name="CntCars" FontSize="22" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </UniformGrid>
+                            </Border>
+
+                            <WrapPanel Orientation="Horizontal">
+                                <Button Content="Модерация объявлений" Style="{StaticResource App.Button.Primary}"
+                                        Height="42" MinWidth="190" Margin="0,0,10,10"
+                                        Click="ModerationCars_Click"/>
+                                <Button Content="Модерация запчастей" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="190" Margin="0,0,10,10"
+                                        Click="ModerationParts_Click"/>
+                                <Button Content="Организации" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="150" Margin="0,0,10,10"
+                                        Click="AdminOrganizations_Click"/>
+                                <Button Content="Системные роли" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="160" Margin="0,0,10,10"
+                                        Click="AdminSystemRoles_Click"/>
+                                <Button Content="Таблицы БД" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="140" Margin="0,0,10,10"
+                                        Click="AdminTables_Click"/>
+                                <Button Content="Уведомления" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="150" Margin="0,0,10,10"
+                                        Click="AdminBroadcast_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <StackPanel x:Name="NavOwnerBlock" Margin="0,0,0,14" Visibility="Collapsed">
+                            <TextBlock Text="Владелец" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Accent}" Margin="0,0,0,8"/>
+                            <WrapPanel Orientation="Horizontal">
+                                <Button Content="Управление сотрудниками" Style="{StaticResource App.Button.Primary}"
+                                        Height="42" MinWidth="220" Margin="0,0,10,10"
+                                        Click="ManageEmployees_Click"/>
+                                <Button Content="Конструктор ролей" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="180" Margin="0,0,10,10"
+                                        Click="RolesConstructor_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <StackPanel x:Name="NavReferenceBlock">
+                            <TextBlock Text="Справочники и сервис" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Accent}" Margin="0,0,0,8"/>
+                            <WrapPanel Orientation="Horizontal">
+                                <Button Content="Автомобили в ремонте" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="190" Margin="0,0,10,10"
+                                        Click="RepairCars_Click"/>
+                                <Button Content="Информация о сотрудниках" Style="{StaticResource App.Button.Outline}"
+                                        Height="42" MinWidth="220" Margin="0,0,10,10"
+                                        Click="EmployeesInfo_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="EmployeeTasksSection" Margin="0,16,0,0" CornerRadius="16" Padding="20,16"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock x:Name="TasksSectionTitle" Text="Мои задания" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock Text="Двойной щелчок — открыть задание. Правый щелчок по таблице — меню."
                                    FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,4,0,10"/>
                         <DataGrid x:Name="TasksGrid" AutoGenerateColumns="False" IsReadOnly="True"
                                   SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
@@ -61,6 +153,13 @@
                                   Foreground="{DynamicResource App.Brush.Foreground}" RowHeight="36"
                                   Background="Transparent" BorderThickness="0"
                                   MouseDoubleClick="TasksGrid_MouseDoubleClick">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Открыть задание" Click="OpenTaskFromMenu_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Обновить список" Click="RefreshTasks_Click"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Задание" Binding="{Binding Title, Mode=OneWay}" Width="2*" MinWidth="160"/>
                                 <DataGridTextColumn Header="Статус" Binding="{Binding StatusDisplay, Mode=OneWay}" Width="*" MinWidth="120"/>

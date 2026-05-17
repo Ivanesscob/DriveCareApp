@@ -13,7 +13,7 @@ namespace DriveCareCore
 
         public static Guid CurrentUserId { get; set; }
 
-        public static Users CurrentUser { get; set; }
+        public static User CurrentUser { get; set; }
 
         public static void Navigate(Page page) => MainFrame.Navigate(page);
 

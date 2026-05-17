@@ -1,0 +1,57 @@
+<Page x:Class="DriveCarePro.Pages.OwnerRolesConstructorPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Конструктор ролей">
+
+    <Grid Background="{DynamicResource App.Brush.Panel}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="← На главную" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="130" Click="Back_Click"/>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Создать роль" Style="{StaticResource App.Button.Primary}"
+                        Height="40" MinWidth="140" Margin="0,0,10,0" Click="CreateRole_Click"/>
+                <Button Content="Изменить" Style="{StaticResource App.Button.Outline}"
+                        Height="40" MinWidth="120" Margin="0,0,10,0" Click="EditRole_Click"/>
+                <Button Content="Обновить" Style="{StaticResource App.Button.Outline}"
+                        Height="40" MinWidth="120" Click="Refresh_Click"/>
+            </StackPanel>
+        </DockPanel>
+
+        <TextBlock x:Name="HintText" Grid.Row="1" FontSize="12" Margin="0,0,0,8" TextWrapping="Wrap"
+                   Foreground="{DynamicResource App.Brush.Muted}"/>
+
+        <Border Grid.Row="2" CornerRadius="12" Padding="12,10"
+                Background="{DynamicResource App.Brush.SurfaceCard}"
+                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+            <DataGrid x:Name="RolesGrid" AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionMode="Single" HeadersVisibility="Column"
+                      AlternatingRowBackground="{DynamicResource App.Brush.Surface2}"
+                      Foreground="{DynamicResource App.Brush.Foreground}" RowHeight="34"
+                      Background="Transparent" BorderThickness="0"
+                      MouseDoubleClick="RolesGrid_MouseDoubleClick"
+                      PreviewMouseRightButtonDown="RolesGrid_PreviewMouseRightButtonDown">
+                <DataGrid.ContextMenu>
+                    <ContextMenu Opened="RolesContextMenu_Opened">
+                        <MenuItem x:Name="CtxEditItem" Header="Изменить" Click="EditRole_Click"/>
+                        <MenuItem x:Name="CtxDeleteItem" Header="Удалить" Click="DeleteRole_Click"/>
+                        <Separator/>
+                        <MenuItem Header="Создать новую" Click="CreateRole_Click"/>
+                        <MenuItem Header="Обновить" Click="Refresh_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Роль" Binding="{Binding Name}" Width="*" MinWidth="140"/>
+                    <DataGridTextColumn Header="Активна" Binding="{Binding ActiveDisplay}" Width="72"/>
+                    <DataGridTextColumn Header="Разрешений" Binding="{Binding PermissionsCount}" Width="90"/>
+                    <DataGridTextColumn Header="Сотрудников" Binding="{Binding EmployeesCount}" Width="90"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Page>
