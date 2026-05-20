@@ -14,10 +14,84 @@
                        VerticalAlignment="Center"
                        Foreground="{DynamicResource App.Brush.Foreground}"/>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="BtnEmployeeNotifications" Style="{StaticResource App.Button.Outline}"
+                        Height="40" Width="40" Margin="0,0,10,0" Padding="0"
+                        Click="EmployeeNotificationsButton_Click"
+                        ToolTip="Уведомления по заданиям">
+                    <Grid>
+                        <Image Width="20" Height="20"
+                               Source="pack://application:,,,/DriveCareCore;component/Data/Pics/Notification.png"/>
+                        <Border x:Name="NotificationsBadge" Background="#E53935" CornerRadius="7"
+                                Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Margin="0,-4,-4,0" Visibility="Collapsed">
+                            <TextBlock x:Name="NotificationsBadgeText" Text="!" FontSize="9" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Button>
                 <Button Content="Профиль" Style="{StaticResource App.Button.Outline}"
                         Height="40" MinWidth="120"
                         Click="Profile_Click"/>
             </StackPanel>
+
+            <Popup x:Name="EmployeeNotificationsPopup"
+                   PlacementTarget="{Binding ElementName=BtnEmployeeNotifications}"
+                   Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                <Border Background="{DynamicResource App.Brush.PopupSurface}"
+                        BorderBrush="{DynamicResource App.Brush.PopupBorder}"
+                        BorderThickness="1" CornerRadius="12"
+                        MinWidth="340" MaxWidth="380" Padding="10" Margin="0,8,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Уведомления"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"
+                                   FontSize="15" FontWeight="SemiBold" Margin="4,2,0,8"/>
+                        <Grid Grid.Row="1">
+                            <TextBlock Text="Нет уведомлений"
+                                       Foreground="{DynamicResource App.Brush.Muted}"
+                                       FontSize="13" TextAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding NoNotificationsVisibility}"/>
+                            <ListBox x:Name="EmployeeNotificationsList"
+                                     ItemsSource="{Binding EmployeeNotificationItems}"
+                                     Visibility="{Binding NotificationsListVisibility}"
+                                     Background="Transparent" BorderThickness="0"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="300"
+                                     MouseLeftButtonUp="EmployeeNotificationsList_Click">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Margin" Value="0,0,0,8"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource App.Brush.NotificationCardBg}"
+                                                BorderBrush="{DynamicResource App.Brush.Border}"
+                                                BorderThickness="1" CornerRadius="8" Padding="10">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13"
+                                                           Foreground="{DynamicResource App.Brush.Foreground}"
+                                                           TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Text}" FontSize="12" Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource App.Brush.Muted}"
+                                                           TextWrapping="Wrap"/>
+                                                <TextBlock Text="Открыть задание →" FontSize="11" Margin="0,6,0,0"
+                                                           Foreground="{DynamicResource App.Brush.Accent}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Popup>
         </DockPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
@@ -167,6 +241,26 @@
                                     Style="{StaticResource App.Button.Outline}"
                                     Height="42" MinWidth="190" Margin="0,0,10,10"
                                     Click="WorkshopServices_Click"/>
+                            <Button x:Name="BtnShop" Content="Магазин"
+                                    Style="{StaticResource App.Button.Outline}"
+                                    Height="42" MinWidth="140" Margin="0,0,10,10"
+                                    Click="Shop_Click"/>
+                            <Button x:Name="BtnClientMessages"
+                                    Style="{StaticResource App.Button.Outline}"
+                                    Height="42" MinWidth="200" Margin="0,0,10,10"
+                                    Click="ClientMessages_Click"
+                                    ToolTip="Сообщения клиентам">
+                                <Grid>
+                                    <TextBlock Text="Сообщения клиентам" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    <Border x:Name="ClientMessagesBadge" Background="#E53935" CornerRadius="8"
+                                            MinWidth="18" Height="18" Padding="4,0"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Margin="0,-6,-6,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="ClientMessagesBadgeText" Text="1" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
                         </WrapPanel>
 
                         <Border x:Name="EmployeeTasksSection" Padding="14,12" CornerRadius="12"
@@ -175,36 +269,66 @@
                             <StackPanel>
                                 <TextBlock x:Name="TasksSectionTitle" Text="Мои задания" FontSize="14" FontWeight="SemiBold"
                                            Foreground="{DynamicResource App.Brush.Foreground}"/>
-                                <TextBlock Text="Двойной щелчок — открыть активное задание. Завершённые — в архиве."
+                                <TextBlock Text="Дерево заданий по документам. Двойной щелчок — открыть. Завершённые — в архиве."
                                            FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,4,0,10"/>
                                 <Button x:Name="BtnCompletedTasks" Content="Завершённые задания"
                                         Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="200"
                                         HorizontalAlignment="Left" Margin="0,0,0,10"
                                         Click="CompletedTasks_Click"/>
-                                <DataGrid x:Name="TasksGrid" AutoGenerateColumns="False" IsReadOnly="True"
-                                          SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                                          MinHeight="180" MaxHeight="360"
-                                          CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
-                                          AlternatingRowBackground="{DynamicResource App.Brush.SurfaceCard}"
-                                          Foreground="{DynamicResource App.Brush.Foreground}" RowHeight="36"
+                                <TreeView x:Name="TasksTree" MinHeight="180" MaxHeight="400"
                                           Background="Transparent" BorderThickness="0"
-                                          LoadingRow="TasksGrid_LoadingRow"
-                                          MouseDoubleClick="TasksGrid_MouseDoubleClick">
-                                    <DataGrid.ContextMenu>
+                                          MouseDoubleClick="TasksTree_MouseDoubleClick">
+                                    <TreeView.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="Открыть задание" Click="OpenTaskFromMenu_Click"/>
+                                            <MenuItem Header="Открыть задание" Click="OpenTaskFromTreeMenu_Click"/>
                                             <Separator/>
                                             <MenuItem Header="Обновить список" Click="RefreshTasks_Click"/>
                                         </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Задание" Binding="{Binding Title, Mode=OneWay}" Width="2*" MinWidth="160"/>
-                                        <DataGridTextColumn Header="Статус" Binding="{Binding StatusDisplay, Mode=OneWay}" Width="*" MinWidth="120"/>
-                                        <DataGridTextColumn Header="Срок" Binding="{Binding DeadlineDisplay, Mode=OneWay}" Width="130"/>
-                                        <DataGridTextColumn Header="Создано" Binding="{Binding CreatedDisplay, Mode=OneWay}" Width="130"/>
-                                        <DataGridTextColumn Header="Выполнено" Binding="{Binding CompletedDisplay, Mode=OneWay}" Width="90"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
+                                    </TreeView.ContextMenu>
+                                    <TreeView.ItemTemplate>
+                                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                            <Border Padding="6,4" CornerRadius="6" Margin="0,2">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                        <Setter Property="BorderBrush" Value="Transparent"/>
+                                                        <Setter Property="BorderThickness" Value="1"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsReadyToComplete}" Value="True">
+                                                                <Setter Property="Background" Value="{DynamicResource App.ComboItemSelected}"/>
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Accent}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding LevelNumber}" FontSize="13" FontWeight="SemiBold"
+                                                               MinWidth="44" Foreground="{DynamicResource App.Brush.Accent}"/>
+                                                    <TextBlock Text="{Binding Title}" FontSize="13" MaxWidth="300" TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource App.Brush.Foreground}" ToolTip="{Binding Title}"/>
+                                                    <TextBlock Text="{Binding EmployeeName}" FontSize="12" Margin="12,0,0,0"
+                                                               Foreground="{DynamicResource App.Brush.Muted}"/>
+                                                    <TextBlock Text="{Binding StatusDisplay}" FontSize="12" Margin="8,0,0,0"
+                                                               Foreground="{DynamicResource App.Brush.SecondaryText}">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground"
+                                                                        Value="{DynamicResource App.Brush.SecondaryText}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsReadyToComplete}" Value="True">
+                                                                        <Setter Property="Foreground"
+                                                                                Value="{DynamicResource App.Brush.Accent}"/>
+                                                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>
+                                        </HierarchicalDataTemplate>
+                                    </TreeView.ItemTemplate>
+                                </TreeView>
                             </StackPanel>
                         </Border>
                     </StackPanel>

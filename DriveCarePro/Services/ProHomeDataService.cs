@@ -30,6 +30,7 @@ namespace DriveCarePro.Services
             public string CreatedDisplay { get; set; }
             public string CompletedDisplay { get; set; }
             public bool IsPartnerDone { get; set; }
+            public bool IsReadyToComplete { get; set; }
         }
 
         private sealed class OwnerDelegationStatusRow
@@ -95,7 +96,7 @@ namespace DriveCarePro.Services
                         {
                             TaskId = t.RowId,
                             Title = string.IsNullOrWhiteSpace(t.Title) ? "—" : t.Title.Trim(),
-                            StatusDisplay = baseStatus,
+                            StatusDisplay = EmployeeTaskListPresentation.NormalizeBaseStatus(baseStatus),
                             DeadlineDisplay = t.Deadline.HasValue ? t.Deadline.Value.ToString("dd.MM.yyyy HH:mm") : "—",
                             CreatedDisplay = t.CreatedAt.ToString("dd.MM.yyyy HH:mm"),
                             CompletedDisplay = t.IsCompleted ? "Да" : "Нет"
@@ -106,6 +107,7 @@ namespace DriveCarePro.Services
                             if (pur.PurchaserDone)
                             {
                                 row.IsPartnerDone = true;
+                                row.IsReadyToComplete = true;
                                 row.StatusDisplay = "Закупка выполнена — проверьте отчёт";
                             }
                             else if (pur.HasPurchase)
@@ -113,13 +115,7 @@ namespace DriveCarePro.Services
                         }
                         else if (delegationMap.TryGetValue(t.RowId, out var del))
                         {
-                            if (del.PartnerDone)
-                            {
-                                row.IsPartnerDone = true;
-                                row.StatusDisplay = "Исполнитель завершил — завершите своё";
-                            }
-                            else if (del.HasDelegate)
-                                row.StatusDisplay = "Передано сотруднику";
+                            EmployeeTaskListPresentation.ApplyFlatRowPresentation(row, del.HasDelegate, del.PartnerDone);
                         }
 
                         return row;
@@ -149,7 +145,28 @@ namespace DriveCarePro.Services
                     employeeId).ToListAsync().ConfigureAwait(false);
 
                 foreach (var row in rows)
+                {
+                    if (row.HasDelegate)
+                    {
+                        try
+                        {
+                            var links = await TaskDelegationService.TryLoadLinksAsync(db, row.TaskId)
+                                .ConfigureAwait(false);
+                            if (links.DelegateTaskId.HasValue)
+                            {
+                                row.PartnerDone = await TaskDelegationService
+                                    .IsDelegateSubtreeFullyCompletedAsync(db, links.DelegateTaskId.Value)
+                                    .ConfigureAwait(false);
+                            }
+                        }
+                        catch
+                        {
+                            row.PartnerDone = false;
+                        }
+                    }
+
                     map[row.TaskId] = row;
+                }
             }
             catch (SqlException)
             {

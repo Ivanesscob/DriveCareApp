@@ -74,7 +74,8 @@ namespace DriveCarePro.Services.ServiceBooking
 
             await InsertGuestCarAsync(db, ctx, workshopId, clientId, carId, repairId, userCarId, linkToUser).ConfigureAwait(false);
 
-            var taskId = await ServiceBookingTaskService.CreateForBookingAsync(db, ctx, carId, repairId).ConfigureAwait(false);
+            var taskId = await ServiceBookingTaskService.CreateForBookingAsync(db, ctx, carId, repairId, workshopId)
+                .ConfigureAwait(false);
             ctx.CreatedTaskId = taskId;
 
             return SaveBookingResult.Ok(repairId, carId, clientId, taskId);

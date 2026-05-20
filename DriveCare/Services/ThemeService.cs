@@ -19,6 +19,8 @@ namespace DriveCare.Services
 
         public static AppUiTheme Current { get; private set; } = AppUiTheme.Dark;
 
+        public static event EventHandler ThemeChanged;
+
         public static void Initialize()
         {
             var parsed = Parse(Settings.Default.UiTheme);
@@ -37,6 +39,8 @@ namespace DriveCare.Services
             ThemeManager.Current.ChangeTheme(app, mahTheme);
 
             SwitchPaletteMergedDictionary(app);
+
+            ThemeChanged?.Invoke(null, EventArgs.Empty);
 
             if (persist)
             {

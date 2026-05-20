@@ -203,12 +203,20 @@
                             Style="{StaticResource ProfileIconButton}"
                             Margin="0,0,10,0"
                             Click="ChatsButton_Click"
-                            ToolTip="Чаты">
-                        <TextBlock Text="💬"
-                                   FontSize="16"
-                                   Foreground="{DynamicResource App.Brush.IconTint}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
+                            ToolTip="Сообщения">
+                        <Grid>
+                            <TextBlock Text="💬"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource App.Brush.IconTint}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                            <Border x:Name="ChatsBadge" Background="#E53935" CornerRadius="7"
+                                    Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Margin="0,-4,-4,0" Visibility="Collapsed">
+                                <TextBlock x:Name="ChatsBadgeText" Text="1" FontSize="9" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
                     </Button>
 
                     <Button x:Name="BtnProfile"

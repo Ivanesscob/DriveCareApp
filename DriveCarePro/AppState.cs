@@ -119,6 +119,36 @@ namespace DriveCarePro
         public static bool IsCurrentEmployeeOwner =>
             UserRoles != null && UserRoles.Any(r => r != null && IsOwnerRoleName(r.Name));
 
+        /// <summary>Закупщик: владелец, роль закуп/снаб/склад или право PURCHASE_PARTS.</summary>
+        public static bool IsCurrentEmployeePurchaser =>
+            IsPurchaserByRolesAndPermissions(UserRoles, EmployeePermissionService.CurrentCodes);
+
+        /// <summary>Каталог «Магазин» на главной (только закупщики).</summary>
+        public static bool CanAccessPurchaserShop =>
+            CanAccessEmployeeWorkspace && IsCurrentEmployeePurchaser;
+
+        public static bool IsPurchaserByRolesAndPermissions(
+            IList<Role> roles,
+            IReadOnlyCollection<string> permissionCodes)
+        {
+            if (roles != null)
+            {
+                foreach (var role in roles)
+                {
+                    if (role == null)
+                        continue;
+                    if (IsOwnerRoleName(role.Name))
+                        return true;
+                    var n = (role.Name ?? string.Empty).Trim().ToLowerInvariant();
+                    if (n.Contains("закуп") || n.Contains("снаб") || n.Contains("склад"))
+                        return true;
+                }
+            }
+
+            return permissionCodes != null &&
+                   permissionCodes.Contains(ProPermissions.PurchaseParts);
+        }
+
         /// <summary>Управление сотрудниками своей организации.</summary>
         public static bool CanManageOrganizationEmployees =>
             CanAccessEmployeeWorkspace &&

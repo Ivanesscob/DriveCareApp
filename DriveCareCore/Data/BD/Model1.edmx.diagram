@@ -4,41 +4,50 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="5c0e18e70f0c4666876afac7aeec4acb" Name="Diagram1">
-        <EntityTypeShape EntityType="DriveCareDBModel.Address" Width="1.5" PointX="0.75" PointY="9.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Brand" Width="1.5" PointX="0.75" PointY="15.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.BusinessType" Width="1.5" PointX="0.75" PointY="19" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.CarColor" Width="1.5" PointX="7.5" PointY="15.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Car" Width="1.5" PointX="5.25" PointY="14.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.CarSalePrice" Width="1.5" PointX="12.75" PointY="15.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.CarSale" Width="1.5" PointX="10.5" PointY="14.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.CarType" Width="1.5" PointX="3" PointY="11.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Color" Width="1.5" PointX="5.25" PointY="23.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Company" Width="1.5" PointX="0.75" PointY="6.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Country" Width="1.5" PointX="1.5" PointY="22.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.EmployeeRolesMap" Width="1.5" PointX="7.5" PointY="1.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Employee" Width="1.5" PointX="5.25" PointY="3.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.FuelType" Width="1.5" PointX="3" PointY="19.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Model" Width="1.5" PointX="3" PointY="14.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Notification" Width="1.5" PointX="7.5" PointY="23.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.PartManufacturer" Width="1.5" PointX="3.75" PointY="26.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Part" Width="1.5" PointX="7.5" PointY="27" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.PermissionGroup" Width="1.5" PointX="8" PointY="31.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Permission" Width="1.5" PointX="10.25" PointY="31.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.RepairCategory" Width="1.5" PointX="5.25" PointY="11.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.RepairHistory" Width="1.5" PointX="7.5" PointY="9.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.RolePermissionsMap" Width="1.5" PointX="12.5" PointY="1.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Role" Width="1.5" PointX="10.25" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Status" Width="1.5" PointX="5.25" PointY="20" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.sysdiagram" Width="1.5" PointX="15" PointY="6.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Task" Width="1.5" PointX="10.5" PointY="9.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.UserCar" Width="1.5" PointX="7.5" PointY="19.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.UserCarSale" Width="1.5" PointX="12.75" PointY="12.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.UserNotification" Width="1.5" PointX="9.75" PointY="23.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.UserRole" Width="1.5" PointX="12.5" PointY="4.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.User" Width="1.5" PointX="8.25" PointY="4.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.WarehouseManager" Width="1.5" PointX="14.75" PointY="2.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="DriveCareDBModel.Workshop" Width="1.5" PointX="3" PointY="4.125" IsExpanded="true" />
+      <Diagram DiagramId="95d044c8c888425a9f67deebf7fbc8d4" Name="Diagram1" ZoomLevel="21">
+        <EntityTypeShape EntityType="DriveCareDBModel.Address" Width="1.5" PointX="3" PointY="27.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Brand" Width="1.5" PointX="3" PointY="15.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.BusinessType" Width="1.5" PointX="3" PointY="24.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarColor" Width="1.5" PointX="15.75" PointY="18.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Car" Width="1.5" PointX="7.5" PointY="11.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarSalePrice" Width="1.5" PointX="12" PointY="30.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarSale" Width="1.5" PointX="9.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.CarType" Width="1.5" PointX="5.25" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Color" Width="1.5" PointX="3" PointY="37.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Company" Width="1.5" PointX="3" PointY="34.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Country" Width="1.5" PointX="0.75" PointY="29.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.EmployeeRolesMap" Width="1.5" PointX="12.75" PointY="22.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Employee" Width="1.5" PointX="7.5" PointY="21.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.FuelType" Width="1.5" PointX="5.25" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Model" Width="1.5" PointX="5.25" PointY="14.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Notification" Width="1.5" PointX="10.5" PointY="1.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.PartManufacturer" Width="1.5" PointX="3" PointY="31.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Part" Width="1.5" PointX="5.25" PointY="31.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.PermissionGroup" Width="1.5" PointX="5.25" PointY="44.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Permission" Width="1.5" PointX="7.5" PointY="43.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.RepairCategory" Width="1.5" PointX="10.5" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.RepairHistory" Width="1.5" PointX="12.75" PointY="17.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.RolePermissionsMap" Width="1.5" PointX="9.75" PointY="28.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Role" Width="1.5" PointX="7.5" PointY="27.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Status" Width="1.5" PointX="7.5" PointY="17.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.sysdiagram" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.TaskPartLine" Width="1.5" PointX="12" PointY="13.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.TaskPurchaseRequestLine" Width="1.5" PointX="15" PointY="26.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.TaskPurchaseRequest" Width="1.5" PointX="12.75" PointY="26" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Task" Width="1.5" PointX="9.75" PointY="15" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.TaskServiceLine" Width="1.5" PointX="12" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserCar" Width="1.5" PointX="9.75" PointY="10.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserCarSale" Width="1.5" PointX="15" PointY="22.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserNotification" Width="1.5" PointX="12.75" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserRole" Width="1.5" PointX="14.75" PointY="31" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.User" Width="1.5" PointX="7.5" PointY="7" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WarehouseManager" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopGuestCar" Width="1.5" PointX="9.75" PointY="32.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopPart" Width="1.5" PointX="7.5" PointY="35.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.Workshop" Width="1.5" PointX="5.25" PointY="27" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopServiceClient" Width="1.5" PointX="7.5" PointY="39.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopService" Width="1.5" PointX="9.75" PointY="37.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopServiceUnit" Width="1.5" PointX="7.5" PointY="47.625" IsExpanded="true" />
         <AssociationConnector Association="DriveCareDBModel.FK__Addresses__Count__0E6E26BF" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Workshops_Addresses" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__Models__BrandId__534D60F1" ManuallyRouted="false" />
@@ -53,6 +62,7 @@
         <AssociationConnector Association="DriveCareDBModel.FK__UserCars__CarId__628FA481" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Cars" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Tasks_Cars" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopGuestCars_Car" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__CarSalePr__CarSa__245D67DE" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserCarSa__CarSa__1F98B2C1" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_CarSales_Employees" ManuallyRouted="false" />
@@ -65,23 +75,37 @@
         <AssociationConnector Association="DriveCareDBModel.FK_EmployeeRolesMap_Role" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Employees_Workshop" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Employees" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskPurchaseRequests_Employees" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskPurchaseRequests_Employees1" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Tasks_Employees" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserNotif__Notif__2EDAF651" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__Parts__PartManuf__04E4BC85" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__Parts__StatusId__06CD04F7" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Permissions_PermissionGroups" ManuallyRouted="false" />
-        <AssociationConnector Association="DriveCareDBModel.FK_RolePermissionsMap_Permissions" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_RolePermissionsMap_Permissions1" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Categories" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_RepairHistory_Statuses" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_RolePermissions_Roles" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserRoles__RoleI__160F4887" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Roles_Workshops" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Tasks_Statuses" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskPartLines_Tasks1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskPurchaseRequestLines_TaskPurchaseRequests" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskPurchaseRequests_Tasks" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskPurchaseRequests_Tasks1" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_Tasks_Users" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_TaskServiceLines_Tasks1" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserCars__UserId__619B8048" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserCarSa__UserI__1EA48E88" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserNotif__UserI__2DE6D218" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK__UserRoles__UserI__151B244E" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopGuestCars_Client" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopGuestCars_Workshops1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopParts_Workshops1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServiceClients_Workshops1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServices_Workshops1" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServiceUnits_Workshops" ManuallyRouted="false" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServices_WorkshopServiceUnits" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

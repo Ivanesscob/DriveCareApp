@@ -24,7 +24,7 @@ namespace DriveCarePro.Windows
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
+            Delegated = false;
             Close();
         }
 
@@ -39,6 +39,9 @@ namespace DriveCarePro.Windows
             var (ok, error, _) = await TaskDelegationService.DelegateAsync(
                 _sourceTaskId, _fromEmployeeId, selected.EmployeeId).ConfigureAwait(true);
 
+            if (!IsLoaded)
+                return;
+
             if (!ok)
             {
                 MessageBox.Show(error ?? "Не удалось передать.", Title, MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -46,7 +49,6 @@ namespace DriveCarePro.Windows
             }
 
             Delegated = true;
-            DialogResult = true;
             Close();
         }
     }

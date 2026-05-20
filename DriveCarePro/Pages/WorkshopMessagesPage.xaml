@@ -1,0 +1,147 @@
+<Page x:Class="DriveCarePro.Pages.WorkshopMessagesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Сообщения клиентам"
+      Background="{DynamicResource App.Brush.Panel}">
+    <Grid Margin="24,18,24,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,14" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="← Назад" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="110" Click="Back_Click"/>
+            <StackPanel DockPanel.Dock="Left" Margin="16,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="Сообщения клиентам" FontSize="22" FontWeight="SemiBold"
+                           Foreground="{DynamicResource App.Brush.Foreground}"/>
+                <TextBlock x:Name="ScopeHintText" FontSize="13" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,4,0,0"/>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Написать клиенту" Style="{StaticResource App.Button.Primary}"
+                        Height="36" MinWidth="140" Margin="0,0,8,0" Click="NewMessage_Click"/>
+                <Button Content="Обновить" Style="{StaticResource App.Button.Outline}"
+                        Height="36" MinWidth="100" Click="Refresh_Click"/>
+            </StackPanel>
+        </DockPanel>
+
+        <TextBlock x:Name="SetupHintText" Grid.Row="1" TextWrapping="Wrap" FontSize="13"
+                   Foreground="{DynamicResource App.Brush.Muted}" Visibility="Collapsed"/>
+
+        <Grid x:Name="ChatGrid" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" MinWidth="240"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" CornerRadius="12" Padding="8"
+                    Background="{DynamicResource App.Brush.SurfaceCard}"
+                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                <Grid>
+                    <TextBlock x:Name="EmptyDialogsText" Text="Нет диалогов.&#x0a;Нажмите «Написать клиенту»."
+                               TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource App.Brush.Muted}"
+                               VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"/>
+                    <ListBox x:Name="ConversationsList" Background="Transparent" BorderThickness="0"
+                             SelectionChanged="ConversationsList_SelectionChanged">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="8,6"/>
+                                <Setter Property="Margin" Value="0,0,0,4"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding VisitorDisplayName}" FontWeight="SemiBold" FontSize="14"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                    <TextBlock Text="{Binding WorkshopName}" FontSize="11"
+                                               Foreground="{DynamicResource App.Brush.Muted}"/>
+                                    <TextBlock Text="{Binding LastMessagePreview}" FontSize="12" Margin="0,4,0,0"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <TextBlock Text="{Binding LastMessageAtLabel}" FontSize="10"
+                                                   Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        <TextBlock Text=" · новые" FontSize="10" FontWeight="SemiBold" Margin="6,0,0,0"
+                                                   Foreground="{DynamicResource App.Brush.Accent}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasUnread}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" CornerRadius="12" Padding="12" MinHeight="360"
+                    Background="{DynamicResource App.Brush.SurfaceCard}"
+                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                <DockPanel LastChildFill="True">
+                    <Border DockPanel.Dock="Bottom" Padding="0,12,0,0" MinHeight="80"
+                            BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="0,1,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="MessageInput" Grid.Column="0" MinHeight="52" MaxHeight="140"
+                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                     VerticalAlignment="Top"
+                                     Style="{StaticResource App.FieldTextBox}"
+                                     KeyDown="MessageInput_KeyDown"/>
+                            <Button Grid.Column="1" Content="Отправить" Margin="12,0,0,0"
+                                    Style="{StaticResource App.Button.Primary}" Height="52" MinWidth="130"
+                                    VerticalAlignment="Top"
+                                    Click="Send_Click"/>
+                        </Grid>
+                    </Border>
+                    <TextBlock x:Name="ThreadTitleText" DockPanel.Dock="Top" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,0,0,8"
+                               Text="Выберите диалог"/>
+                    <ScrollViewer x:Name="MessagesScroll" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="MessagesList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,8" Padding="10,8" CornerRadius="10" MaxWidth="520">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                                <Setter Property="Background" Value="{DynamicResource App.Brush.Surface2}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMine}" Value="True">
+                                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                        <Setter Property="Background" Value="{DynamicResource App.Brush.AccentSoft}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SenderName}" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource App.Brush.Muted}"/>
+                                            <TextBlock Text="{Binding Body}" FontSize="14" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                            <TextBlock Text="{Binding TimeLabel}" FontSize="10" Margin="0,4,0,0"
+                                                       Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

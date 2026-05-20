@@ -19,6 +19,11 @@ namespace DriveCareCore.Data.BD
         {
             this.Employees = new HashSet<Employee>();
             this.Roles = new HashSet<Role>();
+            this.WorkshopGuestCars = new HashSet<WorkshopGuestCar>();
+            this.WorkshopParts = new HashSet<WorkshopPart>();
+            this.WorkshopServiceClients = new HashSet<WorkshopServiceClient>();
+            this.WorkshopServices = new HashSet<WorkshopService>();
+            this.WorkshopServiceUnits = new HashSet<WorkshopServiceUnit>();
         }
     
         public System.Guid RowId { get; set; }
@@ -35,5 +40,15 @@ namespace DriveCareCore.Data.BD
         public virtual ICollection<Employee> Employees { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Role> Roles { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopGuestCar> WorkshopGuestCars { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopPart> WorkshopParts { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopServiceClient> WorkshopServiceClients { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopService> WorkshopServices { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopServiceUnit> WorkshopServiceUnits { get; set; }
     }
 }

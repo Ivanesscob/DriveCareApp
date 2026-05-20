@@ -23,6 +23,7 @@ namespace DriveCareCore.Data.BD
             this.UserCars = new HashSet<UserCar>();
             this.RepairHistories = new HashSet<RepairHistory>();
             this.Tasks = new HashSet<Task>();
+            this.WorkshopGuestCars = new HashSet<WorkshopGuestCar>();
         }
     
         public System.Guid RowId { get; set; }
@@ -47,5 +48,7 @@ namespace DriveCareCore.Data.BD
         public virtual ICollection<RepairHistory> RepairHistories { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Task> Tasks { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopGuestCar> WorkshopGuestCars { get; set; }
     }
 }

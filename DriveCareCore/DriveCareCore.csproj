@@ -316,16 +316,40 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\AppState.cs" />
+    <Compile Include="Data\BD\TaskPartLine.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\TaskPurchaseRequest.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\TaskPurchaseRequestLine.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\TaskServiceLine.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopPart.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopService.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopServiceUnit.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Shop\ToolsStoreCatalog.cs" />
     <Compile Include="Data\BD\Address.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BD\AppConnect.cs" />
+    <Compile Include="Messaging\MessagingModels.cs" />
+    <Compile Include="Messaging\WorkshopMessagingService.cs" />
+    <Compile Include="Messaging\WorkshopChatRealtimeClient.cs" />
     <Compile Include="Data\BD\BusinessType.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BD\DriveCareDBEntities.cs" />
-    <Compile Include="Data\BD\DriveCareDBEntities2.partial.cs" />
+    <Compile Include="Data\BD\DriveCareDBEntities3.partial.cs" />
     <Compile Include="Data\BD\Brand.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -422,8 +446,12 @@
     <Compile Include="Data\BD\UserCar.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Data\BD\WorkshopServiceClient.cs" />
-    <Compile Include="Data\BD\WorkshopGuestCar.cs" />
+    <Compile Include="Data\BD\WorkshopServiceClient.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopGuestCar.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\UserCarSale.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -445,6 +473,7 @@
     <Compile Include="Data\Services\PhotoTcpStorageService.cs" />
     <Compile Include="Data\Services\CarSaleModerationStatuses.cs" />
     <Compile Include="Data\Services\CarSaleModerationNotifier.cs" />
+    <Compile Include="Data\Services\EmployeeTaskNotifier.cs" />
     <Compile Include="Data\Services\CarSalePhotoUiHelper.cs" />
   </ItemGroup>
   <ItemGroup>

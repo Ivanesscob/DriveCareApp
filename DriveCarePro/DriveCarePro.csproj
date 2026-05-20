@@ -39,6 +39,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommunityToolkit.Mvvm, Version=8.4.0.0, Culture=neutral, PublicKeyToken=4aff0a16b403ca14, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommunityToolkit.Mvvm.8.4.0\lib\netstandard2.1\CommunityToolkit.Mvvm.dll</HintPath>
+    </Reference>
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.4.4.0\lib\net462\ControlzEx.dll</HintPath>
     </Reference>
@@ -378,6 +381,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\ServiceDocumentPreviewWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\LoginPages\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -399,6 +406,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\WorkshopRepairCarsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\WorkshopMessagesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\NewWorkshopMessageWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -536,6 +551,9 @@
     <Compile Include="Windows\RequestPurchaseWindow.xaml.cs">
       <DependentUpon>RequestPurchaseWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ServiceDocumentPreviewWindow.xaml.cs">
+      <DependentUpon>ServiceDocumentPreviewWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\RoleEditorService.cs" />
     <Compile Include="Services\ProPermissions.cs" />
     <Compile Include="Services\PermissionAdminService.cs" />
@@ -548,10 +566,14 @@
     <Compile Include="Services\OwnerEmployeesDataService.cs" />
     <Compile Include="Services\OwnerOrganizationScope.cs" />
     <Compile Include="Services\ProHomeDataService.cs" />
+    <Compile Include="Services\EmployeeTaskListPresentation.cs" />
     <Compile Include="Services\CarDisplayHelper.cs" />
     <Compile Include="Services\CompletedTasksDataService.cs" />
     <Compile Include="Services\TaskDelegationService.cs" />
+    <Compile Include="Services\ServiceDocuments\ServiceDocumentModels.cs" />
+    <Compile Include="Services\ServiceDocuments\ServiceDocumentService.cs" />
     <Compile Include="Services\TaskPurchaseRequestService.cs" />
+    <Compile Include="Services\ProEmployeeNotificationService.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderDataService.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderModel.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderWorkLine.cs" />
@@ -564,10 +586,13 @@
     <Compile Include="Services\ServiceBooking\ServiceBookingWorkOrderBuilder.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopServiceCatalogService.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopPartCatalogService.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopStockService.cs" />
+    <Compile Include="Services\WorkshopServices\WorkshopTaskPartStockSync.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopPartModels.cs" />
     <Compile Include="Services\WorkshopServices\TaskPartShopSession.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopServiceUnitsService.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopServiceModels.cs" />
+    <Compile Include="Services\WorkshopServices\TaskPartLineSql.cs" />
     <Compile Include="Services\WorkshopServices\TaskReportService.cs" />
     <Compile Include="Services\WorkshopServices\TaskReportLineVm.cs" />
     <Compile Include="AppState.cs" />
@@ -593,6 +618,12 @@
     </Compile>
     <Compile Include="Pages\WorkshopRepairCarsPage.xaml.cs">
       <DependentUpon>WorkshopRepairCarsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopMessagesPage.xaml.cs">
+      <DependentUpon>WorkshopMessagesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\NewWorkshopMessageWindow.xaml.cs">
+      <DependentUpon>NewWorkshopMessageWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\WorkshopBookServicePage.xaml.cs">
       <DependentUpon>WorkshopBookServicePage.xaml</DependentUpon>

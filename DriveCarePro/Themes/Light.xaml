@@ -112,4 +112,5 @@
   <SolidColorBrush x:Key="App.ComboFg" Color="{StaticResource App.Color.Foreground}"/>
   <SolidColorBrush x:Key="App.ComboItemHover" Color="#FFE0F2FE"/>
   <SolidColorBrush x:Key="App.ComboItemSelected" Color="{StaticResource App.Color.AccentSoft}"/>
+  <SolidColorBrush x:Key="App.Brush.ComboItemSelectedFg" Color="{StaticResource App.Color.Foreground}"/>
 </ResourceDictionary>

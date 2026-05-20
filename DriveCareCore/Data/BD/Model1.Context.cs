@@ -13,10 +13,10 @@ namespace DriveCareCore.Data.BD
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class DriveCareDBEntities2 : DbContext
+    public partial class DriveCareDBEntities3 : DbContext
     {
-        public DriveCareDBEntities2()
-            : base("name=DriveCareDBEntities2")
+        public DriveCareDBEntities3()
+            : base("name=DriveCareDBEntities3")
         {
         }
     
@@ -51,13 +51,22 @@ namespace DriveCareCore.Data.BD
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Status> Statuses { get; set; }
         public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
+        public virtual DbSet<TaskPartLine> TaskPartLines { get; set; }
+        public virtual DbSet<TaskPurchaseRequestLine> TaskPurchaseRequestLines { get; set; }
+        public virtual DbSet<TaskPurchaseRequest> TaskPurchaseRequests { get; set; }
         public virtual DbSet<Task> Tasks { get; set; }
+        public virtual DbSet<TaskServiceLine> TaskServiceLines { get; set; }
         public virtual DbSet<UserCar> UserCars { get; set; }
         public virtual DbSet<UserCarSale> UserCarSales { get; set; }
         public virtual DbSet<UserNotification> UserNotifications { get; set; }
         public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<WarehouseManager> WarehouseManagers { get; set; }
+        public virtual DbSet<WorkshopGuestCar> WorkshopGuestCars { get; set; }
+        public virtual DbSet<WorkshopPart> WorkshopParts { get; set; }
         public virtual DbSet<Workshop> Workshops { get; set; }
+        public virtual DbSet<WorkshopServiceClient> WorkshopServiceClients { get; set; }
+        public virtual DbSet<WorkshopService> WorkshopServices { get; set; }
+        public virtual DbSet<WorkshopServiceUnit> WorkshopServiceUnits { get; set; }
     }
 }

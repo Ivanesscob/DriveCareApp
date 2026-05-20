@@ -136,5 +136,46 @@ ORDER BY rh.RepairDate DESC, rh.Mileage DESC;";
                 Notes = string.IsNullOrWhiteSpace(r.Notes) ? null : r.Notes.Trim()
             };
         }
+
+        /// <summary>Максимальный пробег из истории (UserCarMaintenanceHistory + RepairHistory).</summary>
+        public static int GetMaxRecordedMileageKm(Guid userCarRowId)
+        {
+            var history = LoadHistory(userCarRowId);
+            if (history.Count == 0)
+                return 0;
+            return history.Where(h => h.MileageKm.HasValue).Select(h => h.MileageKm.Value).DefaultIfEmpty(0).Max();
+        }
+
+        /// <summary>Запись реального пробега с одометра на сегодня.</summary>
+        public static (bool ok, string error) TryInsertOdometerReading(Guid userCarRowId, int mileageKm)
+        {
+            if (userCarRowId == Guid.Empty)
+                return (false, "Не выбран автомобиль.");
+            if (mileageKm < 1)
+                return (false, "Укажите пробег больше нуля.");
+            if (!TableExists())
+                return (false, "Таблица истории не найдена. Выполните SQL UserCarMaintenanceHistory_Tables.sql на сервере.");
+
+            try
+            {
+                const string sql = @"
+INSERT INTO dbo.UserCarMaintenanceHistory
+    (RowId, UserCarRowId, ServiceDate, MileageKm, Title, Notes)
+VALUES (@id, @uc, @dt, @km, N'Пробег с одометра', NULL);";
+
+                AppConnect.model1.Database.ExecuteSqlCommand(
+                    sql,
+                    new SqlParameter("@id", Guid.NewGuid()),
+                    new SqlParameter("@uc", userCarRowId),
+                    new SqlParameter("@dt", DateTime.Now),
+                    new SqlParameter("@km", mileageKm));
+
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
     }
 }

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
   <!-- EF Runtime content -->
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="DriveCareDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="DriveCareDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Addresses">
           <Key>
             <PropertyRef Name="RowId" />
@@ -279,6 +279,45 @@
           <Property Name="version" Type="int" />
           <Property Name="definition" Type="varbinary(max)" />
         </EntityType>
+        <EntityType Name="TaskPartLines">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="TaskId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="PartName" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Quantity" Type="decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="UnitName" Type="nvarchar" MaxLength="30" />
+          <Property Name="UnitPrice" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LineAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SortOrder" Type="int" Nullable="false" />
+          <Property Name="WorkshopPartId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="TaskPurchaseRequestLines">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RequestId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopPartId" Type="uniqueidentifier" />
+          <Property Name="PartName" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Quantity" Type="decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="UnitName" Type="nvarchar" MaxLength="30" />
+          <Property Name="UnitPrice" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SortOrder" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaskPurchaseRequests">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="SourceTaskId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="PurchaseTaskId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RequestedByEmployeeId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="PurchaserEmployeeId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IsFulfilled" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="Tasks">
           <Key>
             <PropertyRef Name="RowId" />
@@ -297,6 +336,21 @@
           <Property Name="ReportText" Type="nvarchar(max)" />
           <Property Name="ClientUserId" Type="uniqueidentifier" />
           <Property Name="CarId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="TaskServiceLines">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="TaskId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopServiceId" Type="uniqueidentifier" />
+          <Property Name="ServiceName" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Quantity" Type="decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="UnitName" Type="nvarchar" MaxLength="30" />
+          <Property Name="UnitPrice" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="DiscountPercent" Type="decimal" Precision="9" Scale="2" Nullable="false" />
+          <Property Name="LineAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SortOrder" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="UserCars">
           <Key>
@@ -360,6 +414,41 @@
           <Property Name="Email" Type="nvarchar" MaxLength="100" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
         </EntityType>
+        <EntityType Name="WorkshopGuestCars">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ServiceClientId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="CarId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RepairHistoryId" Type="uniqueidentifier" />
+          <Property Name="Vin" Type="nvarchar" MaxLength="50" />
+          <Property Name="PlateNumber" Type="nvarchar" MaxLength="20" />
+          <Property Name="BrandModelText" Type="nvarchar" MaxLength="300" />
+          <Property Name="Year" Type="int" />
+          <Property Name="Color" Type="nvarchar" MaxLength="100" />
+          <Property Name="Mileage" Type="int" />
+          <Property Name="IsLinkedToUser" Type="bit" Nullable="false" />
+          <Property Name="UserCarId" Type="uniqueidentifier" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="WorkshopParts">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Article" Type="nvarchar" MaxLength="80" />
+          <Property Name="Description" Type="nvarchar" MaxLength="500" />
+          <Property Name="Price" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="UnitName" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="QuantityOnHand" Type="decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="Category" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="Workshops">
           <Key>
             <PropertyRef Name="RowId" />
@@ -370,6 +459,44 @@
           <Property Name="AddressId" Type="uniqueidentifier" />
           <Property Name="Description" Type="nvarchar" MaxLength="255" />
           <Property Name="BusinessTypeId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="WorkshopServiceClients">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="UserId" Type="uniqueidentifier" />
+          <Property Name="FullName" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Phone" Type="nvarchar" MaxLength="50" />
+          <Property Name="Email" Type="nvarchar" MaxLength="200" />
+          <Property Name="IsRegisteredUser" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="WorkshopServices">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Price" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="UnitName" Type="nvarchar" MaxLength="30" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="SortOrder" Type="int" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UnitId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="WorkshopServiceUnits">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="WorkshopId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
         </EntityType>
         <Association Name="FK__Addresses__Count__0E6E26BF">
           <End Role="Countries" Type="Self.Countries" Multiplicity="0..1" />
@@ -771,7 +898,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_RolePermissionsMap_Permissions">
+        <Association Name="FK_RolePermissionsMap_Permissions1">
           <End Role="Permissions" Type="Self.Permissions" Multiplicity="1" />
           <End Role="RolePermissionsMap" Type="Self.RolePermissionsMap" Multiplicity="*" />
           <ReferentialConstraint>
@@ -779,7 +906,7 @@
               <PropertyRef Name="RowId" />
             </Principal>
             <Dependent Role="RolePermissionsMap">
-              <PropertyRef Name="RoleId" />
+              <PropertyRef Name="PermissionId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -804,6 +931,78 @@
             </Principal>
             <Dependent Role="Roles">
               <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPartLines_Tasks1">
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
+          <End Role="TaskPartLines" Type="Self.TaskPartLines" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPartLines">
+              <PropertyRef Name="TaskId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequestLines_TaskPurchaseRequests">
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequests" Multiplicity="1" />
+          <End Role="TaskPurchaseRequestLines" Type="Self.TaskPurchaseRequestLines" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskPurchaseRequests">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequestLines">
+              <PropertyRef Name="RequestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Employees">
+          <End Role="Employees" Type="Self.Employees" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employees">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="RequestedByEmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Employees1">
+          <End Role="Employees" Type="Self.Employees" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employees">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="PurchaserEmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Tasks">
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="SourceTaskId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Tasks1">
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="PurchaseTaskId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -855,6 +1054,66 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_TaskServiceLines_Tasks1">
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
+          <End Role="TaskServiceLines" Type="Self.TaskServiceLines" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskServiceLines">
+              <PropertyRef Name="TaskId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopGuestCars_Car">
+          <End Role="Cars" Type="Self.Cars" Multiplicity="1" />
+          <End Role="WorkshopGuestCars" Type="Self.WorkshopGuestCars" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cars">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopGuestCars">
+              <PropertyRef Name="CarId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopGuestCars_Client">
+          <End Role="WorkshopServiceClients" Type="Self.WorkshopServiceClients" Multiplicity="1" />
+          <End Role="WorkshopGuestCars" Type="Self.WorkshopGuestCars" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WorkshopServiceClients">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopGuestCars">
+              <PropertyRef Name="ServiceClientId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopGuestCars_Workshops1">
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="1" />
+          <End Role="WorkshopGuestCars" Type="Self.WorkshopGuestCars" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopGuestCars">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopParts_Workshops1">
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="1" />
+          <End Role="WorkshopParts" Type="Self.WorkshopParts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopParts">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Workshops_Addresses">
           <End Role="Addresses" Type="Self.Addresses" Multiplicity="0..1" />
           <End Role="Workshops" Type="Self.Workshops" Multiplicity="*" />
@@ -893,6 +1152,54 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_WorkshopServiceClients_Workshops1">
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="1" />
+          <End Role="WorkshopServiceClients" Type="Self.WorkshopServiceClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServiceClients">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServices_Workshops1">
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="1" />
+          <End Role="WorkshopServices" Type="Self.WorkshopServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServices">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServices_WorkshopServiceUnits">
+          <End Role="WorkshopServiceUnits" Type="Self.WorkshopServiceUnits" Multiplicity="0..1" />
+          <End Role="WorkshopServices" Type="Self.WorkshopServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WorkshopServiceUnits">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServices">
+              <PropertyRef Name="UnitId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServiceUnits_Workshops">
+          <End Role="Workshops" Type="Self.Workshops" Multiplicity="1" />
+          <End Role="WorkshopServiceUnits" Type="Self.WorkshopServiceUnits" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServiceUnits">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="DriveCareDBModelStoreContainer">
           <EntitySet Name="Addresses" EntityType="Self.Addresses" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Brands" EntityType="Self.Brands" Schema="dbo" store:Type="Tables" />
@@ -920,14 +1227,23 @@
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Statuses" EntityType="Self.Statuses" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskPartLines" EntityType="Self.TaskPartLines" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskPurchaseRequestLines" EntityType="Self.TaskPurchaseRequestLines" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskPurchaseRequests" EntityType="Self.TaskPurchaseRequests" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tasks" EntityType="Self.Tasks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskServiceLines" EntityType="Self.TaskServiceLines" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserCars" EntityType="Self.UserCars" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserCarSales" EntityType="Self.UserCarSales" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserNotifications" EntityType="Self.UserNotifications" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserRoles" EntityType="Self.UserRoles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="WarehouseManagers" EntityType="Self.WarehouseManagers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WorkshopGuestCars" EntityType="Self.WorkshopGuestCars" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WorkshopParts" EntityType="Self.WorkshopParts" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Workshops" EntityType="Self.Workshops" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WorkshopServiceClients" EntityType="Self.WorkshopServiceClients" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WorkshopServices" EntityType="Self.WorkshopServices" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WorkshopServiceUnits" EntityType="Self.WorkshopServiceUnits" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__Addresses__Count__0E6E26BF" Association="Self.FK__Addresses__Count__0E6E26BF">
             <End Role="Countries" EntitySet="Countries" />
             <End Role="Addresses" EntitySet="Addresses" />
@@ -1060,7 +1376,7 @@
             <End Role="Roles" EntitySet="Roles" />
             <End Role="RolePermissionsMap" EntitySet="RolePermissionsMap" />
           </AssociationSet>
-          <AssociationSet Name="FK_RolePermissionsMap_Permissions" Association="Self.FK_RolePermissionsMap_Permissions">
+          <AssociationSet Name="FK_RolePermissionsMap_Permissions1" Association="Self.FK_RolePermissionsMap_Permissions1">
             <End Role="Permissions" EntitySet="Permissions" />
             <End Role="RolePermissionsMap" EntitySet="RolePermissionsMap" />
           </AssociationSet>
@@ -1071,6 +1387,30 @@
           <AssociationSet Name="FK_Roles_Workshops" Association="Self.FK_Roles_Workshops">
             <End Role="Workshops" EntitySet="Workshops" />
             <End Role="Roles" EntitySet="Roles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPartLines_Tasks1" Association="Self.FK_TaskPartLines_Tasks1">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskPartLines" EntitySet="TaskPartLines" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequestLines_TaskPurchaseRequests" Association="Self.FK_TaskPurchaseRequestLines_TaskPurchaseRequests">
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+            <End Role="TaskPurchaseRequestLines" EntitySet="TaskPurchaseRequestLines" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Employees" Association="Self.FK_TaskPurchaseRequests_Employees">
+            <End Role="Employees" EntitySet="Employees" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Employees1" Association="Self.FK_TaskPurchaseRequests_Employees1">
+            <End Role="Employees" EntitySet="Employees" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Tasks" Association="Self.FK_TaskPurchaseRequests_Tasks">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Tasks1" Association="Self.FK_TaskPurchaseRequests_Tasks1">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
           </AssociationSet>
           <AssociationSet Name="FK_Tasks_Cars" Association="Self.FK_Tasks_Cars">
             <End Role="Cars" EntitySet="Cars" />
@@ -1088,6 +1428,26 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="Tasks" EntitySet="Tasks" />
           </AssociationSet>
+          <AssociationSet Name="FK_TaskServiceLines_Tasks1" Association="Self.FK_TaskServiceLines_Tasks1">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskServiceLines" EntitySet="TaskServiceLines" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopGuestCars_Car" Association="Self.FK_WorkshopGuestCars_Car">
+            <End Role="Cars" EntitySet="Cars" />
+            <End Role="WorkshopGuestCars" EntitySet="WorkshopGuestCars" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopGuestCars_Client" Association="Self.FK_WorkshopGuestCars_Client">
+            <End Role="WorkshopServiceClients" EntitySet="WorkshopServiceClients" />
+            <End Role="WorkshopGuestCars" EntitySet="WorkshopGuestCars" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopGuestCars_Workshops1" Association="Self.FK_WorkshopGuestCars_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopGuestCars" EntitySet="WorkshopGuestCars" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopParts_Workshops1" Association="Self.FK_WorkshopParts_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopParts" EntitySet="WorkshopParts" />
+          </AssociationSet>
           <AssociationSet Name="FK_Workshops_Addresses" Association="Self.FK_Workshops_Addresses">
             <End Role="Addresses" EntitySet="Addresses" />
             <End Role="Workshops" EntitySet="Workshops" />
@@ -1100,8 +1460,25 @@
             <End Role="Companies" EntitySet="Companies" />
             <End Role="Workshops" EntitySet="Workshops" />
           </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServiceClients_Workshops1" Association="Self.FK_WorkshopServiceClients_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopServiceClients" EntitySet="WorkshopServiceClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServices_Workshops1" Association="Self.FK_WorkshopServices_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopServices" EntitySet="WorkshopServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServices_WorkshopServiceUnits" Association="Self.FK_WorkshopServices_WorkshopServiceUnits">
+            <End Role="WorkshopServiceUnits" EntitySet="WorkshopServiceUnits" />
+            <End Role="WorkshopServices" EntitySet="WorkshopServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServiceUnits_Workshops" Association="Self.FK_WorkshopServiceUnits_Workshops">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopServiceUnits" EntitySet="WorkshopServiceUnits" />
+          </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DriveCareDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1170,6 +1547,7 @@
           <NavigationProperty Name="UserCars" Relationship="Self.FK__UserCars__CarId__628FA481" FromRole="Cars" ToRole="UserCars" />
           <NavigationProperty Name="RepairHistories" Relationship="Self.FK_RepairHistory_Cars" FromRole="Cars" ToRole="RepairHistory" />
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Cars" FromRole="Cars" ToRole="Tasks" />
+          <NavigationProperty Name="WorkshopGuestCars" Relationship="Self.FK_WorkshopGuestCars_Car" FromRole="Cars" ToRole="WorkshopGuestCars" />
         </EntityType>
         <EntityType Name="CarSalePrice">
           <Key>
@@ -1275,6 +1653,8 @@
           <NavigationProperty Name="EmployeeRolesMaps" Relationship="Self.FK_EmployeeRolesMap_Employee" FromRole="Employees" ToRole="EmployeeRolesMap" />
           <NavigationProperty Name="Workshop" Relationship="Self.FK_Employees_Workshop" FromRole="Employees" ToRole="Workshops" />
           <NavigationProperty Name="RepairHistories" Relationship="Self.FK_RepairHistory_Employees" FromRole="Employees" ToRole="RepairHistory" />
+          <NavigationProperty Name="TaskPurchaseRequests" Relationship="Self.FK_TaskPurchaseRequests_Employees" FromRole="Employees" ToRole="TaskPurchaseRequests" />
+          <NavigationProperty Name="TaskPurchaseRequests1" Relationship="Self.FK_TaskPurchaseRequests_Employees1" FromRole="Employees" ToRole="TaskPurchaseRequests" />
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Employees" FromRole="Employees" ToRole="Tasks" />
         </EntityType>
         <EntityType Name="FuelType">
@@ -1363,7 +1743,7 @@
           <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
           <Property Name="PermissionGroupId" Type="Guid" />
           <NavigationProperty Name="PermissionGroup" Relationship="Self.FK_Permissions_PermissionGroups" FromRole="Permissions" ToRole="PermissionGroups" />
-          <NavigationProperty Name="RolePermissionsMaps" Relationship="Self.FK_RolePermissionsMap_Permissions" FromRole="Permissions" ToRole="RolePermissionsMap" />
+          <NavigationProperty Name="RolePermissionsMaps" Relationship="Self.FK_RolePermissionsMap_Permissions1" FromRole="Permissions" ToRole="RolePermissionsMap" />
         </EntityType>
         <EntityType Name="RepairCategory">
           <Key>
@@ -1402,7 +1782,7 @@
           <Property Name="RowId" Type="Guid" Nullable="false" />
           <Property Name="RoleId" Type="Guid" Nullable="false" />
           <Property Name="PermissionId" Type="Guid" Nullable="false" />
-          <NavigationProperty Name="Permission" Relationship="Self.FK_RolePermissionsMap_Permissions" FromRole="RolePermissionsMap" ToRole="Permissions" />
+          <NavigationProperty Name="Permission" Relationship="Self.FK_RolePermissionsMap_Permissions1" FromRole="RolePermissionsMap" ToRole="Permissions" />
           <NavigationProperty Name="Role" Relationship="Self.FK_RolePermissions_Roles" FromRole="RolePermissionsMap" ToRole="Roles" />
         </EntityType>
         <EntityType Name="Role">
@@ -1443,6 +1823,52 @@
           <Property Name="version" Type="Int32" />
           <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
         </EntityType>
+        <EntityType Name="TaskPartLine">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="TaskId" Type="Guid" Nullable="false" />
+          <Property Name="PartName" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Quantity" Type="Decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="UnitName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="UnitPrice" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LineAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SortOrder" Type="Int32" Nullable="false" />
+          <Property Name="WorkshopPartId" Type="Guid" />
+          <NavigationProperty Name="Task" Relationship="Self.FK_TaskPartLines_Tasks1" FromRole="TaskPartLines" ToRole="Tasks" />
+        </EntityType>
+        <EntityType Name="TaskPurchaseRequestLine">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="RequestId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopPartId" Type="Guid" />
+          <Property Name="PartName" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Quantity" Type="Decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="UnitName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="UnitPrice" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SortOrder" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="TaskPurchaseRequest" Relationship="Self.FK_TaskPurchaseRequestLines_TaskPurchaseRequests" FromRole="TaskPurchaseRequestLines" ToRole="TaskPurchaseRequests" />
+        </EntityType>
+        <EntityType Name="TaskPurchaseRequest">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="SourceTaskId" Type="Guid" Nullable="false" />
+          <Property Name="PurchaseTaskId" Type="Guid" Nullable="false" />
+          <Property Name="RequestedByEmployeeId" Type="Guid" Nullable="false" />
+          <Property Name="PurchaserEmployeeId" Type="Guid" Nullable="false" />
+          <Property Name="IsFulfilled" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Employee" Relationship="Self.FK_TaskPurchaseRequests_Employees" FromRole="TaskPurchaseRequests" ToRole="Employees" />
+          <NavigationProperty Name="Employee1" Relationship="Self.FK_TaskPurchaseRequests_Employees1" FromRole="TaskPurchaseRequests" ToRole="Employees" />
+          <NavigationProperty Name="TaskPurchaseRequestLines" Relationship="Self.FK_TaskPurchaseRequestLines_TaskPurchaseRequests" FromRole="TaskPurchaseRequests" ToRole="TaskPurchaseRequestLines" />
+          <NavigationProperty Name="Task" Relationship="Self.FK_TaskPurchaseRequests_Tasks" FromRole="TaskPurchaseRequests" ToRole="Tasks" />
+          <NavigationProperty Name="Task1" Relationship="Self.FK_TaskPurchaseRequests_Tasks1" FromRole="TaskPurchaseRequests" ToRole="Tasks" />
+        </EntityType>
         <EntityType Name="Task">
           <Key>
             <PropertyRef Name="RowId" />
@@ -1464,7 +1890,27 @@
           <NavigationProperty Name="Car" Relationship="Self.FK_Tasks_Cars" FromRole="Tasks" ToRole="Cars" />
           <NavigationProperty Name="Employee" Relationship="Self.FK_Tasks_Employees" FromRole="Tasks" ToRole="Employees" />
           <NavigationProperty Name="Status" Relationship="Self.FK_Tasks_Statuses" FromRole="Tasks" ToRole="Statuses" />
+          <NavigationProperty Name="TaskPartLines" Relationship="Self.FK_TaskPartLines_Tasks1" FromRole="Tasks" ToRole="TaskPartLines" />
+          <NavigationProperty Name="TaskPurchaseRequests" Relationship="Self.FK_TaskPurchaseRequests_Tasks" FromRole="Tasks" ToRole="TaskPurchaseRequests" />
+          <NavigationProperty Name="TaskPurchaseRequests1" Relationship="Self.FK_TaskPurchaseRequests_Tasks1" FromRole="Tasks" ToRole="TaskPurchaseRequests" />
           <NavigationProperty Name="User" Relationship="Self.FK_Tasks_Users" FromRole="Tasks" ToRole="Users" />
+          <NavigationProperty Name="TaskServiceLines" Relationship="Self.FK_TaskServiceLines_Tasks1" FromRole="Tasks" ToRole="TaskServiceLines" />
+        </EntityType>
+        <EntityType Name="TaskServiceLine">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="TaskId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopServiceId" Type="Guid" />
+          <Property Name="ServiceName" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Quantity" Type="Decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="UnitName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="UnitPrice" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="DiscountPercent" Type="Decimal" Precision="9" Scale="2" Nullable="false" />
+          <Property Name="LineAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SortOrder" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Task" Relationship="Self.FK_TaskServiceLines_Tasks1" FromRole="TaskServiceLines" ToRole="Tasks" />
         </EntityType>
         <EntityType Name="UserCar">
           <Key>
@@ -1541,6 +1987,45 @@
           <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
         </EntityType>
+        <EntityType Name="WorkshopGuestCar">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopId" Type="Guid" Nullable="false" />
+          <Property Name="ServiceClientId" Type="Guid" Nullable="false" />
+          <Property Name="CarId" Type="Guid" Nullable="false" />
+          <Property Name="RepairHistoryId" Type="Guid" />
+          <Property Name="Vin" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="PlateNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="BrandModelText" Type="String" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="Year" Type="Int32" />
+          <Property Name="Color" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Mileage" Type="Int32" />
+          <Property Name="IsLinkedToUser" Type="Boolean" Nullable="false" />
+          <Property Name="UserCarId" Type="Guid" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Car" Relationship="Self.FK_WorkshopGuestCars_Car" FromRole="WorkshopGuestCars" ToRole="Cars" />
+          <NavigationProperty Name="WorkshopServiceClient" Relationship="Self.FK_WorkshopGuestCars_Client" FromRole="WorkshopGuestCars" ToRole="WorkshopServiceClients" />
+          <NavigationProperty Name="Workshop" Relationship="Self.FK_WorkshopGuestCars_Workshops1" FromRole="WorkshopGuestCars" ToRole="Workshops" />
+        </EntityType>
+        <EntityType Name="WorkshopPart">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopId" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Article" Type="String" MaxLength="80" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Price" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="UnitName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="QuantityOnHand" Type="Decimal" Precision="18" Scale="3" Nullable="false" />
+          <Property Name="Category" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Workshop" Relationship="Self.FK_WorkshopParts_Workshops1" FromRole="WorkshopParts" ToRole="Workshops" />
+        </EntityType>
         <EntityType Name="Workshop">
           <Key>
             <PropertyRef Name="RowId" />
@@ -1556,6 +2041,55 @@
           <NavigationProperty Name="Company" Relationship="Self.FK_Workshops_Company" FromRole="Workshops" ToRole="Companies" />
           <NavigationProperty Name="Employees" Relationship="Self.FK_Employees_Workshop" FromRole="Workshops" ToRole="Employees" />
           <NavigationProperty Name="Roles" Relationship="Self.FK_Roles_Workshops" FromRole="Workshops" ToRole="Roles" />
+          <NavigationProperty Name="WorkshopGuestCars" Relationship="Self.FK_WorkshopGuestCars_Workshops1" FromRole="Workshops" ToRole="WorkshopGuestCars" />
+          <NavigationProperty Name="WorkshopParts" Relationship="Self.FK_WorkshopParts_Workshops1" FromRole="Workshops" ToRole="WorkshopParts" />
+          <NavigationProperty Name="WorkshopServiceClients" Relationship="Self.FK_WorkshopServiceClients_Workshops1" FromRole="Workshops" ToRole="WorkshopServiceClients" />
+          <NavigationProperty Name="WorkshopServices" Relationship="Self.FK_WorkshopServices_Workshops1" FromRole="Workshops" ToRole="WorkshopServices" />
+          <NavigationProperty Name="WorkshopServiceUnits" Relationship="Self.FK_WorkshopServiceUnits_Workshops" FromRole="Workshops" ToRole="WorkshopServiceUnits" />
+        </EntityType>
+        <EntityType Name="WorkshopServiceClient">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopId" Type="Guid" Nullable="false" />
+          <Property Name="UserId" Type="Guid" />
+          <Property Name="FullName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Phone" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="IsRegisteredUser" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="WorkshopGuestCars" Relationship="Self.FK_WorkshopGuestCars_Client" FromRole="WorkshopServiceClients" ToRole="WorkshopGuestCars" />
+          <NavigationProperty Name="Workshop" Relationship="Self.FK_WorkshopServiceClients_Workshops1" FromRole="WorkshopServiceClients" ToRole="Workshops" />
+        </EntityType>
+        <EntityType Name="WorkshopService">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopId" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Price" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="UnitName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="SortOrder" Type="Int32" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UnitId" Type="Guid" />
+          <NavigationProperty Name="Workshop" Relationship="Self.FK_WorkshopServices_Workshops1" FromRole="WorkshopServices" ToRole="Workshops" />
+          <NavigationProperty Name="WorkshopServiceUnit" Relationship="Self.FK_WorkshopServices_WorkshopServiceUnits" FromRole="WorkshopServices" ToRole="WorkshopServiceUnits" />
+        </EntityType>
+        <EntityType Name="WorkshopServiceUnit">
+          <Key>
+            <PropertyRef Name="RowId" />
+          </Key>
+          <Property Name="RowId" Type="Guid" Nullable="false" />
+          <Property Name="WorkshopId" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Workshop" Relationship="Self.FK_WorkshopServiceUnits_Workshops" FromRole="WorkshopServiceUnits" ToRole="Workshops" />
+          <NavigationProperty Name="WorkshopServices" Relationship="Self.FK_WorkshopServices_WorkshopServiceUnits" FromRole="WorkshopServiceUnits" ToRole="WorkshopServices" />
         </EntityType>
         <Association Name="FK__Addresses__Count__0E6E26BF">
           <End Role="Countries" Type="Self.Country" Multiplicity="0..1" />
@@ -1725,6 +2259,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_WorkshopGuestCars_Car">
+          <End Role="Cars" Type="Self.Car" Multiplicity="1" />
+          <End Role="WorkshopGuestCars" Type="Self.WorkshopGuestCar" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Cars">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopGuestCars">
+              <PropertyRef Name="CarId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__CarSalePr__CarSa__245D67DE">
           <End Role="CarSales" Type="Self.CarSale" Multiplicity="1" />
           <End Role="CarSalePrices" Type="Self.CarSalePrice" Multiplicity="*" />
@@ -1875,6 +2421,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_TaskPurchaseRequests_Employees">
+          <End Role="Employees" Type="Self.Employee" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employees">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="RequestedByEmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Employees1">
+          <End Role="Employees" Type="Self.Employee" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Employees">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="PurchaserEmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Tasks_Employees">
           <End Role="Employees" Type="Self.Employee" Multiplicity="1" />
           <End Role="Tasks" Type="Self.Task" Multiplicity="*" />
@@ -1935,7 +2505,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_RolePermissionsMap_Permissions">
+        <Association Name="FK_RolePermissionsMap_Permissions1">
           <End Role="Permissions" Type="Self.Permission" Multiplicity="1" />
           <End Role="RolePermissionsMap" Type="Self.RolePermissionsMap" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1943,7 +2513,7 @@
               <PropertyRef Name="RowId" />
             </Principal>
             <Dependent Role="RolePermissionsMap">
-              <PropertyRef Name="RoleId" />
+              <PropertyRef Name="PermissionId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2019,6 +2589,54 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_TaskPartLines_Tasks1">
+          <End Role="Tasks" Type="Self.Task" Multiplicity="1" />
+          <End Role="TaskPartLines" Type="Self.TaskPartLine" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPartLines">
+              <PropertyRef Name="TaskId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequestLines_TaskPurchaseRequests">
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequest" Multiplicity="1" />
+          <End Role="TaskPurchaseRequestLines" Type="Self.TaskPurchaseRequestLine" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskPurchaseRequests">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequestLines">
+              <PropertyRef Name="RequestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Tasks">
+          <End Role="Tasks" Type="Self.Task" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="SourceTaskId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskPurchaseRequests_Tasks1">
+          <End Role="Tasks" Type="Self.Task" Multiplicity="1" />
+          <End Role="TaskPurchaseRequests" Type="Self.TaskPurchaseRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskPurchaseRequests">
+              <PropertyRef Name="PurchaseTaskId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Tasks_Users">
           <End Role="Users" Type="Self.User" Multiplicity="0..1" />
           <End Role="Tasks" Type="Self.Task" Multiplicity="*" />
@@ -2028,6 +2646,18 @@
             </Principal>
             <Dependent Role="Tasks">
               <PropertyRef Name="ClientUserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_TaskServiceLines_Tasks1">
+          <End Role="Tasks" Type="Self.Task" Multiplicity="1" />
+          <End Role="TaskServiceLines" Type="Self.TaskServiceLine" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="TaskServiceLines">
+              <PropertyRef Name="TaskId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2079,7 +2709,91 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="DriveCareDBEntities2" annotation:LazyLoadingEnabled="true">
+        <Association Name="FK_WorkshopGuestCars_Client">
+          <End Role="WorkshopServiceClients" Type="Self.WorkshopServiceClient" Multiplicity="1" />
+          <End Role="WorkshopGuestCars" Type="Self.WorkshopGuestCar" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WorkshopServiceClients">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopGuestCars">
+              <PropertyRef Name="ServiceClientId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopGuestCars_Workshops1">
+          <End Role="Workshops" Type="Self.Workshop" Multiplicity="1" />
+          <End Role="WorkshopGuestCars" Type="Self.WorkshopGuestCar" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopGuestCars">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopParts_Workshops1">
+          <End Role="Workshops" Type="Self.Workshop" Multiplicity="1" />
+          <End Role="WorkshopParts" Type="Self.WorkshopPart" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopParts">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServiceClients_Workshops1">
+          <End Role="Workshops" Type="Self.Workshop" Multiplicity="1" />
+          <End Role="WorkshopServiceClients" Type="Self.WorkshopServiceClient" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServiceClients">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServices_Workshops1">
+          <End Role="Workshops" Type="Self.Workshop" Multiplicity="1" />
+          <End Role="WorkshopServices" Type="Self.WorkshopService" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServices">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServiceUnits_Workshops">
+          <End Role="Workshops" Type="Self.Workshop" Multiplicity="1" />
+          <End Role="WorkshopServiceUnits" Type="Self.WorkshopServiceUnit" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Workshops">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServiceUnits">
+              <PropertyRef Name="WorkshopId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WorkshopServices_WorkshopServiceUnits">
+          <End Role="WorkshopServiceUnits" Type="Self.WorkshopServiceUnit" Multiplicity="0..1" />
+          <End Role="WorkshopServices" Type="Self.WorkshopService" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WorkshopServiceUnits">
+              <PropertyRef Name="RowId" />
+            </Principal>
+            <Dependent Role="WorkshopServices">
+              <PropertyRef Name="UnitId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="DriveCareDBEntities3" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Addresses" EntityType="Self.Address" />
           <EntitySet Name="Brands" EntityType="Self.Brand" />
           <EntitySet Name="BusinessTypes" EntityType="Self.BusinessType" />
@@ -2106,14 +2820,23 @@
           <EntitySet Name="Roles" EntityType="Self.Role" />
           <EntitySet Name="Statuses" EntityType="Self.Status" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagram" />
+          <EntitySet Name="TaskPartLines" EntityType="Self.TaskPartLine" />
+          <EntitySet Name="TaskPurchaseRequestLines" EntityType="Self.TaskPurchaseRequestLine" />
+          <EntitySet Name="TaskPurchaseRequests" EntityType="Self.TaskPurchaseRequest" />
           <EntitySet Name="Tasks" EntityType="Self.Task" />
+          <EntitySet Name="TaskServiceLines" EntityType="Self.TaskServiceLine" />
           <EntitySet Name="UserCars" EntityType="Self.UserCar" />
           <EntitySet Name="UserCarSales" EntityType="Self.UserCarSale" />
           <EntitySet Name="UserNotifications" EntityType="Self.UserNotification" />
           <EntitySet Name="UserRoles" EntityType="Self.UserRole" />
           <EntitySet Name="Users" EntityType="Self.User" />
           <EntitySet Name="WarehouseManagers" EntityType="Self.WarehouseManager" />
+          <EntitySet Name="WorkshopGuestCars" EntityType="Self.WorkshopGuestCar" />
+          <EntitySet Name="WorkshopParts" EntityType="Self.WorkshopPart" />
           <EntitySet Name="Workshops" EntityType="Self.Workshop" />
+          <EntitySet Name="WorkshopServiceClients" EntityType="Self.WorkshopServiceClient" />
+          <EntitySet Name="WorkshopServices" EntityType="Self.WorkshopService" />
+          <EntitySet Name="WorkshopServiceUnits" EntityType="Self.WorkshopServiceUnit" />
           <AssociationSet Name="FK__Addresses__Count__0E6E26BF" Association="Self.FK__Addresses__Count__0E6E26BF">
             <End Role="Countries" EntitySet="Countries" />
             <End Role="Addresses" EntitySet="Addresses" />
@@ -2170,6 +2893,10 @@
             <End Role="Cars" EntitySet="Cars" />
             <End Role="Tasks" EntitySet="Tasks" />
           </AssociationSet>
+          <AssociationSet Name="FK_WorkshopGuestCars_Car" Association="Self.FK_WorkshopGuestCars_Car">
+            <End Role="Cars" EntitySet="Cars" />
+            <End Role="WorkshopGuestCars" EntitySet="WorkshopGuestCars" />
+          </AssociationSet>
           <AssociationSet Name="FK__CarSalePr__CarSa__245D67DE" Association="Self.FK__CarSalePr__CarSa__245D67DE">
             <End Role="CarSales" EntitySet="CarSales" />
             <End Role="CarSalePrices" EntitySet="CarSalePrices" />
@@ -2218,6 +2945,14 @@
             <End Role="Employees" EntitySet="Employees" />
             <End Role="RepairHistory" EntitySet="RepairHistories" />
           </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Employees" Association="Self.FK_TaskPurchaseRequests_Employees">
+            <End Role="Employees" EntitySet="Employees" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Employees1" Association="Self.FK_TaskPurchaseRequests_Employees1">
+            <End Role="Employees" EntitySet="Employees" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
           <AssociationSet Name="FK_Tasks_Employees" Association="Self.FK_Tasks_Employees">
             <End Role="Employees" EntitySet="Employees" />
             <End Role="Tasks" EntitySet="Tasks" />
@@ -2238,7 +2973,7 @@
             <End Role="PermissionGroups" EntitySet="PermissionGroups" />
             <End Role="Permissions" EntitySet="Permissions" />
           </AssociationSet>
-          <AssociationSet Name="FK_RolePermissionsMap_Permissions" Association="Self.FK_RolePermissionsMap_Permissions">
+          <AssociationSet Name="FK_RolePermissionsMap_Permissions1" Association="Self.FK_RolePermissionsMap_Permissions1">
             <End Role="Permissions" EntitySet="Permissions" />
             <End Role="RolePermissionsMap" EntitySet="RolePermissionsMaps" />
           </AssociationSet>
@@ -2266,9 +3001,29 @@
             <End Role="Statuses" EntitySet="Statuses" />
             <End Role="Tasks" EntitySet="Tasks" />
           </AssociationSet>
+          <AssociationSet Name="FK_TaskPartLines_Tasks1" Association="Self.FK_TaskPartLines_Tasks1">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskPartLines" EntitySet="TaskPartLines" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequestLines_TaskPurchaseRequests" Association="Self.FK_TaskPurchaseRequestLines_TaskPurchaseRequests">
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+            <End Role="TaskPurchaseRequestLines" EntitySet="TaskPurchaseRequestLines" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Tasks" Association="Self.FK_TaskPurchaseRequests_Tasks">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskPurchaseRequests_Tasks1" Association="Self.FK_TaskPurchaseRequests_Tasks1">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskPurchaseRequests" EntitySet="TaskPurchaseRequests" />
+          </AssociationSet>
           <AssociationSet Name="FK_Tasks_Users" Association="Self.FK_Tasks_Users">
             <End Role="Users" EntitySet="Users" />
             <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_TaskServiceLines_Tasks1" Association="Self.FK_TaskServiceLines_Tasks1">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="TaskServiceLines" EntitySet="TaskServiceLines" />
           </AssociationSet>
           <AssociationSet Name="FK__UserCars__UserId__619B8048" Association="Self.FK__UserCars__UserId__619B8048">
             <End Role="Users" EntitySet="Users" />
@@ -2286,13 +3041,41 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="UserRoles" EntitySet="UserRoles" />
           </AssociationSet>
+          <AssociationSet Name="FK_WorkshopGuestCars_Client" Association="Self.FK_WorkshopGuestCars_Client">
+            <End Role="WorkshopServiceClients" EntitySet="WorkshopServiceClients" />
+            <End Role="WorkshopGuestCars" EntitySet="WorkshopGuestCars" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopGuestCars_Workshops1" Association="Self.FK_WorkshopGuestCars_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopGuestCars" EntitySet="WorkshopGuestCars" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopParts_Workshops1" Association="Self.FK_WorkshopParts_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopParts" EntitySet="WorkshopParts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServiceClients_Workshops1" Association="Self.FK_WorkshopServiceClients_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopServiceClients" EntitySet="WorkshopServiceClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServices_Workshops1" Association="Self.FK_WorkshopServices_Workshops1">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopServices" EntitySet="WorkshopServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServiceUnits_Workshops" Association="Self.FK_WorkshopServiceUnits_Workshops">
+            <End Role="Workshops" EntitySet="Workshops" />
+            <End Role="WorkshopServiceUnits" EntitySet="WorkshopServiceUnits" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WorkshopServices_WorkshopServiceUnits" Association="Self.FK_WorkshopServices_WorkshopServiceUnits">
+            <End Role="WorkshopServiceUnits" EntitySet="WorkshopServiceUnits" />
+            <End Role="WorkshopServices" EntitySet="WorkshopServices" />
+          </AssociationSet>
         </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="DriveCareDBModelStoreContainer" CdmEntityContainer="DriveCareDBEntities2">
+        <EntityContainerMapping StorageEntityContainer="DriveCareDBModelStoreContainer" CdmEntityContainer="DriveCareDBEntities3">
           <EntitySetMapping Name="Addresses">
             <EntityTypeMapping TypeName="DriveCareDBModel.Address">
               <MappingFragment StoreEntitySet="Addresses">
@@ -2593,6 +3376,48 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="TaskPartLines">
+            <EntityTypeMapping TypeName="DriveCareDBModel.TaskPartLine">
+              <MappingFragment StoreEntitySet="TaskPartLines">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="TaskId" ColumnName="TaskId" />
+                <ScalarProperty Name="PartName" ColumnName="PartName" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="UnitName" ColumnName="UnitName" />
+                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+                <ScalarProperty Name="LineAmount" ColumnName="LineAmount" />
+                <ScalarProperty Name="SortOrder" ColumnName="SortOrder" />
+                <ScalarProperty Name="WorkshopPartId" ColumnName="WorkshopPartId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskPurchaseRequestLines">
+            <EntityTypeMapping TypeName="DriveCareDBModel.TaskPurchaseRequestLine">
+              <MappingFragment StoreEntitySet="TaskPurchaseRequestLines">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="RequestId" ColumnName="RequestId" />
+                <ScalarProperty Name="WorkshopPartId" ColumnName="WorkshopPartId" />
+                <ScalarProperty Name="PartName" ColumnName="PartName" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="UnitName" ColumnName="UnitName" />
+                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+                <ScalarProperty Name="SortOrder" ColumnName="SortOrder" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskPurchaseRequests">
+            <EntityTypeMapping TypeName="DriveCareDBModel.TaskPurchaseRequest">
+              <MappingFragment StoreEntitySet="TaskPurchaseRequests">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="SourceTaskId" ColumnName="SourceTaskId" />
+                <ScalarProperty Name="PurchaseTaskId" ColumnName="PurchaseTaskId" />
+                <ScalarProperty Name="RequestedByEmployeeId" ColumnName="RequestedByEmployeeId" />
+                <ScalarProperty Name="PurchaserEmployeeId" ColumnName="PurchaserEmployeeId" />
+                <ScalarProperty Name="IsFulfilled" ColumnName="IsFulfilled" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Tasks">
             <EntityTypeMapping TypeName="DriveCareDBModel.Task">
               <MappingFragment StoreEntitySet="Tasks">
@@ -2610,6 +3435,22 @@
                 <ScalarProperty Name="ReportText" ColumnName="ReportText" />
                 <ScalarProperty Name="ClientUserId" ColumnName="ClientUserId" />
                 <ScalarProperty Name="CarId" ColumnName="CarId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskServiceLines">
+            <EntityTypeMapping TypeName="DriveCareDBModel.TaskServiceLine">
+              <MappingFragment StoreEntitySet="TaskServiceLines">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="TaskId" ColumnName="TaskId" />
+                <ScalarProperty Name="WorkshopServiceId" ColumnName="WorkshopServiceId" />
+                <ScalarProperty Name="ServiceName" ColumnName="ServiceName" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="UnitName" ColumnName="UnitName" />
+                <ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+                <ScalarProperty Name="DiscountPercent" ColumnName="DiscountPercent" />
+                <ScalarProperty Name="LineAmount" ColumnName="LineAmount" />
+                <ScalarProperty Name="SortOrder" ColumnName="SortOrder" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2681,6 +3522,43 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="WorkshopGuestCars">
+            <EntityTypeMapping TypeName="DriveCareDBModel.WorkshopGuestCar">
+              <MappingFragment StoreEntitySet="WorkshopGuestCars">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="WorkshopId" ColumnName="WorkshopId" />
+                <ScalarProperty Name="ServiceClientId" ColumnName="ServiceClientId" />
+                <ScalarProperty Name="CarId" ColumnName="CarId" />
+                <ScalarProperty Name="RepairHistoryId" ColumnName="RepairHistoryId" />
+                <ScalarProperty Name="Vin" ColumnName="Vin" />
+                <ScalarProperty Name="PlateNumber" ColumnName="PlateNumber" />
+                <ScalarProperty Name="BrandModelText" ColumnName="BrandModelText" />
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Mileage" ColumnName="Mileage" />
+                <ScalarProperty Name="IsLinkedToUser" ColumnName="IsLinkedToUser" />
+                <ScalarProperty Name="UserCarId" ColumnName="UserCarId" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WorkshopParts">
+            <EntityTypeMapping TypeName="DriveCareDBModel.WorkshopPart">
+              <MappingFragment StoreEntitySet="WorkshopParts">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="WorkshopId" ColumnName="WorkshopId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Article" ColumnName="Article" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="UnitName" ColumnName="UnitName" />
+                <ScalarProperty Name="QuantityOnHand" ColumnName="QuantityOnHand" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Workshops">
             <EntityTypeMapping TypeName="DriveCareDBModel.Workshop">
               <MappingFragment StoreEntitySet="Workshops">
@@ -2690,6 +3568,47 @@
                 <ScalarProperty Name="AddressId" ColumnName="AddressId" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="BusinessTypeId" ColumnName="BusinessTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WorkshopServiceClients">
+            <EntityTypeMapping TypeName="DriveCareDBModel.WorkshopServiceClient">
+              <MappingFragment StoreEntitySet="WorkshopServiceClients">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="WorkshopId" ColumnName="WorkshopId" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="IsRegisteredUser" ColumnName="IsRegisteredUser" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WorkshopServices">
+            <EntityTypeMapping TypeName="DriveCareDBModel.WorkshopService">
+              <MappingFragment StoreEntitySet="WorkshopServices">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="WorkshopId" ColumnName="WorkshopId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="UnitName" ColumnName="UnitName" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="SortOrder" ColumnName="SortOrder" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="UnitId" ColumnName="UnitId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WorkshopServiceUnits">
+            <EntityTypeMapping TypeName="DriveCareDBModel.WorkshopServiceUnit">
+              <MappingFragment StoreEntitySet="WorkshopServiceUnits">
+                <ScalarProperty Name="RowId" ColumnName="RowId" />
+                <ScalarProperty Name="WorkshopId" ColumnName="WorkshopId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

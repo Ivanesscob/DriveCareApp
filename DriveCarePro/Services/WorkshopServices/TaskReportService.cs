@@ -32,7 +32,8 @@ namespace DriveCarePro.Services.WorkshopServices
         {
             try
             {
-                return await LoadPartLinesWithPartIdAsync(taskId).ConfigureAwait(false);
+                return await DatabaseExecutor.WithDbAsync(db => TaskPartLineSql.LoadAsync(db, taskId))
+                    .ConfigureAwait(false);
             }
             catch (SqlException ex) when (ex.Number == 208)
             {
@@ -40,25 +41,15 @@ namespace DriveCarePro.Services.WorkshopServices
             }
         }
 
-        private static async Task<List<TaskPartLineRow>> LoadPartLinesWithPartIdAsync(Guid taskId)
-        {
-            try
-            {
-                return await DatabaseExecutor.WithDbAsync(db =>
-                    db.Database.SqlQuery<TaskPartLineRow>(
-                        @"SELECT RowId, WorkshopPartId, PartName, Quantity, UnitName, UnitPrice, LineAmount
-                          FROM TaskPartLines WHERE TaskId = @p0 ORDER BY SortOrder",
-                        taskId).ToListAsync()).ConfigureAwait(false);
-            }
-            catch (SqlException ex) when (ex.Number == 207)
-            {
-                return await DatabaseExecutor.WithDbAsync(db =>
-                    db.Database.SqlQuery<TaskPartLineRow>(
-                        @"SELECT RowId, PartName, Quantity, UnitName, UnitPrice, LineAmount
-                          FROM TaskPartLines WHERE TaskId = @p0 ORDER BY SortOrder",
-                        taskId).ToListAsync()).ConfigureAwait(false);
-            }
-        }
+        public static Task<List<TaskServiceLineRow>> LoadServiceLinesAsync(
+            DriveCareCore.Data.BD.DriveCareDBEntities db,
+            Guid taskId) =>
+            LoadServiceLinesCoreAsync(db, taskId);
+
+        public static Task<List<TaskPartLineRow>> LoadPartLinesAsync(
+            DriveCareCore.Data.BD.DriveCareDBEntities db,
+            Guid taskId) =>
+            TaskPartLineSql.LoadAsync(db, taskId);
 
         public static Task AppendPartLinesAsync(Guid taskId, IEnumerable<TaskPartLineRow> newLines) =>
             AppendPartLinesAsync(null, taskId, newLines);
@@ -79,8 +70,8 @@ namespace DriveCarePro.Services.WorkshopServices
 
             if (db != null)
             {
-                var existing = await LoadPartLinesAsync(db, taskId).ConfigureAwait(false);
-                var services = await LoadServiceLinesAsync(db, taskId).ConfigureAwait(false);
+                var existing = await TaskPartLineSql.LoadAsync(db, taskId).ConfigureAwait(false);
+                var services = await LoadServiceLinesCoreAsync(db, taskId).ConfigureAwait(false);
                 var merged = existing.Concat(incoming).ToList();
                 var report = await db.Database.SqlQuery<string>(
                     "SELECT ReportText FROM Tasks WHERE RowId = @p0", taskId).FirstOrDefaultAsync().ConfigureAwait(false);
@@ -110,33 +101,13 @@ namespace DriveCarePro.Services.WorkshopServices
             await SaveReportAsync(taskId, servicesOuter, mergedOuter, freeNoteOuter).ConfigureAwait(false);
         }
 
-        private static Task<List<TaskServiceLineRow>> LoadServiceLinesAsync(
+        private static Task<List<TaskServiceLineRow>> LoadServiceLinesCoreAsync(
             DriveCareCore.Data.BD.DriveCareDBEntities db,
             Guid taskId) =>
             db.Database.SqlQuery<TaskServiceLineRow>(
                 @"SELECT RowId, WorkshopServiceId, ServiceName, Quantity, UnitName, UnitPrice, DiscountPercent, LineAmount
                   FROM TaskServiceLines WHERE TaskId = @p0 ORDER BY SortOrder",
                 taskId).ToListAsync();
-
-        private static async Task<List<TaskPartLineRow>> LoadPartLinesAsync(
-            DriveCareCore.Data.BD.DriveCareDBEntities db,
-            Guid taskId)
-        {
-            try
-            {
-                return await db.Database.SqlQuery<TaskPartLineRow>(
-                    @"SELECT RowId, WorkshopPartId, PartName, Quantity, UnitName, UnitPrice, LineAmount
-                      FROM TaskPartLines WHERE TaskId = @p0 ORDER BY SortOrder",
-                    taskId).ToListAsync().ConfigureAwait(false);
-            }
-            catch (SqlException ex) when (ex.Number == 207)
-            {
-                return await db.Database.SqlQuery<TaskPartLineRow>(
-                    @"SELECT RowId, PartName, Quantity, UnitName, UnitPrice, LineAmount
-                      FROM TaskPartLines WHERE TaskId = @p0 ORDER BY SortOrder",
-                    taskId).ToListAsync().ConfigureAwait(false);
-            }
-        }
 
         private static string ExtractFreeTextFromReport(
             string reportText,
@@ -153,6 +124,20 @@ namespace DriveCarePro.Services.WorkshopServices
             if (full.StartsWith(built, StringComparison.Ordinal))
                 return full.Substring(built.Length).Trim();
             return full;
+        }
+
+        public static Task<string> LoadFreeTextNoteAsync(Guid taskId) =>
+            DatabaseExecutor.WithDbAsync(db => LoadFreeTextNoteAsync(db, taskId));
+
+        public static async Task<string> LoadFreeTextNoteAsync(
+            DriveCareCore.Data.BD.DriveCareDBEntities db,
+            Guid taskId)
+        {
+            var services = await LoadServiceLinesAsync(db, taskId).ConfigureAwait(false);
+            var parts = await LoadPartLinesAsync(db, taskId).ConfigureAwait(false);
+            var report = await db.Database.SqlQuery<string>(
+                "SELECT ReportText FROM Tasks WHERE RowId = @p0", taskId).FirstOrDefaultAsync().ConfigureAwait(false);
+            return ExtractFreeTextFromReport(report, services, parts);
         }
 
         public static Task SaveReportAsync(
@@ -275,31 +260,12 @@ namespace DriveCarePro.Services.WorkshopServices
             return sb.ToString().Trim();
         }
 
-        private static async Task InsertPartLineAsync(
+        private static Task InsertPartLineAsync(
             DriveCareCore.Data.BD.DriveCareDBEntities db,
             Guid taskId,
             TaskPartLineRow p,
-            int sortOrder)
-        {
-            try
-            {
-                await db.Database.ExecuteSqlCommandAsync(
-                    @"INSERT INTO TaskPartLines (RowId, TaskId, WorkshopPartId, PartName, Quantity, UnitName, UnitPrice, LineAmount, SortOrder)
-                      VALUES (@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8)",
-                    Guid.NewGuid(), taskId,
-                    (object)p.WorkshopPartId ?? DBNull.Value,
-                    p.PartName.Trim(), p.Quantity,
-                    p.UnitName ?? "шт.", p.UnitPrice, p.LineAmount, sortOrder).ConfigureAwait(false);
-            }
-            catch (SqlException ex) when (ex.Number == 207 || ex.Number == 208)
-            {
-                await db.Database.ExecuteSqlCommandAsync(
-                    @"INSERT INTO TaskPartLines (RowId, TaskId, PartName, Quantity, UnitName, UnitPrice, LineAmount, SortOrder)
-                      VALUES (@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7)",
-                    Guid.NewGuid(), taskId, p.PartName.Trim(), p.Quantity,
-                    p.UnitName ?? "шт.", p.UnitPrice, p.LineAmount, sortOrder).ConfigureAwait(false);
-            }
-        }
+            int sortOrder) =>
+            TaskPartLineSql.InsertAsync(db, taskId, p, sortOrder);
 
         public static List<RepairWorkOrderWorkLine> ToWorkOrderLines(IEnumerable<TaskServiceLineRow> lines) =>
             (lines ?? Enumerable.Empty<TaskServiceLineRow>())

@@ -14,6 +14,15 @@ namespace DriveCareCore.Data.BD
     
     public partial class Task
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Task()
+        {
+            this.TaskPartLines = new HashSet<TaskPartLine>();
+            this.TaskPurchaseRequests = new HashSet<TaskPurchaseRequest>();
+            this.TaskPurchaseRequests1 = new HashSet<TaskPurchaseRequest>();
+            this.TaskServiceLines = new HashSet<TaskServiceLine>();
+        }
+    
         public System.Guid RowId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
@@ -32,6 +41,14 @@ namespace DriveCareCore.Data.BD
         public virtual Car Car { get; set; }
         public virtual Employee Employee { get; set; }
         public virtual Status Status { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TaskPartLine> TaskPartLines { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TaskPurchaseRequest> TaskPurchaseRequests { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TaskPurchaseRequest> TaskPurchaseRequests1 { get; set; }
         public virtual User User { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TaskServiceLine> TaskServiceLines { get; set; }
     }
 }

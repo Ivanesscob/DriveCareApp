@@ -20,6 +20,8 @@ namespace DriveCareCore.Data.BD
             this.CarSales = new HashSet<CarSale>();
             this.EmployeeRolesMaps = new HashSet<EmployeeRolesMap>();
             this.RepairHistories = new HashSet<RepairHistory>();
+            this.TaskPurchaseRequests = new HashSet<TaskPurchaseRequest>();
+            this.TaskPurchaseRequests1 = new HashSet<TaskPurchaseRequest>();
             this.Tasks = new HashSet<Task>();
         }
     
@@ -44,6 +46,10 @@ namespace DriveCareCore.Data.BD
         public virtual Workshop Workshop { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<RepairHistory> RepairHistories { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TaskPurchaseRequest> TaskPurchaseRequests { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<TaskPurchaseRequest> TaskPurchaseRequests1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Task> Tasks { get; set; }
     }

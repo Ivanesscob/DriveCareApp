@@ -112,7 +112,7 @@
                 </ListView>
             </Grid>
 
-            <Border Grid.Column="2" Background="{DynamicResource App.Brush.Surface2}"
+            <Border x:Name="CartPanel" Grid.Column="2" Background="{DynamicResource App.Brush.Surface2}"
                     BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
                     CornerRadius="12" Padding="12">
                 <Grid>
@@ -141,13 +141,13 @@
                     </ListView>
                     <TextBlock x:Name="CartTotalText" Grid.Row="2" FontWeight="SemiBold" FontSize="14"
                                Foreground="{DynamicResource App.Brush.Foreground}"/>
-                    <Button Grid.Row="3" Content="Запросить покупку" Margin="0,12,0,0" Height="40"
+                    <Button x:Name="RequestPurchaseButton" Grid.Row="3" Content="Запросить покупку" Margin="0,12,0,0" Height="40"
                             Style="{StaticResource App.Button.Primary}" Click="RequestPurchase_Click"/>
                 </Grid>
             </Border>
         </Grid>
 
-        <Button Grid.Row="2" Content="← Назад к заданию" Height="40" MinWidth="200" Margin="0,0,0,20"
+        <Button x:Name="BackButton" Grid.Row="2" Content="← Назад к заданию" Height="40" MinWidth="200" Margin="0,0,0,20"
                 HorizontalAlignment="Center" Style="{StaticResource App.Button.Outline}" Click="Back_Click"/>
     </Grid>
 </Page>

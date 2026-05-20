@@ -15,7 +15,7 @@ namespace DriveCarePro.Windows
         {
             _permissionId = permissionId;
             InitializeComponent();
-            LoadData();
+            Loaded += (_, __) => LoadData();
         }
 
         public static bool? ShowEdit(Window owner, Guid permissionId)
@@ -34,7 +34,6 @@ namespace DriveCarePro.Windows
                 if (permission == null)
                 {
                     MessageBox.Show("Разрешение не найдено.", Title, MessageBoxButton.OK, MessageBoxImage.Warning);
-                    DialogResult = false;
                     Close();
                     return;
                 }
@@ -54,7 +53,6 @@ namespace DriveCarePro.Windows
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка загрузки: " + ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Warning);
-                DialogResult = false;
                 Close();
             }
         }

@@ -38,6 +38,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommunityToolkit.Mvvm, Version=8.4.0.0, Culture=neutral, PublicKeyToken=4aff0a16b403ca14, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommunityToolkit.Mvvm.8.4.0\lib\netstandard2.1\CommunityToolkit.Mvvm.dll</HintPath>
+    </Reference>
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.4.4.0\lib\net462\ControlzEx.dll</HintPath>
     </Reference>
@@ -328,16 +331,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\EnterRealMileageWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CarDisplayItem.cs" />
     <Compile Include="CarDetailsWindow.cs" />
+    <Compile Include="Windows\EnterRealMileageWindow.xaml.cs">
+      <DependentUpon>EnterRealMileageWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Data\AppState.cs" />
     <Compile Include="Data\ServiceMaintenanceDtos.cs" />
     <Compile Include="Services\RegistrationMailHelper.cs" />
     <Compile Include="Services\ThemeService.cs" />
+    <Compile Include="Services\OxyPlotThemeHelper.cs" />
     <Compile Include="Services\ServiceMaintenanceRepository.cs" />
     <Compile Include="Services\MaintenanceRecommendationEngine.cs" />
     <Compile Include="Controls\TintedImage.xaml.cs">
@@ -360,6 +371,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\User\ProfilePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\MessagesPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -416,6 +431,9 @@
     </Compile>
     <Compile Include="Pages\User\ProfilePage.xaml.cs">
       <DependentUpon>ProfilePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\MessagesPage.xaml.cs">
+      <DependentUpon>MessagesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\User\ActionPages\ToolsStorePage.xaml.cs">
       <DependentUpon>ToolsStorePage.xaml</DependentUpon>

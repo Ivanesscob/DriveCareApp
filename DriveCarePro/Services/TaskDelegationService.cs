@@ -1,5 +1,7 @@
 using DriveCareCore.Data.BD;
 using DriveCarePro.Services.ServiceBooking;
+using DriveCarePro.Services.ServiceDocuments;
+using DriveCarePro.Services.WorkshopServices;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -39,19 +41,121 @@ namespace DriveCarePro.Services
         public const string AutoCompleteByParentReportTemplate =
             "Завершено автоматически: закрыто родительское задание ({0}).";
 
+        public const string AutoCompleteByDocumentReportTemplate =
+            "Завершено автоматически: закрыт заказ-наряд ({0}).";
+
         public static async Task<TaskDelegationLinks> TryLoadLinksAsync(Guid taskId)
         {
             try
             {
-                return await DatabaseExecutor.WithDbAsync(db =>
-                    db.Database.SqlQuery<TaskDelegationLinks>(
-                        "SELECT ParentTaskId, DelegateTaskId FROM Tasks WHERE RowId = @p0", taskId)
-                        .FirstOrDefaultAsync()).ConfigureAwait(false) ?? new TaskDelegationLinks();
+                return await DatabaseExecutor.WithDbAsync(db => TryLoadLinksAsync(db, taskId)).ConfigureAwait(false)
+                       ?? new TaskDelegationLinks();
             }
             catch (SqlException ex) when (ex.Number == 207 || ex.Number == 208)
             {
                 return new TaskDelegationLinks();
             }
+        }
+
+        public static async Task<TaskDelegationLinks> TryLoadLinksAsync(DriveCareDBEntities db, Guid taskId)
+        {
+            try
+            {
+                return await db.Database.SqlQuery<TaskDelegationLinks>(
+                        "SELECT ParentTaskId, DelegateTaskId FROM Tasks WHERE RowId = @p0", taskId)
+                    .FirstOrDefaultAsync().ConfigureAwait(false) ?? new TaskDelegationLinks();
+            }
+            catch (SqlException ex) when (ex.Number == 207 || ex.Number == 208)
+            {
+                return new TaskDelegationLinks();
+            }
+        }
+
+        /// <summary>Задание-отправитель, у которого DelegateTaskId указывает на childTaskId.</summary>
+        public static async Task<Guid?> TryGetOwnerTaskIdByDelegateAsync(DriveCareDBEntities db, Guid childTaskId)
+        {
+            try
+            {
+                var id = await db.Database.SqlQuery<Guid?>(
+                        "SELECT RowId FROM Tasks WHERE DelegateTaskId = @p0", childTaskId)
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
+                return id.HasValue && id.Value != Guid.Empty ? id : (Guid?)null;
+            }
+            catch (SqlException ex) when (ex.Number == 207 || ex.Number == 208)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>Корневое (самое верхнее) задание в цепочке поручений.</summary>
+        public static Task<Guid> FindRootTaskIdAsync(Guid taskId) =>
+            DatabaseExecutor.WithDbAsync(db => FindRootTaskIdAsync(db, taskId));
+
+        public static async Task<Guid> FindRootTaskIdAsync(DriveCareDBEntities db, Guid taskId)
+        {
+            var chain = await CollectOrderedChainTaskIdsAsync(db, taskId).ConfigureAwait(false);
+            return chain.Count > 0 ? chain[0] : taskId;
+        }
+
+        /// <summary>Упорядоченная цепочка: предки → текущее → переданные вниз (как в BuildChainTextAsync).</summary>
+        public static async Task<List<Guid>> CollectOrderedChainTaskIdsAsync(DriveCareDBEntities db, Guid taskId)
+        {
+            var ordered = new List<Guid>();
+            var upstream = new List<Guid>();
+            var walk = taskId;
+
+            for (var depth = 0; depth < MaxChainDepth; depth++)
+            {
+                var links = await TryLoadLinksAsync(db, walk).ConfigureAwait(false);
+                Guid? parentId = links.ParentTaskId;
+                if (!parentId.HasValue)
+                    parentId = await TryGetOwnerTaskIdByDelegateAsync(db, walk).ConfigureAwait(false);
+                if (!parentId.HasValue)
+                    break;
+
+                upstream.Insert(0, parentId.Value);
+                walk = parentId.Value;
+            }
+
+            ordered.AddRange(upstream);
+            ordered.Add(taskId);
+
+            var downLinks = await TryLoadLinksAsync(db, taskId).ConfigureAwait(false);
+            var downId = downLinks.DelegateTaskId;
+            for (var depth = 0; depth < MaxChainDepth && downId.HasValue; depth++)
+            {
+                ordered.Add(downId.Value);
+                var childLinks = await TryLoadLinksAsync(db, downId.Value).ConfigureAwait(false);
+                downId = childLinks.DelegateTaskId;
+            }
+
+            return ordered.Distinct().ToList();
+        }
+
+        /// <summary>Все задания ниже по ParentTaskId и DelegateTaskId завершены.</summary>
+        public static async Task<bool> IsDelegateSubtreeFullyCompletedAsync(DriveCareDBEntities db, Guid taskId)
+        {
+            List<Guid> ids;
+            try
+            {
+                ids = await CollectSubtreeTaskIdsAsync(db, taskId).ConfigureAwait(false);
+            }
+            catch (SqlException)
+            {
+                return false;
+            }
+
+            if (ids.Count == 0)
+                return false;
+
+            var rows = await db.Tasks.AsNoTracking()
+                .Where(t => ids.Contains(t.RowId))
+                .Select(t => t.IsCompleted)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            return rows.Count == ids.Count && rows.All(c => c);
         }
 
         public static async Task<List<DelegateEmployeeOption>> ListDelegateTargetsAsync(
@@ -92,7 +196,7 @@ namespace DriveCarePro.Services
             bool isCompleted)
         {
             var info = new TaskDelegationCardInfo();
-            var links = await TryLoadLinksAsync(taskId).ConfigureAwait(false);
+            var links = await TryLoadLinksAsync(db, taskId).ConfigureAwait(false);
 
             info.CanDelegate = !archiveView && !isCompleted && !links.DelegateTaskId.HasValue;
 
@@ -102,6 +206,7 @@ namespace DriveCarePro.Services
             {
                 var fromName = await GetAssigneeNameAsync(db, links.ParentTaskId.Value).ConfigureAwait(false);
                 sb.AppendLine("Поручение от: " + fromName + ".");
+                sb.AppendLine("Услуги и запчасти попадают в общий документ заказ-наряда при сохранении или завершении.");
                 sb.AppendLine("Можно передать дальше другому сотруднику — ваше задание останется у вас.");
             }
 
@@ -208,6 +313,7 @@ namespace DriveCarePro.Services
                     await CopyExtendedFieldsAsync(db, sourceTaskId, childId).ConfigureAwait(false);
                     await TrySetParentTaskIdAsync(db, childId, sourceTaskId).ConfigureAwait(false);
                     await TrySetDelegateTaskIdAsync(db, sourceTaskId, childId).ConfigureAwait(false);
+                    await ServiceDocumentService.TryCopyDocumentIdAsync(db, sourceTaskId, childId).ConfigureAwait(false);
 
                     return (true, null, childId);
                 }).ConfigureAwait(false);
@@ -231,42 +337,24 @@ namespace DriveCarePro.Services
                 if (current == null)
                     return string.Empty;
 
-                var currentLinks = await TryLoadLinksAsync(taskId).ConfigureAwait(false);
+                var orderedIds = await CollectOrderedChainTaskIdsAsync(db, taskId).ConfigureAwait(false);
+                if (orderedIds.Count <= 1)
+                    return string.Empty;
 
-                var walkId = currentLinks.ParentTaskId;
-                var depth = 0;
-                while (walkId.HasValue && depth++ < MaxChainDepth)
+                foreach (var id in orderedIds)
                 {
-                    var parent = await db.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.RowId == walkId.Value).ConfigureAwait(false);
-                    if (parent == null)
-                        break;
+                    var row = await db.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.RowId == id).ConfigureAwait(false);
+                    if (row == null)
+                        continue;
 
-                    var name = await GetEmployeeNameAsync(db, parent.EmployeeId).ConfigureAwait(false);
-                    chain.Insert(0, name + (parent.IsCompleted ? " ✓" : string.Empty));
-
-                    var parentLinks = await TryLoadLinksAsync(parent.RowId).ConfigureAwait(false);
-                    walkId = parentLinks.ParentTaskId;
+                    var name = await GetEmployeeNameAsync(db, row.EmployeeId).ConfigureAwait(false);
+                    if (id == taskId)
+                        chain.Add(name + (row.IsCompleted ? " ✓" : " (вы)"));
+                    else
+                        chain.Add(name + (row.IsCompleted ? " ✓" : " …"));
                 }
 
-                var myName = await GetEmployeeNameAsync(db, current.EmployeeId).ConfigureAwait(false);
-                chain.Add(myName + (current.IsCompleted ? " ✓" : " (вы)"));
-
-                var downId = currentLinks.DelegateTaskId;
-                depth = 0;
-                while (downId.HasValue && depth++ < MaxChainDepth)
-                {
-                    var child = await db.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.RowId == downId.Value).ConfigureAwait(false);
-                    if (child == null)
-                        break;
-
-                    var name = await GetEmployeeNameAsync(db, child.EmployeeId).ConfigureAwait(false);
-                    chain.Add(name + (child.IsCompleted ? " ✓" : " …"));
-
-                    var childLinks = await TryLoadLinksAsync(child.RowId).ConfigureAwait(false);
-                    downId = childLinks.DelegateTaskId;
-                }
-
-                return chain.Count <= 1 ? string.Empty : "Цепочка: " + string.Join(" → ", chain);
+                return "Цепочка: " + string.Join(" → ", chain);
             }
             catch
             {
@@ -376,9 +464,7 @@ namespace DriveCarePro.Services
             string parentAssigneeName)
         {
             var closed = 0;
-            var reportNote = string.Format(AutoCompleteByParentReportTemplate,
-                string.IsNullOrWhiteSpace(parentAssigneeName) ? "инициатор" : parentAssigneeName.Trim());
-
+            var reportNote = FormatAutoCloseNote(AutoCompleteByParentReportTemplate, parentAssigneeName);
             var links = await TryLoadLinksAsync(parentTaskId).ConfigureAwait(false);
             var downId = links.DelegateTaskId;
             var depth = 0;
@@ -390,19 +476,127 @@ namespace DriveCarePro.Services
                 if (child == null)
                     break;
 
-                if (!child.IsCompleted)
-                {
-                    child.IsCompleted = true;
-                    child.EndDate = now;
-                    child.ReportText = AppendAutoReportNote(child.ReportText, reportNote);
+                if (TryMarkAutoCompleted(child, reportNote, now))
                     closed++;
-                }
 
                 var childLinks = await TryLoadLinksAsync(child.RowId).ConfigureAwait(false);
                 downId = childLinks.DelegateTaskId;
             }
 
             return closed;
+        }
+
+        /// <summary>
+        /// Закрывает все незавершённые задания документа (поручения, закупки и т.д.).
+        /// </summary>
+        public static async Task<int> CompleteOpenTasksForDocumentAsync(
+            DriveCareDBEntities db,
+            Guid documentId,
+            string closedByName,
+            Guid? excludeTaskId = null)
+        {
+            List<Guid> taskIds;
+            try
+            {
+                taskIds = await db.Database.SqlQuery<Guid>(
+                    "SELECT RowId FROM Tasks WHERE DocumentId = @p0", documentId).ToListAsync().ConfigureAwait(false);
+            }
+            catch (SqlException ex) when (ex.Number == 207 || ex.Number == 208)
+            {
+                return 0;
+            }
+
+            var note = FormatAutoCloseNote(AutoCompleteByDocumentReportTemplate, closedByName);
+            return await CompleteTasksWithNoteAsync(db, taskIds, note, excludeTaskId).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Закрывает всё поддерево от корня (ParentTaskId + DelegateTaskId).
+        /// </summary>
+        public static async Task<int> CompleteEntireSubtreeAsync(
+            DriveCareDBEntities db,
+            Guid rootTaskId,
+            string closedByName,
+            Guid? excludeTaskId = null)
+        {
+            var taskIds = await CollectSubtreeTaskIdsAsync(db, rootTaskId).ConfigureAwait(false);
+            var note = FormatAutoCloseNote(AutoCompleteByParentReportTemplate, closedByName);
+            return await CompleteTasksWithNoteAsync(db, taskIds, note, excludeTaskId).ConfigureAwait(false);
+        }
+
+        private static async Task<List<Guid>> CollectSubtreeTaskIdsAsync(DriveCareDBEntities db, Guid rootTaskId)
+        {
+            var ids = new HashSet<Guid> { rootTaskId };
+            var changed = true;
+            while (changed)
+            {
+                changed = false;
+                foreach (var id in ids.ToList())
+                {
+                    try
+                    {
+                        var children = await db.Database.SqlQuery<Guid>(
+                            "SELECT RowId FROM Tasks WHERE ParentTaskId = @p0", id).ToListAsync().ConfigureAwait(false);
+                        foreach (var childId in children)
+                        {
+                            if (ids.Add(childId))
+                                changed = true;
+                        }
+
+                        var delegateId = await db.Database.SqlQuery<Guid?>(
+                            "SELECT DelegateTaskId FROM Tasks WHERE RowId = @p0", id).FirstOrDefaultAsync().ConfigureAwait(false);
+                        if (delegateId.HasValue && delegateId.Value != Guid.Empty && ids.Add(delegateId.Value))
+                            changed = true;
+                    }
+                    catch (SqlException ex) when (ex.Number == 207 || ex.Number == 208)
+                    {
+                        return ids.ToList();
+                    }
+                }
+            }
+
+            return ids.ToList();
+        }
+
+        private static async Task<int> CompleteTasksWithNoteAsync(
+            DriveCareDBEntities db,
+            IList<Guid> taskIds,
+            string reportNote,
+            Guid? excludeTaskId)
+        {
+            var closed = 0;
+            var now = DateTime.Now;
+            foreach (var id in taskIds)
+            {
+                if (excludeTaskId.HasValue && excludeTaskId.Value == id)
+                    continue;
+
+                var task = await db.Tasks.FirstOrDefaultAsync(t => t.RowId == id).ConfigureAwait(false);
+                if (task == null)
+                    continue;
+
+                if (TryMarkAutoCompleted(task, reportNote, now))
+                    closed++;
+            }
+
+            return closed;
+        }
+
+        private static bool TryMarkAutoCompleted(TaskEntity task, string reportNote, DateTime now)
+        {
+            if (task.IsCompleted)
+                return false;
+
+            task.IsCompleted = true;
+            task.EndDate = now;
+            task.ReportText = AppendAutoReportNote(task.ReportText, reportNote);
+            return true;
+        }
+
+        private static string FormatAutoCloseNote(string template, string closedByName)
+        {
+            var name = string.IsNullOrWhiteSpace(closedByName) ? "инициатор" : closedByName.Trim();
+            return string.Format(template, name);
         }
 
         private static string AppendAutoReportNote(string existing, string autoNote)
@@ -413,5 +607,152 @@ namespace DriveCarePro.Services
                 return existing;
             return existing.TrimEnd() + Environment.NewLine + Environment.NewLine + autoNote;
         }
+
+        /// <summary>
+        /// Переносит строки запчастей из поручения вверх по цепочке ParentTaskId (единый заказ-наряд).
+        /// </summary>
+        public static Task SyncPartLinesToAncestorsAsync(Guid childTaskId) =>
+            DatabaseExecutor.WithDbAsync(db => SyncPartLinesToAncestorsAsync(db, childTaskId));
+
+        public static async Task SyncPartLinesToAncestorsAsync(DriveCareDBEntities db, Guid childTaskId)
+        {
+            var childParts = await TaskReportService.LoadPartLinesAsync(db, childTaskId).ConfigureAwait(false);
+            childParts = childParts.Where(p => !string.IsNullOrWhiteSpace(p.PartName)).ToList();
+            if (childParts.Count == 0)
+                return;
+
+            var links = await TryLoadLinksAsync(childTaskId).ConfigureAwait(false);
+            var walkId = links.ParentTaskId;
+            var depth = 0;
+
+            while (walkId.HasValue && walkId.Value != Guid.Empty && depth++ < MaxChainDepth)
+            {
+                var parentId = walkId.Value;
+                await MergeChildPartsIntoParentAsync(db, parentId, childParts).ConfigureAwait(false);
+
+                var parentLinks = await TryLoadLinksAsync(parentId).ConfigureAwait(false);
+                walkId = parentLinks.ParentTaskId;
+            }
+        }
+
+        /// <summary>
+        /// WorkshopPartId, уже списанные в переданных поручениях ниже — не списывать повторно у инициатора.
+        /// </summary>
+        public static async Task<HashSet<Guid>> GetWorkshopPartIdsInDelegateSubtreeAsync(Guid taskId)
+        {
+            var set = new HashSet<Guid>();
+            var links = await TryLoadLinksAsync(taskId).ConfigureAwait(false);
+            var downId = links.DelegateTaskId;
+            var depth = 0;
+
+            while (downId.HasValue && depth++ < MaxChainDepth)
+            {
+                try
+                {
+                    var parts = await TaskReportService.LoadPartLinesAsync(downId.Value).ConfigureAwait(false);
+                    foreach (var p in parts)
+                    {
+                        if (p.WorkshopPartId.HasValue && p.WorkshopPartId.Value != Guid.Empty)
+                            set.Add(p.WorkshopPartId.Value);
+                    }
+                }
+                catch
+                {
+                    break;
+                }
+
+                var childLinks = await TryLoadLinksAsync(downId.Value).ConfigureAwait(false);
+                downId = childLinks.DelegateTaskId;
+            }
+
+            return set;
+        }
+
+        private static async Task MergeChildPartsIntoParentAsync(
+            DriveCareDBEntities db,
+            Guid parentTaskId,
+            IList<TaskPartLineRow> childParts)
+        {
+            var parentParts = await TaskReportService.LoadPartLinesAsync(db, parentTaskId).ConfigureAwait(false);
+            var merged = MergePartLists(parentParts, childParts);
+            if (PartsListsEquivalent(parentParts, merged))
+                return;
+
+            var services = await TaskReportService.LoadServiceLinesAsync(db, parentTaskId).ConfigureAwait(false);
+            var freeNote = await TaskReportService.LoadFreeTextNoteAsync(db, parentTaskId).ConfigureAwait(false);
+            await TaskReportService.SaveReportAsync(db, parentTaskId, services, merged, freeNote).ConfigureAwait(false);
+        }
+
+        private static List<TaskPartLineRow> MergePartLists(
+            IList<TaskPartLineRow> parentParts,
+            IList<TaskPartLineRow> incomingParts)
+        {
+            var result = parentParts.Select(ClonePartRow).ToList();
+
+            foreach (var inc in incomingParts)
+            {
+                if (string.IsNullOrWhiteSpace(inc.PartName))
+                    continue;
+
+                var key = PartMatchKey(inc);
+                var existing = result.FirstOrDefault(p => PartMatchKey(p) == key);
+                if (existing == null)
+                {
+                    result.Add(ClonePartRow(inc));
+                    continue;
+                }
+
+                if (inc.Quantity > existing.Quantity)
+                    existing.Quantity = inc.Quantity;
+                if (inc.UnitPrice > 0)
+                    existing.UnitPrice = inc.UnitPrice;
+                existing.RecalculateAmount();
+            }
+
+            return result;
+        }
+
+        private static bool PartsListsEquivalent(IList<TaskPartLineRow> left, IList<TaskPartLineRow> right)
+        {
+            var leftMap = left
+                .GroupBy(PartMatchKey)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+            var rightMap = right
+                .GroupBy(PartMatchKey)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+            if (leftMap.Count != rightMap.Count)
+                return false;
+
+            foreach (var kv in leftMap)
+            {
+                if (!rightMap.TryGetValue(kv.Key, out var r))
+                    return false;
+                if (kv.Value.Quantity != r.Quantity || kv.Value.UnitPrice != r.UnitPrice)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static string PartMatchKey(TaskPartLineRow p)
+        {
+            if (p.WorkshopPartId.HasValue && p.WorkshopPartId.Value != Guid.Empty)
+                return "id:" + p.WorkshopPartId.Value.ToString("N");
+
+            return "n:" + (p.PartName ?? string.Empty).Trim().ToLowerInvariant()
+                   + "|" + (p.UnitName ?? string.Empty).Trim().ToLowerInvariant();
+        }
+
+        private static TaskPartLineRow ClonePartRow(TaskPartLineRow p) => new TaskPartLineRow
+        {
+            RowId = p.RowId,
+            WorkshopPartId = p.WorkshopPartId,
+            PartName = p.PartName,
+            Quantity = p.Quantity,
+            UnitName = p.UnitName,
+            UnitPrice = p.UnitPrice,
+            LineAmount = p.LineAmount
+        };
     }
 }

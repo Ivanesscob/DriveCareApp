@@ -1,6 +1,7 @@
 using DriveCare.Pages.User.ActionPages;
 using DriveCareCore;
 using DriveCareCore.Data.BD;
+using DriveCareCore.Messaging;
 using DriveCareCore.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -8,6 +9,7 @@ using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -32,11 +34,30 @@ namespace DriveCare.Pages.User
 
             PrevCommand = new DelegateCommand(_ => Shift(-1), _ => GarageCars.Count > 1);
             NextCommand = new DelegateCommand(_ => Shift(1), _ => GarageCars.Count > 1);
-            Loaded += (_, __) =>
+            Loaded += async (_, __) =>
             {
                 ReloadCars();
                 ReloadNotifications();
+                WorkshopChatRealtimeClient.MessageReceived -= OnChatMessageReceived;
+                WorkshopChatRealtimeClient.MessageReceived += OnChatMessageReceived;
+                if (AppState.CurrentUserId != Guid.Empty)
+                    WorkshopChatRealtimeClient.StartForUser(AppState.CurrentUserId);
+                await ReloadChatsUnreadBadgeAsync().ConfigureAwait(true);
             };
+            Unloaded += (_, __) =>
+            {
+                WorkshopChatRealtimeClient.MessageReceived -= OnChatMessageReceived;
+            };
+        }
+
+        private async void OnChatMessageReceived(ChatPushEventArgs e)
+        {
+            if (e == null)
+                return;
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                await ReloadChatsUnreadBadgeAsync().ConfigureAwait(true);
+            });
         }
 
         public ObservableCollection<CarDisplayItem> GarageCars { get; }
@@ -328,7 +349,45 @@ ORDER BY n.CreatedAt DESC;";
 
         private void ChatsButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Раздел чатов будет добавлен в следующем обновлении.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
+            AppState.Navigate(new MessagesPage());
+        }
+
+        private async Task ReloadChatsUnreadBadgeAsync()
+        {
+            if (ChatsBadge == null)
+                return;
+
+            if (!IsLoggedIn || !WorkshopMessagingService.TablesExist())
+            {
+                UpdateChatsBadge(0);
+                return;
+            }
+
+            try
+            {
+                var unread = await WorkshopMessagingService.CountUnreadForUserAsync(AppState.CurrentUserId)
+                    .ConfigureAwait(true);
+                UpdateChatsBadge(unread);
+            }
+            catch
+            {
+                UpdateChatsBadge(0);
+            }
+        }
+
+        private void UpdateChatsBadge(int unread)
+        {
+            if (ChatsBadge == null)
+                return;
+
+            if (unread <= 0)
+            {
+                ChatsBadge.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            ChatsBadge.Visibility = Visibility.Visible;
+            ChatsBadgeText.Text = unread > 99 ? "99+" : unread.ToString();
         }
 
         private void HeroCar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

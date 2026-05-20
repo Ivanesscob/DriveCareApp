@@ -40,6 +40,14 @@ namespace DriveCare.Pages.User.ActionPages
             LeftInfoSlots = new ObservableCollection<MaintenanceInfoSlotVm>();
             RightInfoSlots = new ObservableCollection<MaintenanceInfoSlotVm>();
             KmRecommendations = new ObservableCollection<MaintenanceRecommendationVm>();
+            ThemeService.ThemeChanged += OnAppThemeChanged;
+        }
+
+        private void OnAppThemeChanged(object sender, EventArgs e)
+        {
+            if (_selectedCar == null)
+                return;
+            RebuildMileageChart();
         }
 
         public PlotModel MileagePlotModel
@@ -79,6 +87,35 @@ namespace DriveCare.Pages.User.ActionPages
             HasMileagePoints ? Visibility.Visible : Visibility.Collapsed;
 
         private bool HasMileagePoints => _historyNewestFirst.Any(h => h.MileageKm.HasValue);
+
+        /// <summary>Минимально допустимый реальный пробег: не ниже истории и примерного ориентира.</summary>
+        public int GetMinimumAllowedMileageKm()
+        {
+            var maxHistory = _historyNewestFirst
+                .Where(h => h.MileageKm.HasValue)
+                .Select(h => h.MileageKm.Value)
+                .DefaultIfEmpty(0)
+                .Max();
+            var approx = _approximateCurrentMileageKm ?? 0;
+            return Math.Max(maxHistory, approx);
+        }
+
+        public (bool ok, string error) TryAddRealMileage(int mileageKm)
+        {
+            if (_selectedCar == null)
+                return (false, "Выберите автомобиль.");
+
+            var minKm = GetMinimumAllowedMileageKm();
+            if (mileageKm < minKm)
+                return (false, $"Пробег не может быть меньше {minKm:N0} км.");
+
+            var result = ServiceMaintenanceRepository.TryInsertOdometerReading(_selectedCar.UserCarId, mileageKm);
+            if (!result.ok)
+                return result;
+
+            ReloadForSelectedCar();
+            return (true, null);
+        }
 
         public ObservableCollection<CarDisplayItem> GarageCars { get; }
         public ObservableCollection<MaintenanceHistoryItemVm> HistoryItems { get; }
@@ -286,53 +323,42 @@ namespace DriveCare.Pages.User.ActionPages
                 MileagePredictedLineVisibility = Visibility.Visible;
             }
 
-            var border = OxyColor.FromRgb(120, 125, 140);
-            var label = OxyColor.FromRgb(154, 160, 176);
-            var title = OxyColor.FromRgb(208, 213, 224);
+            var palette = OxyPlotThemeHelper.GetCurrentPalette();
 
-            var model = new PlotModel
-            {
-                Background = OxyColors.Transparent,
-                PlotAreaBorderColor = border,
-                TextColor = title,
-                PlotMargins = new OxyThickness(48, 8, 12, 40)
-            };
+            var model = new PlotModel { PlotMargins = new OxyThickness(48, 8, 12, 40) };
+            OxyPlotThemeHelper.ApplyToPlotModel(model, palette);
 
-            model.Axes.Add(new DateTimeAxis
+            var dateAxis = new DateTimeAxis
             {
                 Position = AxisPosition.Bottom,
                 Title = "Дата",
                 StringFormat = "dd.MM.yy",
                 MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.None,
-                MajorGridlineColor = OxyColor.FromArgb(80, 120, 125, 140),
-                TicklineColor = label,
-                TextColor = label,
-                TitleColor = title
-            });
+                MinorGridlineStyle = LineStyle.None
+            };
+            OxyPlotThemeHelper.ApplyToAxis(dateAxis, palette);
+            model.Axes.Add(dateAxis);
 
-            model.Axes.Add(new LinearAxis
+            var kmAxis = new LinearAxis
             {
                 Position = AxisPosition.Left,
                 Title = "Пробег, км",
                 MinimumPadding = 0.05,
                 MaximumPadding = 0.12,
                 MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.None,
-                MajorGridlineColor = OxyColor.FromArgb(80, 120, 125, 140),
-                TicklineColor = label,
-                TextColor = label,
-                TitleColor = title
-            });
+                MinorGridlineStyle = LineStyle.None
+            };
+            OxyPlotThemeHelper.ApplyToAxis(kmAxis, palette);
+            model.Axes.Add(kmAxis);
 
             var line = new LineSeries
             {
-                Color = OxyColor.FromRgb(45, 212, 191),
+                Color = palette.LinePrimary,
                 StrokeThickness = 2.5,
                 MarkerType = MarkerType.Circle,
                 MarkerSize = 4.5,
-                MarkerFill = OxyColor.FromRgb(45, 212, 191),
-                MarkerStroke = OxyColors.White,
+                MarkerFill = palette.LinePrimary,
+                MarkerStroke = palette.MarkerStroke,
                 MarkerStrokeThickness = 1
             };
             foreach (var p in pts)
@@ -344,7 +370,7 @@ namespace DriveCare.Pages.User.ActionPages
             {
                 var trend = new LineSeries
                 {
-                    Color = OxyColor.FromArgb(200, 147, 112, 219),
+                    Color = OxyColor.FromAColor(200, palette.LineTrend),
                     LineStyle = LineStyle.Dash,
                     StrokeThickness = 2,
                     MarkerType = MarkerType.None
@@ -360,8 +386,8 @@ namespace DriveCare.Pages.User.ActionPages
                 {
                     MarkerType = MarkerType.Square,
                     MarkerSize = 5.5,
-                    MarkerFill = OxyColor.FromRgb(147, 112, 219),
-                    MarkerStroke = OxyColors.White,
+                    MarkerFill = palette.LineTrend,
+                    MarkerStroke = palette.MarkerStroke,
                     MarkerStrokeThickness = 1
                 };
                 predPt.Points.Add(new ScatterPoint(DateTimeAxis.ToDouble(today), predictedKm));

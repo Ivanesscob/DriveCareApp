@@ -14,29 +14,61 @@ namespace DriveCarePro.Pages
 {
     public partial class ProTaskShopPage : Page, INotifyPropertyChanged
     {
-        private readonly Guid _taskId;
+        private readonly Guid? _taskId;
         private readonly Guid _workshopId;
+        private readonly bool _fromTask;
         private string _activeCategory = "Engine";
         private decimal _cartTotal;
 
         private readonly ObservableCollection<WorkshopPartItem> _products = new ObservableCollection<WorkshopPartItem>();
         private readonly ObservableCollection<ProShopCartItemVm> _cart = new ObservableCollection<ProShopCartItemVm>();
 
+        /// <summary>Каталог для закупщика с главной (без привязки к заданию).</summary>
+        public ProTaskShopPage(Guid workshopId)
+            : this(null, workshopId)
+        {
+        }
+
         public ProTaskShopPage(Guid taskId, Guid workshopId)
+            : this((Guid?)taskId, workshopId)
+        {
+        }
+
+        private ProTaskShopPage(Guid? taskId, Guid workshopId)
         {
             _taskId = taskId;
             _workshopId = workshopId;
+            _fromTask = taskId.HasValue && taskId.Value != Guid.Empty;
             InitializeComponent();
             DataContext = this;
             ProductsList.ItemsSource = _products;
             CartList.ItemsSource = _cart;
             Loaded += ProTaskShopPage_Loaded;
             _cart.CollectionChanged += (_, __) => RefreshCartUi();
+
+            if (!_fromTask)
+            {
+                ShopHintText.Text = "Каталог запчастей для закупщика. Позиции из заданий на закупку открывайте в «Мои задания».";
+                CartPanel.Visibility = Visibility.Collapsed;
+                BackButton.Content = "← На главную";
+            }
         }
 
         private async void ProTaskShopPage_Loaded(object sender, RoutedEventArgs e)
         {
             Loaded -= ProTaskShopPage_Loaded;
+
+            if (!_fromTask && !AppState.CanAccessPurchaserShop)
+            {
+                MessageBox.Show(
+                    "Магазин доступен только сотрудникам с ролью закупки (закуп, снабжение, склад, владелец) или правом PURCHASE_PARTS.",
+                    "Магазин",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                AppState.Navigate(new ProHomePage());
+                return;
+            }
+
             await LoadCategoryAsync(_activeCategory).ConfigureAwait(true);
         }
 
@@ -60,8 +92,13 @@ namespace DriveCarePro.Pages
             }
         }
 
-        private void Back_Click(object sender, RoutedEventArgs e) =>
-            AppState.Navigate(new EmployeeTaskCardPage(_taskId));
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            if (_fromTask && _taskId.HasValue)
+                AppState.Navigate(new EmployeeTaskCardPage(_taskId.Value));
+            else
+                AppState.Navigate(new ProHomePage());
+        }
 
         private async void Category_Click(object sender, RoutedEventArgs e)
         {
@@ -110,6 +147,9 @@ namespace DriveCarePro.Pages
 
         private async void RequestPurchase_Click(object sender, RoutedEventArgs e)
         {
+            if (!_fromTask || !_taskId.HasValue)
+                return;
+
             if (_cart.Count == 0)
             {
                 MessageBox.Show("Добавьте позиции в корзину.", "Магазин", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -145,7 +185,7 @@ namespace DriveCarePro.Pages
             }).ToList();
 
             var (ok, error, _) = await TaskPurchaseRequestService.CreatePurchaseRequestAsync(
-                _taskId, emp.RowId, win.SelectedEmployee.EmployeeId, lines).ConfigureAwait(true);
+                _taskId.Value, emp.RowId, win.SelectedEmployee.EmployeeId, lines).ConfigureAwait(true);
 
             if (!ok)
             {
@@ -156,12 +196,12 @@ namespace DriveCarePro.Pages
 
             MessageBox.Show(
                 "Запрос на покупку отправлен " + win.SelectedEmployee.DisplayName + ".\n" +
-                "После завершения закупки детали появятся в отчёте вашего задания.",
+                "После завершения задания закупщиком детали поступят на склад и в отчёт вашего задания.",
                 "Магазин", MessageBoxButton.OK, MessageBoxImage.Information);
 
             _cart.Clear();
             RefreshCartUi();
-            AppState.Navigate(new EmployeeTaskCardPage(_taskId));
+            AppState.Navigate(new EmployeeTaskCardPage(_taskId.Value));
         }
 
         private void RefreshCartUi()

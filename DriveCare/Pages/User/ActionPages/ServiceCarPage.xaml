@@ -56,7 +56,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="220"/>
+                            <ColumnDefinition Width="320" MinWidth="280"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Автомобиль" Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,0,0,6"/>
@@ -75,15 +75,26 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom" MinWidth="200">
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom" MinWidth="260">
                             <TextBlock Text="Примерный пробег" Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,0,0,6"/>
-                            <Border MinHeight="44" Padding="12,10" CornerRadius="10"
-                                    Background="{DynamicResource App.Brush.FieldInputBg}"
-                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
-                                <TextBlock Text="{Binding ApproximateMileageDisplayText}"
-                                           Foreground="{DynamicResource App.Brush.FieldInputFg}"
-                                           FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" MinHeight="44" Padding="12,10" CornerRadius="10"
+                                        Background="{DynamicResource App.Brush.FieldInputBg}"
+                                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                                    <TextBlock Text="{Binding ApproximateMileageDisplayText}"
+                                               Foreground="{DynamicResource App.Brush.FieldInputFg}"
+                                               FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                </Border>
+                                <Button Grid.Column="1" Content="Реальный пробег"
+                                        Style="{StaticResource App.Button.Outline}" Height="44" MinWidth="120"
+                                        Margin="8,0,0,0" VerticalAlignment="Stretch"
+                                        Click="AddRealMileage_Click"
+                                        ToolTip="Записать показания одометра (не меньше последнего и примерного пробега)"/>
+                            </Grid>
                         </StackPanel>
                     </Grid>
 
@@ -185,7 +196,8 @@
                     <Border CornerRadius="12" Background="{DynamicResource App.Brush.Surface2}"
                             BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" Padding="8,8,8,4" Margin="0,0,0,8"
                             Visibility="{Binding MileagePlotHostVisibility}">
-                        <oxy:PlotView Model="{Binding MileagePlotModel}" MinHeight="240" MinWidth="200"/>
+                        <oxy:PlotView Model="{Binding MileagePlotModel}" MinHeight="240" MinWidth="200"
+                                      Background="Transparent"/>
                     </Border>
 
                     <StackPanel Margin="0,0,0,20" Visibility="{Binding MileageInsightPanelVisibility}">

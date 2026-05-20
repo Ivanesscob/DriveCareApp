@@ -1,5 +1,6 @@
 using DriveCareCore.Data.BD;
 using DriveCarePro.Services.ServiceBooking;
+using DriveCarePro.Services.ServiceDocuments;
 using DriveCarePro.Services.WorkshopServices;
 using System;
 using System.Collections.Generic;
@@ -76,6 +77,14 @@ namespace DriveCarePro.Services
             }).ConfigureAwait(false);
         }
 
+        public static Task<bool> IsAuthorizedPurchaserAsync(Guid employeeId) =>
+            DatabaseExecutor.WithDbAsync(db => IsAuthorizedPurchaserAsync(db, employeeId));
+
+        public static bool IsAuthorizedPurchaserByRolesAndPermissions(
+            IList<Role> roles,
+            IReadOnlyCollection<string> permissionCodes) =>
+            AppState.IsPurchaserByRolesAndPermissions(roles, permissionCodes);
+
         private static async Task<bool> IsAuthorizedPurchaserAsync(DriveCareDBEntities db, Guid employeeId)
         {
             var roleIds = await db.EmployeeRolesMaps.AsNoTracking()
@@ -92,16 +101,8 @@ namespace DriveCarePro.Services
                 .ToListAsync()
                 .ConfigureAwait(false);
 
-            foreach (var role in roles)
-            {
-                if (role == null)
-                    continue;
-                if (AppState.IsOwnerRoleName(role.Name))
-                    return true;
-                var n = (role.Name ?? string.Empty).Trim().ToLowerInvariant();
-                if (n.Contains("закуп") || n.Contains("снаб") || n.Contains("склад"))
-                    return true;
-            }
+            if (IsAuthorizedPurchaserByRolesAndPermissions(roles, Array.Empty<string>()))
+                return true;
 
             try
             {
@@ -116,14 +117,12 @@ namespace DriveCarePro.Services
                     .ToListAsync()
                     .ConfigureAwait(false);
 
-                if (codes.Any(c => string.Equals(c, PurchasePartsPermission, StringComparison.OrdinalIgnoreCase)))
-                    return true;
+                return IsAuthorizedPurchaserByRolesAndPermissions(roles, codes);
             }
             catch
             {
+                return false;
             }
-
-            return false;
         }
 
         public static async Task<(bool ok, string error, Guid? purchaseTaskId)> CreatePurchaseRequestAsync(
@@ -176,10 +175,9 @@ namespace DriveCarePro.Services
 
                     var sb = new StringBuilder();
                     sb.AppendLine("Закупка запчастей по запросу от: " + requesterName);
-                    sb.AppendLine("После нажатия «Закупка выполнена» позиции автоматически попадут в отчёт исходного задания.");
+                    sb.AppendLine("После завершения задания позиции поступят на склад и попадут в отчёт исходного задания.");
                     sb.AppendLine();
                     sb.AppendLine("Список к закупке:");
-                    var sort = 0;
                     foreach (var line in lines.Where(l => !string.IsNullOrWhiteSpace(l.PartName)))
                     {
                         line.RecalculateAmount();
@@ -197,45 +195,60 @@ namespace DriveCarePro.Services
                     if (title.Length > 250)
                         title = title.Substring(0, 250);
 
-                    var purchaseTask = new TaskEntity
+                    using (var tx = db.Database.BeginTransaction())
                     {
-                        RowId = purchaseTaskId,
-                        Title = title,
-                        Description = sb.ToString().Trim(),
-                        EmployeeId = purchaserEmployeeId,
-                        StatusId = statusId,
-                        CreatedAt = DateTime.Now,
-                        StartDate = DateTime.Now,
-                        IsCompleted = false,
-                        CarId = source.CarId,
-                        ClientUserId = source.ClientUserId
-                    };
+                        try
+                        {
+                            var purchaseTask = new TaskEntity
+                            {
+                                RowId = purchaseTaskId,
+                                Title = title,
+                                Description = sb.ToString().Trim(),
+                                EmployeeId = purchaserEmployeeId,
+                                StatusId = statusId,
+                                CreatedAt = DateTime.Now,
+                                StartDate = DateTime.Now,
+                                IsCompleted = false,
+                                CarId = source.CarId,
+                                ClientUserId = source.ClientUserId
+                            };
 
-                    db.Tasks.Add(purchaseTask);
-                    await db.SaveChangesAsync().ConfigureAwait(false);
+                            db.Tasks.Add(purchaseTask);
+                            await db.SaveChangesAsync().ConfigureAwait(false);
 
-                    await CopyExtendedFieldsAsync(db, sourceTaskId, purchaseTaskId).ConfigureAwait(false);
-                    await TrySetParentTaskIdAsync(db, purchaseTaskId, sourceTaskId).ConfigureAwait(false);
+                            await CopyExtendedFieldsAsync(db, sourceTaskId, purchaseTaskId).ConfigureAwait(false);
+                            await TrySetParentTaskIdAsync(db, purchaseTaskId, sourceTaskId).ConfigureAwait(false);
+                            await ServiceDocumentService.TryCopyDocumentIdAsync(db, sourceTaskId, purchaseTaskId)
+                                .ConfigureAwait(false);
 
-                    await db.Database.ExecuteSqlCommandAsync(
-                        @"INSERT INTO TaskPurchaseRequests
-                          (RowId, SourceTaskId, PurchaseTaskId, RequestedByEmployeeId, PurchaserEmployeeId, IsFulfilled, CreatedAt)
-                          VALUES (@p0,@p1,@p2,@p3,@p4,0,@p5)",
-                        requestId, sourceTaskId, purchaseTaskId, fromEmployeeId, purchaserEmployeeId, DateTime.Now)
-                        .ConfigureAwait(false);
+                            await db.Database.ExecuteSqlCommandAsync(
+                                @"INSERT INTO TaskPurchaseRequests
+                                  (RowId, SourceTaskId, PurchaseTaskId, RequestedByEmployeeId, PurchaserEmployeeId, IsFulfilled, CreatedAt)
+                                  VALUES (@p0,@p1,@p2,@p3,@p4,0,@p5)",
+                                requestId, sourceTaskId, purchaseTaskId, fromEmployeeId, purchaserEmployeeId, DateTime.Now)
+                                .ConfigureAwait(false);
 
-                    sort = 0;
-                    foreach (var line in lines.Where(l => !string.IsNullOrWhiteSpace(l.PartName)))
-                    {
-                        line.RecalculateAmount();
-                        await db.Database.ExecuteSqlCommandAsync(
-                            @"INSERT INTO TaskPurchaseRequestLines
-                              (RowId, RequestId, WorkshopPartId, PartName, Quantity, UnitName, UnitPrice, SortOrder)
-                              VALUES (@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7)",
-                            Guid.NewGuid(), requestId,
-                            (object)line.WorkshopPartId ?? DBNull.Value,
-                            line.PartName.Trim(), line.Quantity,
-                            line.UnitName ?? "шт.", line.UnitPrice, sort++).ConfigureAwait(false);
+                            var sort = 0;
+                            foreach (var line in lines.Where(l => !string.IsNullOrWhiteSpace(l.PartName)))
+                            {
+                                line.RecalculateAmount();
+                                await db.Database.ExecuteSqlCommandAsync(
+                                    @"INSERT INTO TaskPurchaseRequestLines
+                                      (RowId, RequestId, WorkshopPartId, PartName, Quantity, UnitName, UnitPrice, SortOrder)
+                                      VALUES (@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7)",
+                                    Guid.NewGuid(), requestId,
+                                    (object)line.WorkshopPartId ?? DBNull.Value,
+                                    line.PartName.Trim(), line.Quantity,
+                                    line.UnitName ?? "шт.", line.UnitPrice, sort++).ConfigureAwait(false);
+                            }
+
+                            tx.Commit();
+                        }
+                        catch
+                        {
+                            tx.Rollback();
+                            throw;
+                        }
                     }
 
                     return (true, null, purchaseTaskId);
@@ -248,6 +261,66 @@ namespace DriveCarePro.Services
             catch (Exception ex)
             {
                 return (false, ex.Message, null);
+            }
+        }
+
+        public static async Task<(bool ok, string error)> SaveRequestLinesAsync(
+            Guid requestId,
+            IList<TaskPartLineRow> lines)
+        {
+            if (requestId == Guid.Empty)
+                return (false, "Не найден запрос на закупку.");
+
+            var rows = (lines ?? Array.Empty<TaskPartLineRow>())
+                .Where(r => !string.IsNullOrWhiteSpace(r?.PartName))
+                .ToList();
+
+            try
+            {
+                return await DatabaseExecutor.WithDbAsync(async db =>
+                {
+                    var req = await db.Database.SqlQuery<PurchaseRequestRow>(
+                        @"SELECT RowId, SourceTaskId, PurchaseTaskId, RequestedByEmployeeId, PurchaserEmployeeId, IsFulfilled
+                          FROM TaskPurchaseRequests WHERE RowId = @p0",
+                        requestId).FirstOrDefaultAsync().ConfigureAwait(false);
+
+                    if (req == null)
+                        return (false, "Запрос на закупку не найден.");
+
+                    if (req.IsFulfilled)
+                        return (false, "Закупка уже завершена — изменения недоступны.");
+
+                    var dbLines = await LoadRequestLinesWithSortAsync(db, requestId).ConfigureAwait(false);
+                    if (dbLines.Count == 0)
+                        return (false, "В запросе нет позиций.");
+
+                    var count = Math.Min(dbLines.Count, rows.Count);
+                    for (var i = 0; i < count; i++)
+                    {
+                        var src = rows[i];
+                        var sort = dbLines[i].SortOrder;
+                        await db.Database.ExecuteSqlCommandAsync(
+                            @"UPDATE TaskPurchaseRequestLines
+                              SET PartName = @p0, Quantity = @p1, UnitName = @p2, UnitPrice = @p3
+                              WHERE RequestId = @p4 AND SortOrder = @p5",
+                            (src.PartName ?? string.Empty).Trim(),
+                            src.Quantity,
+                            src.UnitName ?? "шт.",
+                            src.UnitPrice,
+                            requestId,
+                            sort).ConfigureAwait(false);
+                    }
+
+                    return (true, null);
+                }).ConfigureAwait(false);
+            }
+            catch (SqlException ex) when (ex.Number == 208)
+            {
+                return (false, "Таблицы закупок не найдены. Выполните SQL TaskPurchaseRequests_Tables.sql");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
             }
         }
 
@@ -319,11 +392,13 @@ namespace DriveCarePro.Services
                     var name = FormatName(row.FirstName, row.LastName, row.MidName, row.Login);
                     var info = new TaskPurchaseStatusInfo { HasOpenRequest = true };
 
-                    if (row.PurchaseCompleted)
+                    if (row.IsFulfilled)
                     {
                         info.PurchaserCompleted = true;
                         info.StatusText = name + " завершил(а) закупку — детали добавлены в отчёт.";
                     }
+                    else if (row.PurchaseCompleted)
+                        info.StatusText = name + " закрыл(а) задание, но детали ещё не перенесены. Нужно снова открыть задание закупки и нажать «Завершить задание».";
                     else
                         info.StatusText = "Закупка у " + name + " — в работе.";
 
@@ -369,6 +444,8 @@ namespace DriveCarePro.Services
                     if (lines.Count == 0)
                         return (false, "В запросе нет позиций для переноса в отчёт. Проверьте таблицу TaskPurchaseRequestLines.");
 
+                    using (var tx = db.Database.BeginTransaction())
+                    {
                     var partRows = lines.Select(l =>
                     {
                         var row = new TaskPartLineRow
@@ -383,7 +460,48 @@ namespace DriveCarePro.Services
                         return row;
                     }).ToList();
 
-                    await TaskReportService.AppendPartLinesAsync(req.SourceTaskId, partRows).ConfigureAwait(false);
+                    var workshopId = await WorkshopStockService.ResolveWorkshopIdForPurchaseAsync(
+                        db, purchaserEmployeeId, req.SourceTaskId).ConfigureAwait(false);
+
+                    var (stockOk, stockError) = await WorkshopStockService.ReceivePurchaseLinesAsync(
+                        db, workshopId, partRows).ConfigureAwait(false);
+
+                    if (!stockOk)
+                        return (false, stockError);
+
+                    try
+                    {
+                        await TaskReportService.AppendPartLinesAsync(db, req.SourceTaskId, partRows)
+                            .ConfigureAwait(false);
+                        await ServiceDocumentService.SyncDocumentFromChainAsync(db, req.SourceTaskId)
+                            .ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        return (false, "Не удалось записать детали в исходное задание: " + ex.Message);
+                    }
+
+                    if (!await TaskPartLineSql.TableExistsAsync(db).ConfigureAwait(false))
+                    {
+                        return (false,
+                            "Таблица TaskPartLines не найдена. Выполните на DriveCareDB скрипт WorkshopServices_Tables.sql.");
+                    }
+
+                    var lineCount = await db.Database.SqlQuery<int>(
+                        "SELECT COUNT(1) FROM TaskPartLines WHERE TaskId = @p0", req.SourceTaskId)
+                        .FirstOrDefaultAsync().ConfigureAwait(false);
+
+                    if (lineCount == 0)
+                    {
+                        return (false,
+                            "Детали не записались в TaskPartLines. Проверьте структуру таблицы (UnitName/LineAmount или Unit/Amount).");
+                    }
+
+                    var (consumeOk, consumeError) = await WorkshopStockService.ConsumeStockAsync(
+                        db, workshopId, partRows).ConfigureAwait(false);
+
+                    if (!consumeOk)
+                        return (false, consumeError);
 
                     await db.Database.ExecuteSqlCommandAsync(
                         "UPDATE TaskPurchaseRequests SET IsFulfilled = 1 WHERE RowId = @p0", req.RowId)
@@ -391,10 +509,20 @@ namespace DriveCarePro.Services
 
                     task.IsCompleted = true;
                     task.EndDate = DateTime.Now;
-                    task.ReportText = "Закупка выполнена. Детали добавлены в отчёт исходного задания.";
+                    task.ReportText = "Задание завершено. Детали приняты на склад и добавлены в отчёт исходного задания (списание со склада — при завершении ремонта).";
+
+                    var purchaser = await db.Employees.AsNoTracking()
+                        .FirstOrDefaultAsync(e => e.RowId == purchaserEmployeeId).ConfigureAwait(false);
+                    var purchaserName = purchaser == null
+                        ? "Закупщик"
+                        : AppState.FormatEmployeeDisplayName(purchaser);
+                    DriveCareCore.Data.Services.EmployeeTaskNotifier.NotifyPurchaseFulfilled(
+                        db, req.SourceTaskId, req.RequestedByEmployeeId, purchaserName);
 
                     await db.SaveChangesAsync().ConfigureAwait(false);
+                    tx.Commit();
                     return (true, null);
+                    }
                 }).ConfigureAwait(false);
             }
             catch (SqlException ex) when (ex.Number == 208)
@@ -435,17 +563,23 @@ namespace DriveCarePro.Services
 
         private static async Task<List<TaskPurchaseLineRow>> LoadRequestLinesAsync(DriveCareDBEntities db, Guid requestId)
         {
+            var rows = await LoadRequestLinesWithSortAsync(db, requestId).ConfigureAwait(false);
+            return rows;
+        }
+
+        private static async Task<List<TaskPurchaseLineRow>> LoadRequestLinesWithSortAsync(DriveCareDBEntities db, Guid requestId)
+        {
             try
             {
                 return await db.Database.SqlQuery<TaskPurchaseLineRow>(
-                    @"SELECT WorkshopPartId, PartName, Quantity, UnitName, UnitPrice
+                    @"SELECT WorkshopPartId, PartName, Quantity, UnitName, UnitPrice, SortOrder
                       FROM TaskPurchaseRequestLines WHERE RequestId = @p0 ORDER BY SortOrder",
                     requestId).ToListAsync().ConfigureAwait(false);
             }
             catch (SqlException ex) when (ex.Number == 207)
             {
                 return await db.Database.SqlQuery<TaskPurchaseLineRow>(
-                    @"SELECT PartName, Quantity, UnitName, UnitPrice
+                    @"SELECT PartName, Quantity, UnitName, UnitPrice, SortOrder
                       FROM TaskPurchaseRequestLines WHERE RequestId = @p0 ORDER BY SortOrder",
                     requestId).ToListAsync().ConfigureAwait(false);
             }
@@ -537,6 +671,7 @@ namespace DriveCarePro.Services
             public decimal Quantity { get; set; }
             public string UnitName { get; set; }
             public decimal UnitPrice { get; set; }
+            public int SortOrder { get; set; }
         }
 
         private sealed class SourcePurchaseStatusRow

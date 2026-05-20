@@ -1,4 +1,5 @@
 using DriveCareCore.Data.BD;
+using DriveCarePro.Services.ServiceDocuments;
 using System;
 using System.Data.Entity;
 using System.Data.SqlClient;
@@ -16,7 +17,8 @@ namespace DriveCarePro.Services.ServiceBooking
             DriveCareDBEntities db,
             ServiceBookingContext ctx,
             Guid carId,
-            Guid repairHistoryId)
+            Guid repairHistoryId,
+            Guid workshopId)
         {
             var employee = AppState.CurrentEmployee;
             if (employee == null)
@@ -47,6 +49,13 @@ namespace DriveCarePro.Services.ServiceBooking
             await db.SaveChangesAsync().ConfigureAwait(false);
 
             await TryWriteExtendedFieldsAsync(db, task.RowId, ctx, repairHistoryId).ConfigureAwait(false);
+
+            if (workshopId != Guid.Empty)
+            {
+                await ServiceDocumentService.CreateForBookingAsync(
+                    db, ctx, task.RowId, carId, repairHistoryId, workshopId).ConfigureAwait(false);
+            }
+
             return task.RowId;
         }
 
