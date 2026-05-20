@@ -26,6 +26,22 @@ namespace DriveCare.Pages.User
                 if (AppState.CurrentUserId != Guid.Empty)
                     WorkshopChatRealtimeClient.StartForUser(AppState.CurrentUserId);
                 await LoadConversationsAsync().ConfigureAwait(true);
+                if (AppState.PendingOpenConversationId.HasValue)
+                {
+                    _selectedConversationId = AppState.PendingOpenConversationId.Value;
+                    AppState.PendingOpenConversationId = null;
+                    if (ConversationsList.ItemsSource is IEnumerable<ConversationListItem> items)
+                    {
+                        var item = items.FirstOrDefault(c => c.ConversationId == _selectedConversationId);
+                        if (item != null)
+                        {
+                            _suppressSelectionChanged = true;
+                            try { ConversationsList.SelectedItem = item; }
+                            finally { _suppressSelectionChanged = false; }
+                            await LoadMessagesOnlyAsync().ConfigureAwait(true);
+                        }
+                    }
+                }
             };
             Unloaded += (_, __) =>
             {
@@ -156,12 +172,17 @@ namespace DriveCare.Pages.User
 
         private async void Send_Click(object sender, RoutedEventArgs e) => await SendMessageAsync().ConfigureAwait(true);
 
-        private async void MessageInput_KeyDown(object sender, KeyEventArgs e)
+        private async void MessageInput_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Enter)
+            if (!ChatInputKeyHelper.IsEnterKey(e))
                 return;
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+
+            if (ChatInputKeyHelper.IsShiftHeld)
+            {
+                e.Handled = true;
+                ChatInputKeyHelper.InsertNewLine(MessageInput);
                 return;
+            }
 
             e.Handled = true;
             await SendMessageAsync().ConfigureAwait(true);

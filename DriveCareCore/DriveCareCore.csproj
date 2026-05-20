@@ -345,6 +345,19 @@
     <Compile Include="Messaging\MessagingModels.cs" />
     <Compile Include="Messaging\WorkshopMessagingService.cs" />
     <Compile Include="Messaging\WorkshopChatRealtimeClient.cs" />
+    <Compile Include="Messaging\ChatInputKeyHelper.cs" />
+    <Compile Include="Maps\WorkshopMapPin.cs" />
+    <Compile Include="Maps\YandexMapsConfig.cs" />
+    <Compile Include="Maps\YandexGeocoderService.cs" />
+    <Compile Include="Maps\YandexWorkshopMapHtmlBuilder.cs" />
+    <Compile Include="Maps\WorkshopMapService.cs" />
+    <Compile Include="Maps\WorkshopServiceKinds.cs" />
+    <Compile Include="Maps\CoordinateHelper.cs" />
+    <Compile Include="Maps\AddressCoordinatesHelper.cs" />
+    <Compile Include="Bookings\WorkshopOnlineBookingModels.cs" />
+    <Compile Include="Bookings\WorkshopOnlineBookingService.cs" />
+    <Compile Include="Bookings\WorkshopBookingIssueCategories.cs" />
+    <Compile Include="Bookings\UserCarPickerItem.cs" />
     <Compile Include="Data\BD\BusinessType.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

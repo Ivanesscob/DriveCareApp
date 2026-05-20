@@ -409,6 +409,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\WorkshopOnlineBookingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\WorkshopMessagesPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -618,6 +622,9 @@
     </Compile>
     <Compile Include="Pages\WorkshopRepairCarsPage.xaml.cs">
       <DependentUpon>WorkshopRepairCarsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopOnlineBookingsPage.xaml.cs">
+      <DependentUpon>WorkshopOnlineBookingsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\WorkshopMessagesPage.xaml.cs">
       <DependentUpon>WorkshopMessagesPage.xaml</DependentUpon>

@@ -97,10 +97,10 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="MessageInput" Grid.Column="0" MinHeight="52" MaxHeight="140"
-                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                     AcceptsReturn="False" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                                      VerticalAlignment="Top"
                                      Style="{StaticResource App.FieldTextBox}"
-                                     KeyDown="MessageInput_KeyDown"/>
+                                     PreviewKeyDown="MessageInput_PreviewKeyDown"/>
                             <Button Grid.Column="1" Content="Отправить" Margin="12,0,0,0"
                                     Style="{StaticResource App.Button.Primary}" Height="52" MinWidth="130"
                                     VerticalAlignment="Top"

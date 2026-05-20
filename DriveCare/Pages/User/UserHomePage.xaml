@@ -386,7 +386,7 @@
                                                       HorizontalAlignment="Center"
                                                       Kind="Tools"
                                                       Foreground="{DynamicResource App.Brush.IconTint}"/>
-                            <TextBlock Text="СТО" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Text="Автосервисы" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{DynamicResource App.Brush.SecondaryText}" TextAlignment="Center"
                                        HorizontalAlignment="Center"/>
                         </StackPanel>

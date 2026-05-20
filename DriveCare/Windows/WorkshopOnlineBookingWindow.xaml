@@ -1,0 +1,63 @@
+<Window x:Class="DriveCare.Windows.WorkshopOnlineBookingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Онлайн-запись на сервис" Height="480" Width="460"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource App.Brush.PageBackground}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="WorkshopTitleText" Grid.Row="0" FontSize="16" FontWeight="SemiBold"
+                       TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+            <TextBlock Grid.Row="1" Text="Автомобиль из гаража *" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <ComboBox x:Name="CarCombo" Grid.Row="2" Height="36" Margin="0,0,0,10"
+                      DisplayMemberPath="DisplayName" SelectedValuePath="UserCarId"/>
+
+            <TextBlock Grid.Row="3" Text="Что случилось? *" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <ComboBox x:Name="IssueCategoryCombo" Grid.Row="4" Height="36" Margin="0,0,0,10"
+                      DisplayMemberPath="Name" SelectedValuePath="Code"
+                      SelectionChanged="IssueCategoryCombo_SelectionChanged"/>
+
+            <TextBlock x:Name="OtherDetailsLabel" Grid.Row="5" Text="Опишите проблему *" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4" Visibility="Collapsed"/>
+            <TextBox x:Name="OtherDetailsBox" Grid.Row="6" Style="{StaticResource App.FieldTextBox}"
+                     MinHeight="56" AcceptsReturn="True" TextWrapping="Wrap"
+                     Visibility="Collapsed" Margin="0,0,0,10"/>
+
+            <TextBlock Grid.Row="7" Text="Дополнительно (необязательно)" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="CommentBox" Grid.Row="8" Style="{StaticResource App.FieldTextBox}" MinHeight="48"
+                     AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+            <TextBlock Grid.Row="9" Text="Время визита согласуем с автосервисом после подтверждения заявки."
+                       FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,10"/>
+
+            <TextBlock x:Name="ErrorText" Grid.Row="10" Foreground="#C62828" TextWrapping="Wrap"
+                       Visibility="Collapsed" Margin="0,0,0,8"/>
+
+            <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Отмена" Style="{StaticResource App.Button.Outline}" Width="100" Height="36"
+                        Margin="0,0,8,0" Click="Cancel_Click"/>
+                <Button Content="Отправить заявку" Style="{StaticResource App.Button.Primary}" Width="140" Height="36"
+                        Click="Send_Click"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Window>

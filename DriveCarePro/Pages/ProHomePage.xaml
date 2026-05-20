@@ -245,6 +245,10 @@
                                     Style="{StaticResource App.Button.Outline}"
                                     Height="42" MinWidth="140" Margin="0,0,10,10"
                                     Click="Shop_Click"/>
+                            <Button x:Name="BtnOnlineBookings" Content="Онлайн-записи"
+                                    Style="{StaticResource App.Button.Outline}"
+                                    Height="42" MinWidth="170" Margin="0,0,10,10"
+                                    Click="OnlineBookings_Click"/>
                             <Button x:Name="BtnClientMessages"
                                     Style="{StaticResource App.Button.Outline}"
                                     Height="42" MinWidth="200" Margin="0,0,10,10"

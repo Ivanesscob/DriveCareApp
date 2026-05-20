@@ -200,6 +200,12 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Web.WebView2.Core, Version=1.0.2792.45, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.2792.45\lib\net462\Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.Wpf, Version=1.0.2792.45, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.2792.45\lib\net462\Microsoft.Web.WebView2.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="OxyPlot, Version=2.2.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
       <HintPath>..\packages\OxyPlot.Core.2.2.0\lib\net462\OxyPlot.dll</HintPath>
     </Reference>
@@ -327,7 +333,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\YandexWorkshopMapView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\WorkshopOnlineBookingWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -341,6 +355,9 @@
     </Compile>
     <Compile Include="CarDisplayItem.cs" />
     <Compile Include="CarDetailsWindow.cs" />
+    <Compile Include="Windows\WorkshopOnlineBookingWindow.xaml.cs">
+      <DependentUpon>WorkshopOnlineBookingWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EnterRealMileageWindow.xaml.cs">
       <DependentUpon>EnterRealMileageWindow.xaml</DependentUpon>
     </Compile>
@@ -348,11 +365,15 @@
     <Compile Include="Data\ServiceMaintenanceDtos.cs" />
     <Compile Include="Services\RegistrationMailHelper.cs" />
     <Compile Include="Services\ThemeService.cs" />
+    <Compile Include="Services\UserSessionStore.cs" />
     <Compile Include="Services\OxyPlotThemeHelper.cs" />
     <Compile Include="Services\ServiceMaintenanceRepository.cs" />
     <Compile Include="Services\MaintenanceRecommendationEngine.cs" />
     <Compile Include="Controls\TintedImage.xaml.cs">
       <DependentUpon>TintedImage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\YandexWorkshopMapView.xaml.cs">
+      <DependentUpon>YandexWorkshopMapView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -441,6 +462,8 @@
     <Compile Include="Pages\User\ActionPages\ServiceSelectPage.xaml.cs">
       <DependentUpon>ServiceSelectPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\BrowserEmulationHelper.cs" />
+    <Compile Include="Helpers\MapBrowserScriptBridge.cs" />
     <Compile Include="Pages\User\ActionPages\PaintCarPage.xaml.cs">
       <DependentUpon>PaintCarPage.xaml</DependentUpon>
     </Compile>
@@ -512,8 +535,10 @@
     <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
     <Error Condition="!Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Web.WebView2.1.0.2792.45\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebView2.1.0.2792.45\build\Microsoft.Web.WebView2.targets'))" />
   </Target>
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
   <Import Project="..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets" Condition="Exists('..\packages\System.ValueTuple.4.6.2\build\net471\System.ValueTuple.targets')" />
   <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
+  <Import Project="..\packages\Microsoft.Web.WebView2.1.0.2792.45\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.2792.45\build\Microsoft.Web.WebView2.targets')" />
 </Project>

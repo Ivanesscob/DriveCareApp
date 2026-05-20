@@ -1,5 +1,6 @@
 using DriveCareCore.Data.BD;
 using DriveCareCore.Dialogs;
+using DriveCareCore.Maps;
 using DriveCarePro.Services;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace DriveCarePro.Windows
         private string _parsedCity = string.Empty;
         private string _parsedStreet = string.Empty;
         private string _parsedHouse = string.Empty;
+        private double? _parsedLatitude;
+        private double? _parsedLongitude;
 
         public CreateCompanyWindow()
         {
@@ -158,6 +161,8 @@ namespace DriveCarePro.Windows
                 _parsedCity = item.City ?? string.Empty;
                 _parsedStreet = item.Street ?? string.Empty;
                 _parsedHouse = item.House ?? string.Empty;
+                _parsedLatitude = item.Latitude;
+                _parsedLongitude = item.Longitude;
                 TrySelectCountry(item.CountryCode, item.CountryName);
                 _addressPickedFromGeo = true;
                 SuggestionsPopup.IsOpen = false;
@@ -216,14 +221,24 @@ namespace DriveCarePro.Windows
                 return;
             }
 
+            if (!(ServiceKindCombo.SelectedValue is Guid serviceKindId) || serviceKindId == Guid.Empty)
+            {
+                AppMessageBox.Show("Выберите тип услуг (автосервис, покраска или шиномонтаж).",
+                    "Проверьте данные", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             var input = new CompanyCreationService.CreateCompanyInput
             {
                 CompanyName = CompanyNameBox.Text.Trim(),
                 CompanyDescription = CompanyDescriptionBox.Text.Trim(),
                 WorkshopName = WorkshopNameBox.Text.Trim(),
                 WorkshopDescription = WorkshopDescriptionBox.Text.Trim(),
+                BusinessTypeId = serviceKindId,
                 CountryId = country.RowId,
                 AddressLine = AddressLineBox.Text.Trim(),
+                Latitude = _parsedLatitude,
+                Longitude = _parsedLongitude,
                 ParsedCity = _parsedCity,
                 ParsedStreet = _parsedStreet,
                 ParsedHouse = _parsedHouse,

@@ -2,6 +2,7 @@ using DriveCareCore.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DriveCarePro.Windows
 {
@@ -26,7 +27,20 @@ namespace DriveCarePro.Windows
             Close();
         }
 
-        private async void Send_Click(object sender, RoutedEventArgs e)
+        private async void MessageText_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter && e.Key != Key.Return)
+                return;
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                return;
+
+            e.Handled = true;
+            await SendAsync().ConfigureAwait(true);
+        }
+
+        private async void Send_Click(object sender, RoutedEventArgs e) => await SendAsync().ConfigureAwait(true);
+
+        private async System.Threading.Tasks.Task SendAsync()
         {
             ErrorText.Visibility = Visibility.Collapsed;
             if (!(VisitorCombo.SelectedItem is VisitorPickItem visitor))

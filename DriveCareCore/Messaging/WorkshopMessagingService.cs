@@ -281,6 +281,55 @@ ORDER BY m.CreatedAt ASC;";
             }
         }
 
+        public static Task<(bool ok, string error, Guid? conversationId)> GetOrCreateConversationForUserAsync(
+            Guid workshopId,
+            Guid userId) =>
+            WithDb(db => GetOrCreateConversationForUserAsync(db, workshopId, userId));
+
+        public static async Task<(bool ok, string error, Guid? conversationId)> GetOrCreateConversationForUserAsync(
+            DriveCareDBEntities db,
+            Guid workshopId,
+            Guid userId)
+        {
+            if (!TablesExist())
+                return (false, "Таблицы сообщений не найдены.", null);
+            if (workshopId == Guid.Empty || userId == Guid.Empty)
+                return (false, "Не указана мастерская или пользователь.", null);
+
+            try
+            {
+                var existing = await db.Database.SqlQuery<Guid?>(
+                    "SELECT RowId FROM dbo.WorkshopConversations WHERE WorkshopId = @w AND UserId = @u",
+                    new SqlParameter("@w", workshopId),
+                    new SqlParameter("@u", userId)).FirstOrDefaultAsync().ConfigureAwait(false);
+
+                if (existing.HasValue && existing.Value != Guid.Empty)
+                    return (true, null, existing.Value);
+
+                var convId = Guid.NewGuid();
+                var clientId = await TryResolveServiceClientIdAsync(db, workshopId, userId).ConfigureAwait(false);
+                var now = DateTime.Now;
+                await db.Database.ExecuteSqlCommandAsync(
+                    @"INSERT INTO dbo.WorkshopConversations
+                      (RowId, WorkshopId, UserId, WorkshopServiceClientId, Subject, LastMessageAt, LastMessagePreview,
+                       UnreadForUser, UnreadForWorkshop, CreatedAt)
+                      VALUES (@id, @w, @u, @sc, @sub, @dt, @pr, 0, 1, @dt)",
+                    new SqlParameter("@id", convId),
+                    new SqlParameter("@w", workshopId),
+                    new SqlParameter("@u", userId),
+                    new SqlParameter("@sc", (object)clientId ?? DBNull.Value),
+                    new SqlParameter("@sub", "Обращение с карты автосервисов"),
+                    new SqlParameter("@dt", now),
+                    new SqlParameter("@pr", "Новый диалог")).ConfigureAwait(false);
+
+                return (true, null, convId);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
         public static Task<int> CountUnreadForUserAsync(Guid userId) =>
             WithDb(async db =>
             {

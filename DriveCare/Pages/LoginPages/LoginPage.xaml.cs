@@ -1,3 +1,4 @@
+using DriveCareCore;
 using DriveCareCore.Data.BD;
 using DriveCareCore.Dialogs;
 using System;
@@ -6,8 +7,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using DriveCareCore;
 using DriveCare.Pages.User;
+using AppState = DriveCare.AppState;
 
 namespace DriveCare.Pages.LoginPages
 {
@@ -55,13 +56,8 @@ namespace DriveCare.Pages.LoginPages
 
                 if (user != null)
                 {
-                    AppState.CurrentUserId = user.RowId;
-                    AppState.CurrentUser = user;
-                    AppState.UserRoles = AppConnect.model1.UserRoles
-                        .Where(u => u.UserId == AppState.CurrentUserId)
-                        .Select(u => u.Role)
-                        .ToList();
-                AppState.SetFrame<UserHomePage>();
+                    AppState.SignInUser(user);
+                    AppState.SetFrame<UserHomePage>();
                 }
                 else
                 {

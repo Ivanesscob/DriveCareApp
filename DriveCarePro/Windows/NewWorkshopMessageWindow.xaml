@@ -28,7 +28,8 @@
         <TextBlock Grid.Row="4" Text="Сообщение" FontSize="13" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,6"/>
         <TextBox Grid.Row="5" x:Name="MessageText" MinHeight="100"
                  AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                 Style="{StaticResource App.FieldTextBox}"/>
+                 Style="{StaticResource App.FieldTextBox}"
+                 PreviewKeyDown="MessageText_PreviewKeyDown"/>
 
         <TextBlock Grid.Row="6" x:Name="ErrorText" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap"
                    Foreground="{DynamicResource App.Brush.DangerBorder}" Visibility="Collapsed"/>

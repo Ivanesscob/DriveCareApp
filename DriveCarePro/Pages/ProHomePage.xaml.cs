@@ -133,8 +133,9 @@ namespace DriveCarePro.Pages
                 AppState.HasAnyPermission(ProPermissions.CreateRepairs, ProPermissions.EditRepairs);
             AppState.SetControlVisible(BtnWorkshopServices, canServices);
             AppState.SetControlVisible(BtnShop, AppState.CanAccessPurchaserShop);
+            AppState.SetControlVisible(BtnOnlineBookings, AppState.CanAccessEmployeeWorkspace);
 
-            UpdateSectionHeader(SectionWorkLabel, WorkActionsPanel, BtnBookRepair, BtnBookPainting, BtnRepairCars, BtnWorkshopServices, BtnShop);
+            UpdateSectionHeader(SectionWorkLabel, WorkActionsPanel, BtnBookRepair, BtnBookPainting, BtnRepairCars, BtnWorkshopServices, BtnShop, BtnOnlineBookings, BtnClientMessages);
 
             var canTasks = AppState.CanAccessEmployeeTasks;
             AppState.SetControlVisible(EmployeeTasksSection, canTasks);
@@ -186,6 +187,9 @@ namespace DriveCarePro.Pages
 
         private void ClientMessages_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new WorkshopMessagesPage());
+
+        private void OnlineBookings_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new WorkshopOnlineBookingsPage());
 
         private List<Guid> ResolveWorkshopIdsForMessages()
         {

@@ -62,6 +62,9 @@
                         <TextBlock Text="Описание" Style="{StaticResource FieldLabel}"/>
                         <TextBox x:Name="WorkshopDescriptionBox" Style="{StaticResource App.FieldTextBox}"
                                  AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40"/>
+                        <TextBlock Text="Тип услуг *" Style="{StaticResource FieldLabel}" Margin="0,8,0,0"/>
+                        <ComboBox x:Name="ServiceKindCombo" Height="36" Margin="0,4,0,0"
+                                  DisplayMemberPath="Name" SelectedValuePath="Id"/>
                     </StackPanel>
                 </Border>
 

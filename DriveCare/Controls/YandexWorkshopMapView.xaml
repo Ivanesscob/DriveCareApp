@@ -1,0 +1,19 @@
+<UserControl x:Class="DriveCare.Controls.YandexWorkshopMapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             MinHeight="200">
+    <Grid>
+        <wv2:WebView2 x:Name="MapWebView"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Border x:Name="LoadingOverlay" Background="#AA000000"
+                Visibility="Visible" IsHitTestVisible="True">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="420" Margin="16">
+                <TextBlock Text="Загрузка Яндекс.Карты…" Foreground="White" FontSize="15"
+                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                <TextBlock x:Name="ErrorText" TextWrapping="Wrap" Foreground="#FFCCCC"
+                           FontSize="12" Margin="0,12,0,0" TextAlignment="Center" Visibility="Collapsed"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

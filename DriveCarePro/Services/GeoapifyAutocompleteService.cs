@@ -17,6 +17,8 @@ namespace DriveCarePro.Services
         public string CountryCode { get; set; }
         public string Postcode { get; set; }
         public bool HasHouseNumber { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 
     /// <summary>Подсказки адреса Geoapify (до уровня дома).</summary>
@@ -128,6 +130,9 @@ namespace DriveCarePro.Services
             if (string.IsNullOrWhiteSpace(label))
                 return;
 
+            double? lat = TryGetDouble(item, "lat");
+            double? lon = TryGetDouble(item, "lon");
+
             list.Add(new GeoapifyAddressSuggestion
             {
                 Label = label,
@@ -137,7 +142,9 @@ namespace DriveCarePro.Services
                 CountryName = GetString(item, "country") ?? string.Empty,
                 CountryCode = GetString(item, "country_code") ?? string.Empty,
                 Postcode = GetString(item, "postcode") ?? string.Empty,
-                HasHouseNumber = !string.IsNullOrWhiteSpace(housenumber)
+                HasHouseNumber = !string.IsNullOrWhiteSpace(housenumber),
+                Latitude = lat,
+                Longitude = lon
             });
         }
 
@@ -160,6 +167,21 @@ namespace DriveCarePro.Services
             if (prop.ValueKind == JsonValueKind.Null)
                 return null;
             return prop.GetString();
+        }
+
+        private static double? TryGetDouble(JsonElement element, string name)
+        {
+            if (!element.TryGetProperty(name, out var prop))
+                return null;
+            if (prop.ValueKind == JsonValueKind.Number && prop.TryGetDouble(out var d))
+                return d;
+            if (prop.ValueKind == JsonValueKind.String)
+            {
+                var s = prop.GetString();
+                if (DriveCareCore.Maps.CoordinateHelper.TryParse(s, out var v))
+                    return v;
+            }
+            return null;
         }
 
         private static string FirstNonEmpty(params string[] values)

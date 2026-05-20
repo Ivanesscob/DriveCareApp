@@ -180,12 +180,17 @@ namespace DriveCarePro.Pages
 
         private async void Send_Click(object sender, RoutedEventArgs e) => await SendMessageAsync().ConfigureAwait(true);
 
-        private async void MessageInput_KeyDown(object sender, KeyEventArgs e)
+        private async void MessageInput_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Enter)
+            if (!ChatInputKeyHelper.IsEnterKey(e))
                 return;
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+
+            if (ChatInputKeyHelper.IsShiftHeld)
+            {
+                e.Handled = true;
+                ChatInputKeyHelper.InsertNewLine(MessageInput);
                 return;
+            }
 
             e.Handled = true;
             await SendMessageAsync().ConfigureAwait(true);

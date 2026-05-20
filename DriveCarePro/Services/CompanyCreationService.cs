@@ -1,6 +1,8 @@
 using DriveCareCore.Data.BD;
+using DriveCareCore.Maps;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DriveCarePro.Services
 {
@@ -16,7 +18,10 @@ namespace DriveCarePro.Services
             public string CompanyDescription { get; set; }
             public string WorkshopName { get; set; }
             public string WorkshopDescription { get; set; }
+            public Guid? BusinessTypeId { get; set; }
             public Guid CountryId { get; set; }
+            public double? Latitude { get; set; }
+            public double? Longitude { get; set; }
             public string AddressLine { get; set; }
             public string ParsedCity { get; set; }
             public string ParsedStreet { get; set; }
@@ -73,6 +78,7 @@ namespace DriveCarePro.Services
                 city = Truncate((input.AddressLine ?? string.Empty).Trim(), 100);
             }
 
+            var fullAddress = Truncate((input.AddressLine ?? string.Empty).Trim(), 500);
             var address = new Address
             {
                 RowId = addressId,
@@ -81,6 +87,7 @@ namespace DriveCarePro.Services
                 Street = street,
                 House = house,
                 Apartment = Truncate(NullIfEmpty(input.Apartment), 50),
+                FullAddress = fullAddress,
                 Description = null
             };
 
@@ -91,12 +98,14 @@ namespace DriveCarePro.Services
                 Description = Truncate(NullIfEmpty(input.CompanyDescription), 255)
             };
 
+            var businessTypeId = input.BusinessTypeId ?? WorkshopServiceKinds.AutoServiceId;
             var workshop = new Workshop
             {
                 RowId = workshopId,
                 Name = Truncate((input.WorkshopName ?? string.Empty).Trim(), 200),
                 CompanyId = companyId,
                 AddressId = addressId,
+                BusinessTypeId = businessTypeId,
                 Description = Truncate(NullIfEmpty(input.WorkshopDescription), 255)
             };
 
@@ -136,6 +145,26 @@ namespace DriveCarePro.Services
                     db.EmployeeRolesMaps.Add(roleMap);
                     db.SaveChanges();
                     tx.Commit();
+
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            if (input.Latitude.HasValue && input.Longitude.HasValue)
+                            {
+                                await AddressCoordinatesHelper.SaveAsync(addressId, input.Latitude.Value, input.Longitude.Value)
+                                    .ConfigureAwait(false);
+                            }
+                            else if (!string.IsNullOrWhiteSpace(fullAddress))
+                            {
+                                await AddressCoordinatesHelper.SaveFromAddressLineAsync(addressId, fullAddress)
+                                    .ConfigureAwait(false);
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    });
 
                     return new CreateCompanyResult
                     {
