@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
