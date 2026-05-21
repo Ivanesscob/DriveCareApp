@@ -1,6 +1,7 @@
 using DriveCareCore.Data.BD;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
@@ -422,24 +423,28 @@ WHERE t.ClientUserId IS NOT NULL
             Guid? employeeId,
             string body)
         {
+            var now = DateTime.Now;
             var preview = BuildPreview(body);
+            var sentAt = new SqlParameter("@p_dt", SqlDbType.DateTime) { Value = now };
             await db.Database.ExecuteSqlCommandAsync(
                 @"INSERT INTO dbo.WorkshopMessages
                   (RowId, ConversationId, SenderKind, SenderUserId, SenderEmployeeId, Body, CreatedAt)
-                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, GETDATE())",
+                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, @p_dt)",
                 new SqlParameter("@p_id", Guid.NewGuid()),
                 new SqlParameter("@p_cid", conversationId),
                 new SqlParameter("@p_kind", (byte)kind),
                 new SqlParameter("@p_uid", (object)userId ?? DBNull.Value),
                 new SqlParameter("@p_eid", (object)employeeId ?? DBNull.Value),
-                new SqlParameter("@p_body", body)).ConfigureAwait(false);
+                new SqlParameter("@p_body", body),
+                sentAt).ConfigureAwait(false);
 
             if (kind == MessageSenderKind.User)
             {
                 await db.Database.ExecuteSqlCommandAsync(
                     @"UPDATE dbo.WorkshopConversations
-                      SET LastMessageAt = GETDATE(), LastMessagePreview = @p_pr, UnreadForWorkshop = UnreadForWorkshop + 1
+                      SET LastMessageAt = @p_dt, LastMessagePreview = @p_pr, UnreadForWorkshop = UnreadForWorkshop + 1
                       WHERE RowId = @p_cid",
+                    sentAt,
                     new SqlParameter("@p_pr", preview),
                     new SqlParameter("@p_cid", conversationId)).ConfigureAwait(false);
             }
@@ -447,8 +452,9 @@ WHERE t.ClientUserId IS NOT NULL
             {
                 await db.Database.ExecuteSqlCommandAsync(
                     @"UPDATE dbo.WorkshopConversations
-                      SET LastMessageAt = GETDATE(), LastMessagePreview = @p_pr, UnreadForUser = UnreadForUser + 1
+                      SET LastMessageAt = @p_dt, LastMessagePreview = @p_pr, UnreadForUser = UnreadForUser + 1
                       WHERE RowId = @p_cid",
+                    sentAt,
                     new SqlParameter("@p_pr", preview),
                     new SqlParameter("@p_cid", conversationId)).ConfigureAwait(false);
             }

@@ -19,7 +19,7 @@ namespace DriveCareCore.Messaging
         public string LastMessagePreview { get; set; }
         public DateTime LastMessageAt { get; set; }
         public int UnreadCount { get; set; }
-        public string LastMessageAtLabel => LastMessageAt.ToString("dd.MM.yyyy HH:mm");
+        public string LastMessageAtLabel => ChatTimeFormat.Format(LastMessageAt);
         public string ListTitle => string.IsNullOrWhiteSpace(WorkshopName) ? CompanyName : WorkshopName;
         public bool HasUnread => UnreadCount > 0;
     }
@@ -32,18 +32,20 @@ namespace DriveCareCore.Messaging
         public string Body { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsMine { get; set; }
-        public string TimeLabel
-        {
-            get
-            {
-                if (CreatedAt <= new DateTime(1900, 1, 1))
-                    return string.Empty;
-                var local = CreatedAt.Kind == DateTimeKind.Utc
-                    ? CreatedAt.ToLocalTime()
-                    : DateTime.SpecifyKind(CreatedAt, DateTimeKind.Local);
-                return local.ToString("dd.MM.yyyy HH:mm");
-            }
-        }
+        public string TimeLabel => ChatTimeFormat.Format(CreatedAt);
         public bool IsFromWorkshop => SenderKind == MessageSenderKind.Employee;
+    }
+
+    /// <summary>Время из SQL datetime без пояса — показываем как записано (локальное время ПК при отправке).</summary>
+    internal static class ChatTimeFormat
+    {
+        public static string Format(DateTime value)
+        {
+            if (value <= new DateTime(1900, 1, 1))
+                return string.Empty;
+            if (value.Kind == DateTimeKind.Utc)
+                value = value.ToLocalTime();
+            return value.ToString("dd.MM.yyyy HH:mm");
+        }
     }
 }
