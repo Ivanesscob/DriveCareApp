@@ -63,6 +63,7 @@
   <SolidColorBrush x:Key="App.Brush.TextDim" Color="{StaticResource App.Color.TextDim}"/>
   <SolidColorBrush x:Key="App.Brush.Accent" Color="{StaticResource App.Color.Accent}"/>
   <SolidColorBrush x:Key="App.Brush.AccentDim" Color="{StaticResource App.Color.AccentDim}"/>
+  <SolidColorBrush x:Key="App.Brush.AccentSoft" Color="{StaticResource App.Color.AccentSoft}"/>
   <SolidColorBrush x:Key="App.Brush.IconTint" Color="{StaticResource App.Color.IconTint}"/>
   <SolidColorBrush x:Key="App.Brush.FooterMuted" Color="{StaticResource App.Color.FooterMuted}"/>
   <SolidColorBrush x:Key="App.Brush.PriceChipBg" Color="{StaticResource App.Color.PriceChipBg}"/>

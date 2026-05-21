@@ -339,6 +339,11 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Shop\ToolsStoreCatalog.cs" />
+    <Compile Include="Shop\StoreOrderStatus.cs" />
+    <Compile Include="Shop\OrderPickupPointItem.cs" />
+    <Compile Include="Shop\OrderPickupPointService.cs" />
+    <Compile Include="Shop\StoreOrderModels.cs" />
+    <Compile Include="Shop\StoreOrderService.cs" />
     <Compile Include="Data\BD\Address.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

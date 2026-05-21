@@ -604,6 +604,8 @@
     <Compile Include="Services\OwnerEmployeesDataService.cs" />
     <Compile Include="Services\OwnerOrganizationScope.cs" />
     <Compile Include="Services\ProHomeDataService.cs" />
+    <Compile Include="Services\ModerationPendingCountsService.cs" />
+    <Compile Include="Services\ModerationBadgeHelper.cs" />
     <Compile Include="Services\EmployeeTaskListPresentation.cs" />
     <Compile Include="Services\CarDisplayHelper.cs" />
     <Compile Include="Services\CompletedTasksDataService.cs" />

@@ -88,10 +88,33 @@ SELECT CASE WHEN OBJECT_ID(N'dbo.RepairHistory', N'U') IS NOT NULL THEN 1 ELSE 0
             return string.Equals(ta, tb, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool HistoryHasExtendedColumns()
+        {
+            try
+            {
+                const string sql = @"SELECT CASE WHEN COL_LENGTH(N'dbo.UserCarMaintenanceHistory', N'ComponentCode') IS NOT NULL THEN 1 ELSE 0 END;";
+                return AppConnect.model1.Database.SqlQuery<int>(sql).FirstOrDefault() == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static IReadOnlyList<MaintenanceHistoryItemVm> LoadUserCarMaintenance(Guid userCarRowId)
         {
-            const string sql = @"
-SELECT RowId, UserCarRowId, ServiceDate, MileageKm, Title, Notes
+            var ext = HistoryHasExtendedColumns();
+            var sql = ext
+                ? @"
+SELECT RowId, UserCarRowId, ServiceDate, MileageKm, Title, Notes, ComponentCode, WorkshopName, SeverityAfter
+FROM dbo.UserCarMaintenanceHistory
+WHERE UserCarRowId = @uc
+ORDER BY ServiceDate DESC, MileageKm DESC;"
+                : @"
+SELECT RowId, UserCarRowId, ServiceDate, MileageKm, Title, Notes,
+       CAST(NULL AS NVARCHAR(32)) AS ComponentCode,
+       CAST(NULL AS NVARCHAR(120)) AS WorkshopName,
+       CAST(NULL AS TINYINT) AS SeverityAfter
 FROM dbo.UserCarMaintenanceHistory
 WHERE UserCarRowId = @uc
 ORDER BY ServiceDate DESC, MileageKm DESC;";
@@ -133,7 +156,10 @@ ORDER BY rh.RepairDate DESC, rh.Mileage DESC;";
                 ServiceDate = r.ServiceDate,
                 MileageKm = r.MileageKm,
                 Title = string.IsNullOrWhiteSpace(r.Title) ? "ТО" : r.Title.Trim(),
-                Notes = string.IsNullOrWhiteSpace(r.Notes) ? null : r.Notes.Trim()
+                Notes = string.IsNullOrWhiteSpace(r.Notes) ? null : r.Notes.Trim(),
+                ComponentCode = string.IsNullOrWhiteSpace(r.ComponentCode) ? null : r.ComponentCode.Trim(),
+                WorkshopName = string.IsNullOrWhiteSpace(r.WorkshopName) ? null : r.WorkshopName.Trim(),
+                SeverityAfter = r.SeverityAfter
             };
         }
 

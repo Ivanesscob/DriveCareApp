@@ -49,6 +49,7 @@ namespace DriveCarePro.Pages
             await LoadDataAsync().ConfigureAwait(true);
             await ReloadEmployeeNotificationsAsync().ConfigureAwait(true);
             await ReloadClientMessagesBadgeAsync().ConfigureAwait(true);
+            await ReloadModerationBadgesAsync().ConfigureAwait(true);
         }
 
         private void ProHomePage_Unloaded(object sender, RoutedEventArgs e)
@@ -73,6 +74,30 @@ namespace DriveCarePro.Pages
 
             if (AppState.CanAccessEmployeeTasks)
                 await LoadTasksGridAsync().ConfigureAwait(true);
+        }
+
+        private async System.Threading.Tasks.Task ReloadModerationBadgesAsync()
+        {
+            if (!AppState.CanAccessAdminPanel)
+                return;
+
+            try
+            {
+                var counts = await ModerationPendingCountsService.LoadAsync().ConfigureAwait(true);
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    if (AppState.HasPermission(ProPermissions.ModerateSales))
+                        ModerationBadgeHelper.Apply(ModerationCarsBadge, ModerationCarsBadgeText, counts.CarSales);
+                    if (AppState.HasPermission(ProPermissions.AdminPanel))
+                    {
+                        ModerationBadgeHelper.Apply(ModerationWorkshopTypesBadge, ModerationWorkshopTypesBadgeText, counts.WorkshopTypes);
+                        ModerationBadgeHelper.Apply(ModerationPartsBadge, ModerationPartsBadgeText, 0);
+                    }
+                });
+            }
+            catch
+            {
+            }
         }
 
         private void ApplyPermissionLayout()

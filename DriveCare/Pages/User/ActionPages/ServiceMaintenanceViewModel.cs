@@ -32,13 +32,16 @@ namespace DriveCare.Pages.User.ActionPages
         private PlotModel _mileagePlotModel = new PlotModel();
         private string _mileagePredictedSummary = string.Empty;
         private Visibility _mileagePredictedLineVisibility = Visibility.Collapsed;
+        private string _overallHint = string.Empty;
+        private int _countGood;
+        private int _countWatch;
+        private int _countDue;
 
         public ServiceMaintenanceViewModel()
         {
             GarageCars = new ObservableCollection<CarDisplayItem>();
             HistoryItems = new ObservableCollection<MaintenanceHistoryItemVm>();
-            LeftInfoSlots = new ObservableCollection<MaintenanceInfoSlotVm>();
-            RightInfoSlots = new ObservableCollection<MaintenanceInfoSlotVm>();
+            ComponentStatuses = new ObservableCollection<VehicleComponentStatusVm>();
             KmRecommendations = new ObservableCollection<MaintenanceRecommendationVm>();
             ThemeService.ThemeChanged += OnAppThemeChanged;
         }
@@ -119,9 +122,35 @@ namespace DriveCare.Pages.User.ActionPages
 
         public ObservableCollection<CarDisplayItem> GarageCars { get; }
         public ObservableCollection<MaintenanceHistoryItemVm> HistoryItems { get; }
-        public ObservableCollection<MaintenanceInfoSlotVm> LeftInfoSlots { get; }
-        public ObservableCollection<MaintenanceInfoSlotVm> RightInfoSlots { get; }
+        public ObservableCollection<VehicleComponentStatusVm> ComponentStatuses { get; }
         public ObservableCollection<MaintenanceRecommendationVm> KmRecommendations { get; }
+
+        public string OverallHint
+        {
+            get => _overallHint;
+            private set { _overallHint = value ?? string.Empty; OnPropertyChanged(); }
+        }
+
+        public int CountGood
+        {
+            get => _countGood;
+            private set { _countGood = value; OnPropertyChanged(); }
+        }
+
+        public int CountWatch
+        {
+            get => _countWatch;
+            private set { _countWatch = value; OnPropertyChanged(); }
+        }
+
+        public int CountDue
+        {
+            get => _countDue;
+            private set { _countDue = value; OnPropertyChanged(); }
+        }
+
+        public Visibility ComponentPanelVisibility =>
+            ComponentStatuses.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
         public CarDisplayItem SelectedCar
         {
@@ -219,10 +248,11 @@ namespace DriveCare.Pages.User.ActionPages
         private void ReloadForSelectedCar()
         {
             HistoryItems.Clear();
-            LeftInfoSlots.Clear();
-            RightInfoSlots.Clear();
+            ComponentStatuses.Clear();
             KmRecommendations.Clear();
             _historyNewestFirst = Array.Empty<MaintenanceHistoryItemVm>();
+            CountGood = CountWatch = CountDue = 0;
+            OverallHint = string.Empty;
 
             if (_selectedCar == null)
             {
@@ -231,6 +261,7 @@ namespace DriveCare.Pages.User.ActionPages
                 ClearMileageInsight();
                 NotifyMileageUi();
                 NotifyShell();
+                NotifyComponentUi();
                 return;
             }
 
@@ -248,11 +279,45 @@ namespace DriveCare.Pages.User.ActionPages
             foreach (var h in _historyNewestFirst)
                 HistoryItems.Add(h);
 
-            MaintenanceSlotBuilder.FillColumns(_historyNewestFirst, LeftInfoSlots, RightInfoSlots);
             UpdateApproximateCurrentMileage();
+            RebuildComponentStatuses();
             RebuildKmRecommendations();
             RebuildMileageChart();
             NotifyShell();
+            NotifyComponentUi();
+        }
+
+        private void RebuildComponentStatuses()
+        {
+            ComponentStatuses.Clear();
+            if (_selectedCar == null)
+                return;
+
+            var items = VehicleComponentStatusService.Build(
+                _selectedCar.UserCarId,
+                _historyNewestFirst,
+                _approximateCurrentMileageKm);
+
+            foreach (var item in items.OrderBy(i => i.SortOrder))
+                ComponentStatuses.Add(item);
+
+            VehicleComponentStatusService.PersistComputed(_selectedCar.UserCarId, items);
+
+            var counts = VehicleComponentStatusService.CountByLevel(items);
+            CountGood = counts.good;
+            CountWatch = counts.watch;
+            CountDue = counts.due;
+            OverallHint = VehicleComponentStatusService.BuildOverallHint(
+                counts.good, counts.watch, counts.due, counts.unknown);
+        }
+
+        private void NotifyComponentUi()
+        {
+            OnPropertyChanged(nameof(ComponentPanelVisibility));
+            OnPropertyChanged(nameof(OverallHint));
+            OnPropertyChanged(nameof(CountGood));
+            OnPropertyChanged(nameof(CountWatch));
+            OnPropertyChanged(nameof(CountDue));
         }
 
         private void UpdateApproximateCurrentMileage()
@@ -556,89 +621,4 @@ namespace DriveCare.Pages.User.ActionPages
         }
     }
 
-    internal static class MaintenanceSlotBuilder
-    {
-        private sealed class CatDef
-        {
-            public string Title { get; }
-            public string[] Keys { get; }
-
-            public CatDef(string title, params string[] keys)
-            {
-                Title = title;
-                Keys = keys;
-            }
-        }
-
-        private static readonly CatDef[] Categories =
-        {
-            new CatDef("Плановое ТО", "т.о.", "техобслуживание", "планов", "сервисн", "регламент", "осмотр", "диагностик"),
-            new CatDef("Масло и фильтры", "масло", "фильтр", "жидкост", "антифриз", "охлаждающ"),
-            new CatDef("Тормоза", "тормоз", "колодк", "диск", "суппорт"),
-            new CatDef("ГРМ и навесное", "грм", "ремень", "цепь", "помпа", "ролик", "натяжител")
-        };
-
-        public static void FillColumns(
-            IReadOnlyList<MaintenanceHistoryItemVm> historyNewestFirst,
-            ICollection<MaintenanceInfoSlotVm> left,
-            ICollection<MaintenanceInfoSlotVm> right)
-        {
-            left.Clear();
-            right.Clear();
-            for (var i = 0; i < Categories.Length; i++)
-            {
-                var slot = BuildSlot(Categories[i], historyNewestFirst);
-                if (i < 2)
-                    left.Add(slot);
-                else
-                    right.Add(slot);
-            }
-        }
-
-        private static MaintenanceInfoSlotVm BuildSlot(CatDef cat, IReadOnlyList<MaintenanceHistoryItemVm> history)
-        {
-            var matches = history
-                .Where(h => Matches(cat, h))
-                .OrderByDescending(h => h.ServiceDate)
-                .ThenByDescending(h => h.MileageKm ?? int.MinValue)
-                .ToList();
-
-            if (matches.Count == 0)
-            {
-                return new MaintenanceInfoSlotVm
-                {
-                    DisplayTitle = cat.Title,
-                    Line1 = "Пока нет записей по этой теме.",
-                    Line2 = string.Empty,
-                    Detail = "После визита в сервис строки появятся в истории ниже.",
-                    HasData = false
-                };
-            }
-
-            var last = matches[0];
-            var note = string.IsNullOrWhiteSpace(last.Notes) ? null : last.Notes.Trim();
-            if (!string.IsNullOrEmpty(note) && note.Length > 120)
-                note = note.Substring(0, 117) + "…";
-
-            return new MaintenanceInfoSlotVm
-            {
-                DisplayTitle = cat.Title,
-                Line1 = $"Записей: {matches.Count}",
-                Line2 = $"Последний визит: {last.WhenWhereLine}",
-                Detail = string.IsNullOrEmpty(note) ? last.Title : $"{last.Title} · {note}",
-                HasData = true
-            };
-        }
-
-        private static bool Matches(CatDef cat, MaintenanceHistoryItemVm h)
-        {
-            var blob = $"{h.Title}\n{h.Notes}".ToLowerInvariant();
-            foreach (var k in cat.Keys)
-            {
-                if (blob.Contains(k))
-                    return true;
-            }
-            return false;
-        }
-    }
 }

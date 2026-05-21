@@ -110,7 +110,9 @@ SELECT BusinessTypeId FROM dbo.WorkshopBusinessTypes WHERE WorkshopId = @p0 ORDE
             if (workshopId == Guid.Empty)
                 return (false, "Мастерская не указана.");
 
-            var ids = (typeIds ?? Array.Empty<Guid>()).Where(id => id != Guid.Empty).Distinct().ToList();
+            WorkshopServiceKinds.EnsureCatalogInDatabase();
+            var ids = WorkshopServiceKinds.ResolveBusinessTypeIdsForDatabase(
+                (typeIds ?? Array.Empty<Guid>()).Where(id => id != Guid.Empty).Distinct().ToList());
             if (ids.Count == 0)
                 return (false, "Выберите хотя бы один тип: автосервис, покраска или шиномонтаж.");
 

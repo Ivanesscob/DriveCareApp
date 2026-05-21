@@ -133,8 +133,8 @@ ORDER BY m.CreatedAt ASC;";
                 Body = r.Body ?? string.Empty,
                 CreatedAt = r.CreatedAt,
                 IsMine = forUserSide
-                    ? r.SenderKind == (byte)MessageSenderKind.User
-                    : r.SenderKind == (byte)MessageSenderKind.Employee
+                    ? (MessageSenderKind)r.SenderKind == MessageSenderKind.User
+                    : (MessageSenderKind)r.SenderKind == MessageSenderKind.Employee
             }).ToList();
         }
 
@@ -423,14 +423,14 @@ WHERE t.ClientUserId IS NOT NULL
             await db.Database.ExecuteSqlCommandAsync(
                 @"INSERT INTO dbo.WorkshopMessages
                   (RowId, ConversationId, SenderKind, SenderUserId, SenderEmployeeId, Body, CreatedAt)
-                  VALUES (@id, @cid, @kind, @uid, @eid, @body, @dt)",
-                new SqlParameter("@id", Guid.NewGuid()),
-                new SqlParameter("@cid", conversationId),
-                new SqlParameter("@kind", (byte)kind),
-                new SqlParameter("@uid", (object)userId ?? DBNull.Value),
-                new SqlParameter("@eid", (object)employeeId ?? DBNull.Value),
-                new SqlParameter("@body", body),
-                new SqlParameter("@dt", now)).ConfigureAwait(false);
+                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, @p_dt)",
+                new SqlParameter("@p_id", Guid.NewGuid()),
+                new SqlParameter("@p_cid", conversationId),
+                new SqlParameter("@p_kind", (byte)kind),
+                new SqlParameter("@p_uid", (object)userId ?? DBNull.Value),
+                new SqlParameter("@p_eid", (object)employeeId ?? DBNull.Value),
+                new SqlParameter("@p_body", body),
+                new SqlParameter("@p_dt", now)).ConfigureAwait(false);
 
             if (kind == MessageSenderKind.User)
             {

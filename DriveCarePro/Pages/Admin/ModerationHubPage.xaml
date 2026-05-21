@@ -13,8 +13,16 @@
                 BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="0,0,1,0" Padding="16,20">
             <DockPanel LastChildFill="True">
                 <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-                    <TextBlock Text="Модерация" FontSize="18" FontWeight="SemiBold"
-                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Модерация" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource App.Brush.Foreground}" VerticalAlignment="Center"/>
+                        <Border x:Name="TotalModerationBadge" Background="#E53935" CornerRadius="10"
+                                MinWidth="22" Height="22" Padding="6,0" Margin="10,0,0,0"
+                                VerticalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock x:Name="TotalModerationBadgeText" FontSize="11" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
                     <TextBlock Text="Контент и объявления" FontSize="12" Margin="0,4,0,0"
                                Foreground="{DynamicResource App.Brush.Muted}"/>
                 </StackPanel>
@@ -24,12 +32,48 @@
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <Button x:Name="NavCars" Content="Машины" Style="{StaticResource App.Button.Primary}"
-                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavCars_Click"/>
-                        <Button x:Name="NavParts" Content="Запчасти" Style="{StaticResource App.Button.Outline}"
-                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavParts_Click"/>
-                        <Button x:Name="NavWorkshopTypes" Content="Типы мастерских" Style="{StaticResource App.Button.Outline}"
-                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavWorkshopTypes_Click"/>
+                        <Button x:Name="NavCars" Style="{StaticResource App.Button.Primary}"
+                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavCars_Click">
+                            <Grid>
+                                <TextBlock Text="Машины" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                <Border x:Name="NavCarsBadge" Background="#E53935" CornerRadius="9"
+                                        MinWidth="18" Height="18" Padding="4,0"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                                        Visibility="Collapsed">
+                                    <TextBlock x:Name="NavCarsBadgeText" FontSize="10" FontWeight="Bold"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Button>
+                        <Button x:Name="NavParts" Style="{StaticResource App.Button.Outline}"
+                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavParts_Click">
+                            <Grid>
+                                <TextBlock Text="Запчасти" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                <Border x:Name="NavPartsBadge" Background="#E53935" CornerRadius="9"
+                                        MinWidth="18" Height="18" Padding="4,0"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                                        Visibility="Collapsed">
+                                    <TextBlock x:Name="NavPartsBadgeText" FontSize="10" FontWeight="Bold"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Button>
+                        <Button x:Name="NavWorkshopTypes" Style="{StaticResource App.Button.Outline}"
+                                Height="42" Margin="0,0,0,8" HorizontalAlignment="Stretch" Click="NavWorkshopTypes_Click">
+                            <Grid>
+                                <TextBlock Text="Типы мастерских" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                <Border x:Name="NavWorkshopTypesBadge" Background="#E53935" CornerRadius="9"
+                                        MinWidth="18" Height="18" Padding="4,0"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0"
+                                        Visibility="Collapsed">
+                                    <TextBlock x:Name="NavWorkshopTypesBadgeText" FontSize="10" FontWeight="Bold"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Button>
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>

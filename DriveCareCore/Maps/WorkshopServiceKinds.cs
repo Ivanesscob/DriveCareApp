@@ -1,5 +1,8 @@
+using DriveCareCore.Data.BD;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 
 namespace DriveCareCore.Maps
@@ -108,6 +111,111 @@ namespace DriveCareCore.Maps
             if (codes.Contains(WorkshopServiceKindCode.AutoService))
                 return WorkshopServiceKindCode.AutoService;
             return WorkshopServiceKindCode.Other;
+        }
+
+        /// <summary>Создаёт в dbo.BusinessTypes три типа мастерской (если ещё нет) — нужно для FK заявок и junction.</summary>
+        public static void EnsureCatalogInDatabase()
+        {
+            try
+            {
+                if (!TableExists())
+                    return;
+
+                foreach (var item in All)
+                {
+                    AppConnect.model1.Database.ExecuteSqlCommand(@"
+IF NOT EXISTS (SELECT 1 FROM dbo.BusinessTypes WHERE RowId = @p_id)
+    INSERT INTO dbo.BusinessTypes (RowId, Name, Description)
+    VALUES (@p_id, @p_name, @p_desc);",
+                        new SqlParameter("@p_id", SqlDbType.UniqueIdentifier) { Value = item.Id },
+                        new SqlParameter("@p_name", SqlDbType.NVarChar, 120) { Value = item.Name ?? string.Empty },
+                        new SqlParameter("@p_desc", SqlDbType.NVarChar, 500) { Value = GetDescription(item.Code) });
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>Приводит выбранные Id к существующим в БД (фиксированный GUID или поиск по имени типа).</summary>
+        public static List<Guid> ResolveBusinessTypeIdsForDatabase(IReadOnlyList<Guid> selectedIds)
+        {
+            EnsureCatalogInDatabase();
+            if (selectedIds == null || selectedIds.Count == 0)
+                return new List<Guid>();
+
+            var result = new List<Guid>();
+            foreach (var id in selectedIds.Where(x => x != Guid.Empty).Distinct())
+            {
+                var resolved = ResolveSingleBusinessTypeId(id);
+                if (resolved != Guid.Empty && !result.Contains(resolved))
+                    result.Add(resolved);
+            }
+
+            return result;
+        }
+
+        static Guid ResolveSingleBusinessTypeId(Guid typeId)
+        {
+            if (typeId == Guid.Empty)
+                return Guid.Empty;
+
+            try
+            {
+                var exists = AppConnect.model1.Database.SqlQuery<int>(
+                    @"SELECT COUNT(1) FROM dbo.BusinessTypes WHERE RowId = @p0;",
+                    new SqlParameter("@p0", SqlDbType.UniqueIdentifier) { Value = typeId }).FirstOrDefault();
+                if (exists > 0)
+                    return typeId;
+            }
+            catch
+            {
+            }
+
+            var code = ResolveCode(typeId, null);
+            var item = All.FirstOrDefault(x => x.Code == code);
+            if (item == null)
+                return typeId;
+
+            try
+            {
+                var byName = AppConnect.model1.Database.SqlQuery<Guid?>(
+                    @"SELECT TOP 1 RowId FROM dbo.BusinessTypes WHERE Name = @p0 ORDER BY RowId;",
+                    new SqlParameter("@p0", SqlDbType.NVarChar, 120) { Value = item.Name }).FirstOrDefault();
+                if (byName.HasValue && byName.Value != Guid.Empty)
+                    return byName.Value;
+            }
+            catch
+            {
+            }
+
+            return item.Id;
+        }
+
+        static bool TableExists()
+        {
+            try
+            {
+                const string sql = @"SELECT CASE WHEN OBJECT_ID(N'dbo.BusinessTypes', N'U') IS NOT NULL THEN 1 ELSE 0 END;";
+                return AppConnect.model1.Database.SqlQuery<int>(sql).FirstOrDefault() == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        static string GetDescription(WorkshopServiceKindCode code)
+        {
+            switch (code)
+            {
+                case WorkshopServiceKindCode.Painting:
+                    return "Кузовной ремонт и покраска";
+                case WorkshopServiceKindCode.TireService:
+                    return "Шины, диски, сезонное хранение";
+                default:
+                    return "Ремонт и обслуживание автомобилей";
+            }
         }
 
         public static bool MatchesFilter(WorkshopMapPin pin, WorkshopServiceKindCode? filter)

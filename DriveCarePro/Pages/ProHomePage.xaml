@@ -170,18 +170,54 @@
                         </Border>
 
                         <WrapPanel x:Name="AdminActionsPanel">
-                            <Button x:Name="BtnModerationCars" Content="Модерация объявлений"
+                            <Button x:Name="BtnModerationCars"
                                     Style="{StaticResource App.Button.Primary}"
                                     Height="42" MinWidth="190" Margin="0,0,10,10"
-                                    Click="ModerationCars_Click"/>
-                            <Button x:Name="BtnModerationParts" Content="Модерация запчастей"
+                                    Click="ModerationCars_Click">
+                                <Grid>
+                                    <TextBlock Text="Модерация объявлений" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                    <Border x:Name="ModerationCarsBadge" Background="#E53935" CornerRadius="9"
+                                            MinWidth="18" Height="18" Padding="4,0"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Margin="0,-6,-6,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="ModerationCarsBadgeText" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
+                            <Button x:Name="BtnModerationParts"
                                     Style="{StaticResource App.Button.Outline}"
                                     Height="42" MinWidth="190" Margin="0,0,10,10"
-                                    Click="ModerationParts_Click"/>
-                            <Button x:Name="BtnModerationWorkshopTypes" Content="Типы мастерских"
+                                    Click="ModerationParts_Click">
+                                <Grid>
+                                    <TextBlock Text="Модерация запчастей" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                    <Border x:Name="ModerationPartsBadge" Background="#E53935" CornerRadius="9"
+                                            MinWidth="18" Height="18" Padding="4,0"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Margin="0,-6,-6,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="ModerationPartsBadgeText" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
+                            <Button x:Name="BtnModerationWorkshopTypes"
                                     Style="{StaticResource App.Button.Outline}"
                                     Height="42" MinWidth="190" Margin="0,0,10,10"
-                                    Click="ModerationWorkshopTypes_Click"/>
+                                    Click="ModerationWorkshopTypes_Click">
+                                <Grid>
+                                    <TextBlock Text="Типы мастерских" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                    <Border x:Name="ModerationWorkshopTypesBadge" Background="#E53935" CornerRadius="9"
+                                            MinWidth="18" Height="18" Padding="4,0"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Margin="0,-6,-6,0" Visibility="Collapsed">
+                                        <TextBlock x:Name="ModerationWorkshopTypesBadgeText" FontSize="10" FontWeight="Bold"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
                             <Button x:Name="BtnOrganizations" Content="Организации"
                                     Style="{StaticResource App.Button.Outline}"
                                     Height="42" MinWidth="150" Margin="0,0,10,10"

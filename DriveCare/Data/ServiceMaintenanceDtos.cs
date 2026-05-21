@@ -11,6 +11,9 @@ namespace DriveCare.Data
         public int? MileageKm { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
+        public string ComponentCode { get; set; }
+        public string WorkshopName { get; set; }
+        public byte? SeverityAfter { get; set; }
     }
 
     /// <summary>Строка из RepairHistory при подгрузке в экран обслуживания (SqlQuery).</summary>
@@ -28,10 +31,15 @@ namespace DriveCare.Data
         public int? MileageKm { get; set; }
         public string Title { get; set; }
         public string Notes { get; set; }
+        public string ComponentCode { get; set; }
+        public string WorkshopName { get; set; }
+        public byte? SeverityAfter { get; set; }
         public string DateLabel => ServiceDate.ToString("dd.MM.yyyy");
         public string MileageLabel => MileageKm.HasValue ? $"{MileageKm:N0} км" : "пробег не указан";
         public string WhenWhereLine => $"{DateLabel} · {MileageLabel}";
         public bool HasNotes => !string.IsNullOrWhiteSpace(Notes);
+        public string ComponentLabel => string.IsNullOrWhiteSpace(ComponentCode) ? null : ComponentCode.Trim();
+        public string WorkshopLine => string.IsNullOrWhiteSpace(WorkshopName) ? null : WorkshopName.Trim();
     }
 
     public sealed class MaintenanceRecommendationVm

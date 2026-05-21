@@ -337,6 +337,11 @@ ORDER BY n.CreatedAt DESC;";
             }
         }
 
+        private void MyOrdersButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppState.SetFrame<MyOrdersPage>();
+        }
+
         private void ProfileButton_Click(object sender, RoutedEventArgs e)
         {
             AppState.SetFrame<ProfilePage>();

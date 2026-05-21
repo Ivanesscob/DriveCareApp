@@ -20,7 +20,6 @@ namespace DriveCare.Pages.User.ActionPages
         private const string FallbackImagePath = "pack://application:,,,/DriveCare;component/Data/NotPhotoCar.png";
         private string _activeCategory = "Engine";
         private decimal _cartTotal;
-
         public ObservableCollection<ShopProductVm> VisibleProducts { get; } = new ObservableCollection<ShopProductVm>();
         public ObservableCollection<CartItemVm> CartItems => StoreCartService.Items;
         public string CartTitle => $"Корзина ({StoreCartService.Items.Sum(i => i.Quantity)} шт.)";
@@ -33,6 +32,26 @@ namespace DriveCare.Pages.User.ActionPages
             Loaded += async (_, __) => await LoadCategoryAsync(_activeCategory);
             StoreCartService.Items.CollectionChanged += (_, __) => RecalculateCart();
             RecalculateCart();
+        }
+
+        private void Checkout_Click(object sender, RoutedEventArgs e)
+        {
+            if (AppState.CurrentUserId == Guid.Empty)
+            {
+                MessageBox.Show("Войдите в аккаунт, чтобы оформить заказ.", "Заказ",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (StoreCartService.Items.Count == 0)
+            {
+                MessageBox.Show("Добавьте товары в корзину.", "Заказ",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            StoreCheckoutSession.SetFromCart();
+            AppState.SetFrame<StoreCheckoutPage>();
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
@@ -226,6 +245,7 @@ namespace DriveCare.Pages.User.ActionPages
     {
         public Guid ProductId { get; set; }
         public string Name { get; set; }
+        public string Category { get; set; }
         public decimal Price { get; set; }
         private int _quantity;
         public int Quantity { get => _quantity; set { _quantity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Quantity))); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayText))); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LineTotal))); } }
@@ -247,6 +267,7 @@ namespace DriveCare.Pages.User.ActionPages
                 {
                     ProductId = product.ProductId,
                     Name = product.Name,
+                    Category = product.Category,
                     Price = product.Price,
                     Quantity = 1
                 });
@@ -265,6 +286,11 @@ namespace DriveCare.Pages.User.ActionPages
             item.Quantity--;
             if (item.Quantity <= 0)
                 Items.Remove(item);
+        }
+
+        public static void Clear()
+        {
+            Items.Clear();
         }
     }
 }

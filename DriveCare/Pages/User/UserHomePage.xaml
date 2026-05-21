@@ -219,6 +219,18 @@
                         </Grid>
                     </Button>
 
+                    <Button x:Name="BtnMyOrders"
+                            Style="{StaticResource ProfileIconButton}"
+                            Margin="0,0,10,0"
+                            Click="MyOrdersButton_Click"
+                            ToolTip="Мои заказы">
+                        <TextBlock Text="📦"
+                                   FontSize="16"
+                                   Foreground="{DynamicResource App.Brush.IconTint}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Button>
+
                     <Button x:Name="BtnProfile"
                             Style="{StaticResource ProfileIconButton}"
                             Click="ProfileButton_Click"

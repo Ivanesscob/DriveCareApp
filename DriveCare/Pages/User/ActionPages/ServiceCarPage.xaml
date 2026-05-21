@@ -2,22 +2,38 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:data="clr-namespace:DriveCare.Data"
+      xmlns:services="clr-namespace:DriveCare.Services"
       xmlns:oxy="http://oxyplot.org/wpf"
       Title="Обслуживание">
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <Style x:Key="SlotCardBorder" TargetType="Border">
+        <Style x:Key="ComponentStatusBorder" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource App.Brush.Surface2}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="14,12"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
             <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding HasData}" Value="True">
+                <DataTrigger Binding="{Binding StatusLevel}" Value="Good">
+                    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.AccentDim}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusLevel}" Value="Watch">
                     <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Accent}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding StatusLevel}" Value="Due">
+                    <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.DangerBorder}"/>
+                    <Setter Property="Background" Value="{DynamicResource App.Brush.DangerPanel}"/>
+                </DataTrigger>
             </Style.Triggers>
+        </Style>
+        <Style x:Key="SummaryChip" TargetType="Border">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.Surface2}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </Page.Resources>
 
@@ -37,14 +53,14 @@
                 <TextBlock Text="Обслуживание"
                            Foreground="{DynamicResource App.Brush.Foreground}"
                            FontSize="22" FontWeight="SemiBold"/>
-                <TextBlock Text="Ориентиры по истории визитов в сервис"
+                <TextBlock Text="Состояние узлов по истории визитов и пробегу"
                            Foreground="{DynamicResource App.Brush.Muted}"
                            FontSize="13" Margin="0,4,0,0"/>
             </StackPanel>
         </DockPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,0,24,28">
-            <StackPanel MaxWidth="1040">
+            <StackPanel MaxWidth="960">
 
                 <TextBlock Text="Нет привязанных автомобилей. Добавьте машину в профиле."
                            Foreground="{DynamicResource App.Brush.Muted}"
@@ -52,11 +68,10 @@
                            Visibility="{Binding NoCarsVisibility}"/>
 
                 <StackPanel Visibility="{Binding CarPanelVisibility}">
-                    <Grid Margin="0,0,0,20">
+                    <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="320" MinWidth="280"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Автомобиль" Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,0,0,6"/>
@@ -66,7 +81,7 @@
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <Image Source="{Binding Photo}" Width="36" Height="36" Margin="0,0,10,0"
+                                            <Image Source="{Binding Photo}" Width="32" Height="32" Margin="0,0,8,0"
                                                    Stretch="Uniform" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
                                                        Foreground="{DynamicResource App.Brush.Foreground}" FontSize="14"/>
@@ -74,97 +89,103 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom" MinWidth="260">
-                            <TextBlock Text="Примерный пробег" Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,0,0,6"/>
-                            <Grid>
+                            <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" MinHeight="44" Padding="12,10" CornerRadius="10"
-                                        Background="{DynamicResource App.Brush.FieldInputBg}"
-                                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Примерный пробег" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
                                     <TextBlock Text="{Binding ApproximateMileageDisplayText}"
-                                               Foreground="{DynamicResource App.Brush.FieldInputFg}"
-                                               FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                                </Border>
+                                               Foreground="{DynamicResource App.Brush.Foreground}"
+                                               FontSize="15" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                </StackPanel>
                                 <Button Grid.Column="1" Content="Реальный пробег"
-                                        Style="{StaticResource App.Button.Outline}" Height="44" MinWidth="120"
-                                        Margin="8,0,0,0" VerticalAlignment="Stretch"
-                                        Click="AddRealMileage_Click"
-                                        ToolTip="Записать показания одометра (не меньше последнего и примерного пробега)"/>
+                                        Style="{StaticResource App.Button.Outline}" Height="40" MinWidth="130"
+                                        Margin="12,0,0,0" VerticalAlignment="Bottom"
+                                        Click="AddRealMileage_Click"/>
                             </Grid>
                         </StackPanel>
-                    </Grid>
-
-                    <!-- Центр: машина; слева / справа карточки -->
-                    <Grid MinHeight="260" Margin="0,0,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="280"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <ItemsControl ItemsSource="{Binding LeftInfoSlots}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type data:MaintenanceInfoSlotVm}">
-                                        <Border Style="{StaticResource SlotCardBorder}">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding DisplayTitle}" FontSize="16" FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource App.Brush.Foreground}"/>
-                                                <TextBlock Text="{Binding Line1}" FontSize="13" TextWrapping="Wrap" Margin="0,10,0,0"
-                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
-                                                <TextBlock Text="{Binding Line2}" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0"
-                                                           Foreground="{DynamicResource App.Brush.Foreground}"/>
-                                                <TextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
-                                                           Foreground="{DynamicResource App.Brush.Muted}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-
-                        <Border Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                CornerRadius="20" Padding="16"
+                        <Border Grid.Column="1" Margin="16,0,0,0" CornerRadius="14" Padding="10"
+                                VerticalAlignment="Top"
                                 Background="{DynamicResource App.Brush.SurfaceCard}"
-                                BorderBrush="{DynamicResource App.Brush.Border}"
-                                BorderThickness="1">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.35" Color="{DynamicResource App.Color.HeroShadow}"/>
-                            </Border.Effect>
-                            <Image Source="{Binding CenterCarImage}" Width="220" Height="200"
-                                   Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                            <Image Source="{Binding CenterCarImage}" Width="100" Height="88" Stretch="Uniform"/>
                         </Border>
-
-                        <StackPanel Grid.Column="2" Margin="12,0,0,0">
-                            <ItemsControl ItemsSource="{Binding RightInfoSlots}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type data:MaintenanceInfoSlotVm}">
-                                        <Border Style="{StaticResource SlotCardBorder}">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding DisplayTitle}" FontSize="16" FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource App.Brush.Foreground}"/>
-                                                <TextBlock Text="{Binding Line1}" FontSize="13" TextWrapping="Wrap" Margin="0,10,0,0"
-                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
-                                                <TextBlock Text="{Binding Line2}" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0"
-                                                           Foreground="{DynamicResource App.Brush.Foreground}"/>
-                                                <TextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
-                                                           Foreground="{DynamicResource App.Brush.Muted}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
                     </Grid>
 
-                    <Expander Margin="0,8,0,16" Foreground="{DynamicResource App.Brush.Foreground}"
-                              Header="Оценка по пробегу после последнего ТО" IsExpanded="False">
+                    <Border CornerRadius="14" Padding="16,14" Margin="0,0,0,16"
+                            Background="{DynamicResource App.Brush.SurfaceCard}"
+                            BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                            Visibility="{Binding ComponentPanelVisibility}">
+                        <StackPanel>
+                            <TextBlock Text="Сводка" FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                            <TextBlock Text="{Binding OverallHint}" FontSize="13" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource App.Brush.SecondaryText}" Margin="0,8,0,12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Style="{StaticResource SummaryChip}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Норма" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding CountGood}" FontWeight="SemiBold" FontSize="14"
+                                                   Foreground="{DynamicResource App.Brush.Accent}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource SummaryChip}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Скоро" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding CountWatch}" FontWeight="SemiBold" FontSize="14"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource SummaryChip}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Заменить" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding CountDue}" FontWeight="SemiBold" FontSize="14"
+                                                   Foreground="{DynamicResource App.Brush.DangerFg}"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Узлы и расходники" FontSize="16" FontWeight="SemiBold"
+                               Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,0,0,8"
+                               Visibility="{Binding ComponentPanelVisibility}"/>
+                    <ItemsControl ItemsSource="{Binding ComponentStatuses}"
+                                  Visibility="{Binding ComponentPanelVisibility}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type services:VehicleComponentStatusVm}">
+                                <Border Style="{StaticResource ComponentStatusBorder}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                            <TextBlock Text="{Binding Hint}" FontSize="12" TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource App.Brush.Muted}" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" FontSize="12" FontWeight="SemiBold"
+                                                   VerticalAlignment="Top" Margin="8,0,0,0"
+                                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Expander Margin="0,12,0,0" Foreground="{DynamicResource App.Brush.Foreground}"
+                              Header="Оценка по пробегу" IsExpanded="False">
                         <StackPanel Margin="0,8,0,0">
-                            <TextBlock Text="Ориентиры ниже считаются от примерного пробега на сегодня (справа вверху)."
+                            <TextBlock Text="Ориентиры от последнего ТО и примерного пробега на сегодня."
                                        Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/>
                             <ItemsControl ItemsSource="{Binding KmRecommendations}">
                                 <ItemsControl.ItemTemplate>
@@ -185,57 +206,59 @@
                         </StackPanel>
                     </Expander>
 
-                    <TextBlock Text="График пробега" FontSize="18" FontWeight="SemiBold"
-                               Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,8,0,8"/>
-                    <TextBlock Text="История визитов пуста — после появления записей с указанным пробегом здесь будет график."
-                               Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,12"
-                               Visibility="{Binding MileageHintEmptyHistoryVisibility}"/>
-                    <TextBlock Text="В записях нет километража. Укажите пробег при занесении визита в сервис — тогда можно построить динамику."
-                               Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,12"
-                               Visibility="{Binding MileageHintNoOdometerVisibility}"/>
-                    <Border CornerRadius="12" Background="{DynamicResource App.Brush.Surface2}"
-                            BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" Padding="8,8,8,4" Margin="0,0,0,8"
-                            Visibility="{Binding MileagePlotHostVisibility}">
-                        <oxy:PlotView Model="{Binding MileagePlotModel}" MinHeight="240" MinWidth="200"
-                                      Background="Transparent"/>
-                    </Border>
+                    <Expander Margin="0,8,0,0" Foreground="{DynamicResource App.Brush.Foreground}"
+                              Header="График пробега и история визитов" IsExpanded="False">
+                        <StackPanel Margin="0,8,0,0">
+                            <TextBlock Text="История визитов пуста — после записей с пробегом появится график."
+                                       Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,8"
+                                       Visibility="{Binding MileageHintEmptyHistoryVisibility}"/>
+                            <TextBlock Text="В записях нет километража — укажите пробег при визите в сервис."
+                                       Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,8"
+                                       Visibility="{Binding MileageHintNoOdometerVisibility}"/>
+                            <Border CornerRadius="12" Background="{DynamicResource App.Brush.Surface2}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" Padding="8,8,8,4" Margin="0,0,0,8"
+                                    Visibility="{Binding MileagePlotHostVisibility}">
+                                <oxy:PlotView Model="{Binding MileagePlotModel}" MinHeight="220" Background="Transparent"/>
+                            </Border>
+                            <TextBlock Text="{Binding MileagePredictedSummary}" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource App.Brush.SecondaryText}" Margin="0,0,0,12"
+                                       Visibility="{Binding MileagePredictedLineVisibility}"/>
 
-                    <StackPanel Margin="0,0,0,20" Visibility="{Binding MileageInsightPanelVisibility}">
-                        <TextBlock Text="Как считается примерный пробег"
-                                   Foreground="{DynamicResource App.Brush.Foreground}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                        <TextBlock Text="{Binding MileagePredictedSummary}" FontSize="13" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource App.Brush.SecondaryText}"
-                                   Visibility="{Binding MileagePredictedLineVisibility}"/>
-                    </StackPanel>
-
-                    <TextBlock Text="История обслуживания" FontSize="18" FontWeight="SemiBold"
-                               Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,0,0,10"/>
-
-                    <TextBlock Text="Пока нет записей по этой машине в базе."
-                               Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,0,0,12"
-                               Visibility="{Binding EmptyHistoryVisibility}"/>
-
-                    <ItemsControl ItemsSource="{Binding HistoryItems}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type data:MaintenanceHistoryItemVm}">
-                                <Border Background="{DynamicResource App.Brush.Surface2}"
-                                        BorderBrush="{DynamicResource App.Brush.Border}"
-                                        BorderThickness="1" CornerRadius="10" Padding="12,10" Margin="0,0,0,8">
-                                    <StackPanel>
-                                        <TextBlock Foreground="{DynamicResource App.Brush.Foreground}"
-                                                   FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
-                                                   Text="{Binding Title}"/>
-                                        <TextBlock Text="{Binding WhenWhereLine}"
-                                                   Foreground="{DynamicResource App.Brush.Muted}"
-                                                   FontSize="12" Margin="0,6,0,0"/>
-                                        <TextBlock Text="{Binding Notes}" Foreground="{DynamicResource App.Brush.SecondaryText}"
-                                                   FontSize="13" TextWrapping="Wrap" Margin="0,6,0,0"
-                                                   Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                            <TextBlock Text="История" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Foreground}" Margin="0,4,0,8"/>
+                            <TextBlock Text="Пока нет записей по этой машине."
+                                       Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" Margin="0,0,0,8"
+                                       Visibility="{Binding EmptyHistoryVisibility}"/>
+                            <ItemsControl ItemsSource="{Binding HistoryItems}" MaxHeight="320">
+                                <ItemsControl.Template>
+                                    <ControlTemplate TargetType="ItemsControl">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <ItemsPresenter/>
+                                        </ScrollViewer>
+                                    </ControlTemplate>
+                                </ItemsControl.Template>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type data:MaintenanceHistoryItemVm}">
+                                        <Border Background="{DynamicResource App.Brush.Surface2}"
+                                                BorderBrush="{DynamicResource App.Brush.Border}"
+                                                BorderThickness="1" CornerRadius="10" Padding="10,8" Margin="0,0,0,6">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource App.Brush.Foreground}" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding WhenWhereLine}" FontSize="12" Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource App.Brush.Muted}"/>
+                                                <TextBlock Text="{Binding WorkshopLine}" FontSize="12" Margin="0,2,0,0"
+                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                                <TextBlock Text="{Binding Notes}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"
+                                                           Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Expander>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

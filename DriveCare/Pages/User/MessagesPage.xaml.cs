@@ -1,6 +1,7 @@
 using DriveCareCore.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -152,7 +153,8 @@ namespace DriveCare.Pages.User
                     AppState.CurrentUserId,
                     Guid.Empty).ConfigureAwait(true);
 
-                MessagesList.ItemsSource = messages ?? new List<ChatMessageItem>();
+                MessagesList.ItemsSource = new ObservableCollection<ChatMessageItem>(
+                    messages ?? new List<ChatMessageItem>());
                 ScheduleScrollToEnd();
             }
             catch (Exception ex)

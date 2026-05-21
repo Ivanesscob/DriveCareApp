@@ -102,6 +102,8 @@ namespace DriveCarePro.Pages
                 return;
             }
 
+            WorkshopServiceKinds.EnsureCatalogInDatabase();
+
             if (!WorkshopPaintCatalogService.TablesExist())
             {
                 HintText.Text = "Выполните SQL: DriveCareCore/Data/BD/Sql/WorkshopPaintServices_Tables.sql и WorkshopBusinessTypes_Tables.sql";

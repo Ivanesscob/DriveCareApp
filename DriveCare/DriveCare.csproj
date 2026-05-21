@@ -349,6 +349,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\StoreOrderPaymentWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\EnterRealMileageWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -369,6 +373,9 @@
     <Compile Include="Windows\PaintJobWindow.xaml.cs">
       <DependentUpon>PaintJobWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\StoreOrderPaymentWindow.xaml.cs">
+      <DependentUpon>StoreOrderPaymentWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EnterRealMileageWindow.xaml.cs">
       <DependentUpon>EnterRealMileageWindow.xaml</DependentUpon>
     </Compile>
@@ -376,6 +383,7 @@
       <DependentUpon>ProfileCarEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\AppState.cs" />
+    <Compile Include="Data\StoreCheckoutSession.cs" />
     <Compile Include="Data\ServiceMaintenanceDtos.cs" />
     <Compile Include="Services\RegistrationMailHelper.cs" />
     <Compile Include="Services\UserInputValidators.cs" />
@@ -385,6 +393,7 @@
     <Compile Include="Services\UserSessionStore.cs" />
     <Compile Include="Services\OxyPlotThemeHelper.cs" />
     <Compile Include="Services\ServiceMaintenanceRepository.cs" />
+    <Compile Include="Services\VehicleComponentStatusService.cs" />
     <Compile Include="Services\PaintColorBrushHelper.cs" />
     <Compile Include="Services\MaintenanceRecommendationEngine.cs" />
     <Compile Include="Controls\TintedImage.xaml.cs">
@@ -417,6 +426,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\User\ActionPages\StoreCheckoutPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\User\ActionPages\ToolsStorePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -438,6 +451,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\User\ActionPages\AddCarSalePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\User\ActionPages\MyOrdersPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -474,6 +491,9 @@
     <Compile Include="Pages\User\MessagesPage.xaml.cs">
       <DependentUpon>MessagesPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\User\ActionPages\StoreCheckoutPage.xaml.cs">
+      <DependentUpon>StoreCheckoutPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\User\ActionPages\ToolsStorePage.xaml.cs">
       <DependentUpon>ToolsStorePage.xaml</DependentUpon>
     </Compile>
@@ -482,6 +502,7 @@
     </Compile>
     <Compile Include="Helpers\BrowserEmulationHelper.cs" />
     <Compile Include="Helpers\MapBrowserScriptBridge.cs" />
+    <Compile Include="Helpers\DemoQrCodeHelper.cs" />
     <Compile Include="Pages\User\ActionPages\PaintCarPage.xaml.cs">
       <DependentUpon>PaintCarPage.xaml</DependentUpon>
     </Compile>
@@ -496,6 +517,9 @@
     </Compile>
     <Compile Include="Pages\User\ActionPages\AddCarSalePage.xaml.cs">
       <DependentUpon>AddCarSalePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\ActionPages\MyOrdersPage.xaml.cs">
+      <DependentUpon>MyOrdersPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\User\ActionPages\MyCarSalesPage.xaml.cs">
       <DependentUpon>MyCarSalesPage.xaml</DependentUpon>

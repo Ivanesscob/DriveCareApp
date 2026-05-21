@@ -26,13 +26,15 @@
 
         <StackPanel Grid.Row="0" Margin="0,24,0,8" HorizontalAlignment="Center">
             <TextBlock Text="Магазин инструментов" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="30" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Добавьте товары в корзину — пункт выдачи и оплата на следующем шаге"
+                       Foreground="{DynamicResource App.Brush.Muted}" FontSize="13" HorizontalAlignment="Center" Margin="0,6,0,0"/>
         </StackPanel>
 
         <Grid Grid.Row="1" Margin="24,0,24,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="14"/>
-                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
@@ -79,7 +81,6 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
-
                                     <Border Grid.Row="0" CornerRadius="10" Background="{DynamicResource App.Brush.PhotoMat}" ClipToBounds="True" Margin="0,0,0,10">
                                         <Grid>
                                             <Image Source="{Binding Photo}" Stretch="UniformToFill"/>
@@ -88,12 +89,10 @@
                                             </Border>
                                         </Grid>
                                     </Border>
-
                                     <StackPanel Grid.Row="1">
                                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Description}" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="42"/>
                                     </StackPanel>
-
                                     <Grid Grid.Row="2" Margin="0,10,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -118,9 +117,11 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="{Binding CartTitle}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="18" FontWeight="SemiBold"/>
-                    <ListView Grid.Row="1" Margin="0,10,0,10" ItemsSource="{Binding CartItems}" Background="{DynamicResource App.Brush.Panel}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <ListView Grid.Row="1" Margin="0,10,0,10" ItemsSource="{Binding CartItems}" MinHeight="120"
+                              Background="{DynamicResource App.Brush.Panel}" BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <DockPanel Margin="6,4">
@@ -132,6 +133,8 @@
                         </ListView.ItemTemplate>
                     </ListView>
                     <TextBlock Grid.Row="2" Text="{Binding CartTotalText}" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="14" FontWeight="SemiBold"/>
+                    <Button Grid.Row="3" Content="Оформить заказ" Margin="0,12,0,0" Height="42"
+                            Style="{StaticResource App.Button.Primary}" Click="Checkout_Click"/>
                 </Grid>
             </Border>
         </Grid>

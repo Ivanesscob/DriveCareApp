@@ -95,11 +95,18 @@
                                     Click="AddService_Click"/>
                         </Grid>
                         <DataGrid x:Name="ServicesGrid" AutoGenerateColumns="False" IsReadOnly="True"
-                                  HeadersVisibility="Column" CanUserAddRows="False" MinHeight="100">
+                                  HeadersVisibility="Column" CanUserAddRows="False" MinHeight="100" MaxHeight="280">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Услуга" Binding="{Binding Name}" Width="*"/>
-                                <DataGridTextColumn Header="Тип" Binding="{Binding KindTitle}" Width="140"/>
-                                <DataGridTextColumn Header="Цена" Binding="{Binding PriceDisplay}" Width="100"/>
+                                <DataGridTextColumn Header="Услуга" Binding="{Binding Name}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextWrapping" Value="Wrap"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Тип" Binding="{Binding KindTitle}" Width="160"/>
+                                <DataGridTextColumn Header="Цена" Binding="{Binding PriceDisplay}" Width="90"/>
                                 <DataGridTemplateColumn Header="" Width="90">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
