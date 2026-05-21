@@ -259,17 +259,20 @@ ORDER BY m.CreatedAt ASC;";
                 {
                     convId = Guid.NewGuid();
                     var clientId = await TryResolveServiceClientIdAsync(db, workshopId, userId).ConfigureAwait(false);
+                    var now = DateTime.Now;
                     var preview = BuildPreview(text);
+                    var dtParam = new SqlParameter("@dt", now);
                     await db.Database.ExecuteSqlCommandAsync(
                         @"INSERT INTO dbo.WorkshopConversations
                           (RowId, WorkshopId, UserId, WorkshopServiceClientId, Subject, LastMessageAt, LastMessagePreview,
                            UnreadForUser, UnreadForWorkshop, CreatedAt)
-                          VALUES (@id, @w, @u, @sc, @sub, GETDATE(), @pr, 0, 1, GETDATE())",
+                          VALUES (@id, @w, @u, @sc, @sub, @dt, @pr, 0, 1, @dt)",
                         new SqlParameter("@id", convId),
                         new SqlParameter("@w", workshopId),
                         new SqlParameter("@u", userId),
                         new SqlParameter("@sc", (object)clientId ?? DBNull.Value),
                         new SqlParameter("@sub", "Сообщение от мастерской"),
+                        dtParam,
                         new SqlParameter("@pr", preview)).ConfigureAwait(false);
                 }
 
@@ -310,16 +313,19 @@ ORDER BY m.CreatedAt ASC;";
 
                 var convId = Guid.NewGuid();
                 var clientId = await TryResolveServiceClientIdAsync(db, workshopId, userId).ConfigureAwait(false);
+                var now = DateTime.Now;
+                var dtParam = new SqlParameter("@dt", now);
                 await db.Database.ExecuteSqlCommandAsync(
                     @"INSERT INTO dbo.WorkshopConversations
                       (RowId, WorkshopId, UserId, WorkshopServiceClientId, Subject, LastMessageAt, LastMessagePreview,
                        UnreadForUser, UnreadForWorkshop, CreatedAt)
-                      VALUES (@id, @w, @u, @sc, @sub, GETDATE(), @pr, 0, 1, GETDATE())",
+                      VALUES (@id, @w, @u, @sc, @sub, @dt, @pr, 0, 1, @dt)",
                     new SqlParameter("@id", convId),
                     new SqlParameter("@w", workshopId),
                     new SqlParameter("@u", userId),
                     new SqlParameter("@sc", (object)clientId ?? DBNull.Value),
                     new SqlParameter("@sub", "Обращение с карты автосервисов"),
+                    dtParam,
                     new SqlParameter("@pr", "Новый диалог")).ConfigureAwait(false);
 
                 return (true, null, convId);
@@ -418,24 +424,28 @@ WHERE t.ClientUserId IS NOT NULL
             Guid? employeeId,
             string body)
         {
+            var now = DateTime.Now;
             var preview = BuildPreview(body);
+            var sentAt = new SqlParameter("@p_dt", now);
             await db.Database.ExecuteSqlCommandAsync(
                 @"INSERT INTO dbo.WorkshopMessages
                   (RowId, ConversationId, SenderKind, SenderUserId, SenderEmployeeId, Body, CreatedAt)
-                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, GETDATE())",
+                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, @p_dt)",
                 new SqlParameter("@p_id", Guid.NewGuid()),
                 new SqlParameter("@p_cid", conversationId),
                 new SqlParameter("@p_kind", (byte)kind),
                 new SqlParameter("@p_uid", (object)userId ?? DBNull.Value),
                 new SqlParameter("@p_eid", (object)employeeId ?? DBNull.Value),
-                new SqlParameter("@p_body", body)).ConfigureAwait(false);
+                new SqlParameter("@p_body", body),
+                sentAt).ConfigureAwait(false);
 
             if (kind == MessageSenderKind.User)
             {
                 await db.Database.ExecuteSqlCommandAsync(
                     @"UPDATE dbo.WorkshopConversations
-                      SET LastMessageAt = GETDATE(), LastMessagePreview = @p_pr, UnreadForWorkshop = UnreadForWorkshop + 1
+                      SET LastMessageAt = @p_dt, LastMessagePreview = @p_pr, UnreadForWorkshop = UnreadForWorkshop + 1
                       WHERE RowId = @p_cid",
+                    sentAt,
                     new SqlParameter("@p_pr", preview),
                     new SqlParameter("@p_cid", conversationId)).ConfigureAwait(false);
             }
@@ -443,8 +453,9 @@ WHERE t.ClientUserId IS NOT NULL
             {
                 await db.Database.ExecuteSqlCommandAsync(
                     @"UPDATE dbo.WorkshopConversations
-                      SET LastMessageAt = GETDATE(), LastMessagePreview = @p_pr, UnreadForUser = UnreadForUser + 1
+                      SET LastMessageAt = @p_dt, LastMessagePreview = @p_pr, UnreadForUser = UnreadForUser + 1
                       WHERE RowId = @p_cid",
+                    sentAt,
                     new SqlParameter("@p_pr", preview),
                     new SqlParameter("@p_cid", conversationId)).ConfigureAwait(false);
             }
