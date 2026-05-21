@@ -345,7 +345,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\PaintJobWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\EnterRealMileageWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\ProfileCarEditWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -358,16 +366,26 @@
     <Compile Include="Windows\WorkshopOnlineBookingWindow.xaml.cs">
       <DependentUpon>WorkshopOnlineBookingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\PaintJobWindow.xaml.cs">
+      <DependentUpon>PaintJobWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EnterRealMileageWindow.xaml.cs">
       <DependentUpon>EnterRealMileageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\ProfileCarEditWindow.xaml.cs">
+      <DependentUpon>ProfileCarEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\AppState.cs" />
     <Compile Include="Data\ServiceMaintenanceDtos.cs" />
     <Compile Include="Services\RegistrationMailHelper.cs" />
+    <Compile Include="Services\UserInputValidators.cs" />
+    <Compile Include="Services\UserGarageService.cs" />
+    <Compile Include="Services\UserProfileService.cs" />
     <Compile Include="Services\ThemeService.cs" />
     <Compile Include="Services\UserSessionStore.cs" />
     <Compile Include="Services\OxyPlotThemeHelper.cs" />
     <Compile Include="Services\ServiceMaintenanceRepository.cs" />
+    <Compile Include="Services\PaintColorBrushHelper.cs" />
     <Compile Include="Services\MaintenanceRecommendationEngine.cs" />
     <Compile Include="Controls\TintedImage.xaml.cs">
       <DependentUpon>TintedImage.xaml</DependentUpon>
@@ -467,6 +485,8 @@
     <Compile Include="Pages\User\ActionPages\PaintCarPage.xaml.cs">
       <DependentUpon>PaintCarPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\User\ActionPages\PaintCarViewModel.cs" />
+    <Compile Include="Data\CarPaintHistoryItemVm.cs" />
     <Compile Include="Pages\User\ActionPages\ServiceCarPage.xaml.cs">
       <DependentUpon>ServiceCarPage.xaml</DependentUpon>
     </Compile>

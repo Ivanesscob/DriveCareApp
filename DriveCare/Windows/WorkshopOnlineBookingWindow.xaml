@@ -1,7 +1,7 @@
 <Window x:Class="DriveCare.Windows.WorkshopOnlineBookingWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Онлайн-запись на сервис" Height="480" Width="460"
+        Title="Онлайн-запись на сервис" Height="540" Width="460"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{DynamicResource App.Brush.PageBackground}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -41,18 +41,23 @@
                      MinHeight="56" AcceptsReturn="True" TextWrapping="Wrap"
                      Visibility="Collapsed" Margin="0,0,0,10"/>
 
-            <TextBlock Grid.Row="7" Text="Дополнительно (необязательно)" FontSize="12"
+            <TextBlock Grid.Row="7" Text="День визита *" FontSize="12"
                        Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
-            <TextBox x:Name="CommentBox" Grid.Row="8" Style="{StaticResource App.FieldTextBox}" MinHeight="48"
+            <ComboBox x:Name="VisitDateCombo" Grid.Row="8" Height="36" Margin="0,0,0,10"
+                      DisplayMemberPath="DisplayLabel" SelectedValuePath="Date"/>
+
+            <TextBlock Grid.Row="9" Text="Дополнительно (необязательно)" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+            <TextBox x:Name="CommentBox" Grid.Row="10" Style="{StaticResource App.FieldTextBox}" MinHeight="48"
                      AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-            <TextBlock Grid.Row="9" Text="Время визита согласуем с автосервисом после подтверждения заявки."
+            <TextBlock Grid.Row="11" Text="Точное время визита согласуете с автосервисом после подтверждения."
                        FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,10"/>
 
-            <TextBlock x:Name="ErrorText" Grid.Row="10" Foreground="#C62828" TextWrapping="Wrap"
+            <TextBlock x:Name="ErrorText" Grid.Row="12" Foreground="#C62828" TextWrapping="Wrap"
                        Visibility="Collapsed" Margin="0,0,0,8"/>
 
-            <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="13" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Отмена" Style="{StaticResource App.Button.Outline}" Width="100" Height="36"
                         Margin="0,0,8,0" Click="Cancel_Click"/>
                 <Button Content="Отправить заявку" Style="{StaticResource App.Button.Primary}" Width="140" Height="36"

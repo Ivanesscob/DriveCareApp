@@ -9,6 +9,7 @@ using System.Data.Entity;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace DriveCarePro.Pages.LoginPages
 {
@@ -102,6 +103,30 @@ namespace DriveCarePro.Pages.LoginPages
         private void RegisterExecute()
         {
             AppState.MainFrame.Navigate(new RegisterPage());
+        }
+
+        private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter)
+                return;
+            TryLoginFromEnter();
+            e.Handled = true;
+        }
+
+        private void PasswordInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter)
+                return;
+            TryLoginFromEnter();
+            e.Handled = true;
+        }
+
+        void TryLoginFromEnter()
+        {
+            if (IsBusy)
+                return;
+            if (LoginCommand?.CanExecute(null) == true)
+                LoginCommand.Execute(null);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

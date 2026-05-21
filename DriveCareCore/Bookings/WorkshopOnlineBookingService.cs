@@ -1,4 +1,5 @@
 using DriveCareCore.Data.BD;
+using DriveCareCore.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -98,6 +99,15 @@ namespace DriveCareCore.Bookings
                 return (false, "Выберите автомобиль из гаража.", null);
             if (string.IsNullOrWhiteSpace(issueCategory))
                 return (false, "Выберите категорию неисправности.", null);
+            if (!preferredDate.HasValue)
+                return (false, "Выберите дату визита.", null);
+
+            var visitDate = preferredDate.Value.Date;
+            var (dateOk, dateError) = await WorkshopOnlineBookingCapacity.ValidateBookingDateAsync(db, workshopId, visitDate)
+                .ConfigureAwait(false);
+            if (!dateOk)
+                return (false, dateError, null);
+            preferredDate = visitDate;
 
             var carOk = await db.UserCars.AnyAsync(uc => uc.RowId == userCarId && uc.UserId == userId)
                 .ConfigureAwait(false);
@@ -180,22 +190,37 @@ namespace DriveCareCore.Bookings
             IList<Guid> workshopIds,
             bool pendingOnly)
         {
-            if (!TablesExist() || workshopIds == null || workshopIds.Count == 0)
+            if (!TablesExist() || workshopIds == null)
+                return new List<WorkshopOnlineBookingItem>();
+
+            var ids = workshopIds.Where(id => id != Guid.Empty).Distinct().ToList();
+            if (ids.Count == 0)
                 return new List<WorkshopOnlineBookingItem>();
 
             var hasIssueCol = await ColumnExistsAsync(db, "WorkshopOnlineBookings", "IssueCategory")
                 .ConfigureAwait(false);
+            var hasRejectCol = await ColumnExistsAsync(db, "WorkshopOnlineBookings", "RejectReason")
+                .ConfigureAwait(false);
 
-            var ids = workshopIds.Distinct().ToList();
-            var paramNames = ids.Select((_, i) => "@w" + i).ToList();
+            var paramNames = Enumerable.Range(0, ids.Count).Select(i => "@w" + i).ToArray();
+            var inClause = string.Join(",", paramNames);
+            if (string.IsNullOrEmpty(inClause))
+                return new List<WorkshopOnlineBookingItem>();
+
             var statusFilter = pendingOnly ? " AND b.Status = 0 " : string.Empty;
-            var issueSelect = hasIssueCol ? "b.IssueCategory" : "CAST(NULL AS NVARCHAR(120)) AS IssueCategory";
-            var sql = $@"
+            var issueCol = hasIssueCol
+                ? "b.IssueCategory AS IssueCategory"
+                : "CAST(NULL AS NVARCHAR(120)) AS IssueCategory";
+            var rejectCol = hasRejectCol
+                ? "b.RejectReason AS RejectReason"
+                : "CAST(NULL AS NVARCHAR(500)) AS RejectReason";
+
+            var sql = @"
 SELECT b.RowId AS BookingId, b.WorkshopId, w.Name AS WorkshopName, b.UserId,
        COALESCE(NULLIF(LTRIM(RTRIM(u.Login)), N''), u.Email, N'Клиент') AS ClientDisplayName,
-       b.ClientPhone, b.ClientComment, {issueSelect},
+       b.ClientPhone, b.ClientComment, " + issueCol + @", " + rejectCol + @",
        COALESCE(
-         NULLIF(LTRIM(RTRIM(CONCAT(br.Name, N' ', m.Name))), N''),
+         NULLIF(LTRIM(RTRIM(ISNULL(br.Name, N'') + N' ' + ISNULL(m.Name, N''))), N''),
          N'Автомобиль'
        ) AS CarDisplayName,
        b.PreferredDate, b.Status AS StatusCode, b.CreatedAt
@@ -206,7 +231,7 @@ LEFT JOIN dbo.UserCars uc ON uc.RowId = b.UserCarId
 LEFT JOIN dbo.Cars c ON c.RowId = uc.CarId
 LEFT JOIN dbo.Models m ON m.RowId = c.ModelId
 LEFT JOIN dbo.Brands br ON br.RowId = m.BrandId
-WHERE b.WorkshopId IN ({string.Join(",", paramNames)}) {statusFilter}
+WHERE b.WorkshopId IN (" + inClause + @")" + statusFilter + @"
 ORDER BY b.CreatedAt DESC;";
 
             var parameters = ids.Select((id, i) => new SqlParameter(paramNames[i], id)).ToArray();
@@ -214,18 +239,32 @@ ORDER BY b.CreatedAt DESC;";
                 .ToListAsync().ConfigureAwait(false);
         }
 
-        public static Task<(bool ok, string error)> ConfirmBookingAsync(Guid bookingId, Guid employeeId) =>
-            WithDb(db => ConfirmBookingAsync(db, bookingId, employeeId));
+        public static Task<BookingActionResult> AcceptBookingAsync(
+            Guid bookingId,
+            Guid employeeId,
+            string visitWhenText) =>
+            WithDb(db => AcceptBookingAsync(db, bookingId, employeeId, visitWhenText));
 
-        public static async Task<(bool ok, string error)> ConfirmBookingAsync(
+        public static async Task<BookingActionResult> AcceptBookingAsync(
             DriveCareDBEntities db,
             Guid bookingId,
-            Guid employeeId)
+            Guid employeeId,
+            string visitWhenText)
         {
             if (!TablesExist())
-                return (false, "Таблица записей не найдена.");
+                return BookingActionResult.Fail("Таблица записей не найдена.");
             if (bookingId == Guid.Empty || employeeId == Guid.Empty)
-                return (false, "Не указана запись или сотрудник.");
+                return BookingActionResult.Fail("Не указана запись или сотрудник.");
+
+            var when = (visitWhenText ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(when))
+                return BookingActionResult.Fail("Укажите, когда ждать клиента.");
+
+            var booking = await LoadBookingRowAsync(db, bookingId).ConfigureAwait(false);
+            if (booking == null)
+                return BookingActionResult.Fail("Запись не найдена.");
+            if (booking.Status != (byte)WorkshopBookingStatus.Pending)
+                return BookingActionResult.Fail("Запись уже обработана.");
 
             var n = await db.Database.ExecuteSqlCommandAsync(
                 @"UPDATE dbo.WorkshopOnlineBookings
@@ -234,7 +273,161 @@ ORDER BY b.CreatedAt DESC;";
                 new SqlParameter("@e", employeeId),
                 new SqlParameter("@id", bookingId)).ConfigureAwait(false);
 
-            return n > 0 ? (true, null) : (false, "Запись не найдена или уже обработана.");
+            if (n == 0)
+                return BookingActionResult.Fail("Запись не найдена или уже обработана.");
+
+            var chatBody = BuildAcceptChatMessage(booking, when);
+            var chatWarning = await TryNotifyUserInChatAsync(db, booking.WorkshopId, booking.UserId, employeeId, chatBody)
+                .ConfigureAwait(false);
+
+            return BookingActionResult.Success(chatWarning);
+        }
+
+        public static Task<BookingActionResult> RejectBookingAsync(
+            Guid bookingId,
+            Guid employeeId,
+            string rejectReason) =>
+            WithDb(db => RejectBookingAsync(db, bookingId, employeeId, rejectReason));
+
+        public static async Task<BookingActionResult> RejectBookingAsync(
+            DriveCareDBEntities db,
+            Guid bookingId,
+            Guid employeeId,
+            string rejectReason)
+        {
+            if (!TablesExist())
+                return BookingActionResult.Fail("Таблица записей не найдена.");
+            if (bookingId == Guid.Empty || employeeId == Guid.Empty)
+                return BookingActionResult.Fail("Не указана запись или сотрудник.");
+
+            var reason = (rejectReason ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(reason))
+                return BookingActionResult.Fail("Укажите причину отклонения.");
+            if (reason.Length > 500)
+                reason = reason.Substring(0, 500);
+
+            var booking = await LoadBookingRowAsync(db, bookingId).ConfigureAwait(false);
+            if (booking == null)
+                return BookingActionResult.Fail("Запись не найдена.");
+            if (booking.Status != (byte)WorkshopBookingStatus.Pending)
+                return BookingActionResult.Fail("Запись уже обработана.");
+
+            var hasRejectCol = await ColumnExistsAsync(db, "WorkshopOnlineBookings", "RejectReason")
+                .ConfigureAwait(false);
+
+            int n;
+            if (hasRejectCol)
+            {
+                n = await db.Database.ExecuteSqlCommandAsync(
+                    @"UPDATE dbo.WorkshopOnlineBookings
+                      SET Status = 3, RejectedAt = GETDATE(), RejectedByEmployeeId = @e, RejectReason = @r
+                      WHERE RowId = @id AND Status = 0",
+                    new SqlParameter("@e", employeeId),
+                    new SqlParameter("@r", reason),
+                    new SqlParameter("@id", bookingId)).ConfigureAwait(false);
+            }
+            else
+            {
+                n = await db.Database.ExecuteSqlCommandAsync(
+                    @"UPDATE dbo.WorkshopOnlineBookings
+                      SET Status = 3
+                      WHERE RowId = @id AND Status = 0",
+                    new SqlParameter("@id", bookingId)).ConfigureAwait(false);
+            }
+
+            if (n == 0)
+                return BookingActionResult.Fail("Запись не найдена или уже обработана.");
+
+            var chatBody = BuildRejectChatMessage(booking, reason);
+            var chatWarning = await TryNotifyUserInChatAsync(db, booking.WorkshopId, booking.UserId, employeeId, chatBody)
+                .ConfigureAwait(false);
+
+            return BookingActionResult.Success(chatWarning);
+        }
+
+        /// <summary>Устаревший вызов — используйте AcceptBookingAsync.</summary>
+        public static Task<(bool ok, string error)> ConfirmBookingAsync(Guid bookingId, Guid employeeId) =>
+            WithDb(async db =>
+            {
+                var visit = "в согласованное время";
+                var booking = await LoadBookingRowAsync(db, bookingId).ConfigureAwait(false);
+                if (booking?.PreferredDate != null)
+                    visit = booking.PreferredDate.Value.ToString("dd.MM.yyyy");
+                var result = await AcceptBookingAsync(db, bookingId, employeeId, visit).ConfigureAwait(false);
+                return (result.Ok, result.Error);
+            });
+
+        static string BuildAcceptChatMessage(BookingRow booking, string visitWhen)
+        {
+            var car = string.IsNullOrWhiteSpace(booking.CarDisplayName) ? "ваш автомобиль" : booking.CarDisplayName.Trim();
+            var issue = string.IsNullOrWhiteSpace(booking.IssueCategory)
+                ? "обращение"
+                : WorkshopBookingIssueCategories.GetDisplayName(booking.IssueCategory);
+            return "Запись на сервис подтверждена.\n\nЖдём вас: " + visitWhen
+                   + ".\n\nАвтомобиль: " + car + "\nПроблема: " + issue + ".";
+        }
+
+        static string BuildRejectChatMessage(BookingRow booking, string reason)
+        {
+            var date = booking.PreferredDate.HasValue
+                ? booking.PreferredDate.Value.ToString("dd.MM.yyyy")
+                : "запрошенную дату";
+            return "Онлайн-запись на " + date + " отклонена.\n\nПричина: " + reason;
+        }
+
+        static async Task<string> TryNotifyUserInChatAsync(
+            DriveCareDBEntities db,
+            Guid workshopId,
+            Guid userId,
+            Guid employeeId,
+            string message)
+        {
+            if (!WorkshopMessagingService.TablesExist())
+                return "Чат не настроен (SQL WorkshopMessaging). Клиент не получил сообщение в приложении.";
+
+            var chatStart = await WorkshopMessagingService.StartConversationAsync(
+                db, workshopId, userId, employeeId, message).ConfigureAwait(false);
+
+            if (!chatStart.ok || !chatStart.conversationId.HasValue)
+                return chatStart.error ?? "Не удалось отправить сообщение в чат.";
+
+            WorkshopChatRealtimeClient.NotifyNewMessage(
+                chatStart.conversationId.Value, workshopId, userId, MessageSenderKind.Employee);
+            return null;
+        }
+
+        static async Task<BookingRow> LoadBookingRowAsync(DriveCareDBEntities db, Guid bookingId)
+        {
+            var hasIssueCol = await ColumnExistsAsync(db, "WorkshopOnlineBookings", "IssueCategory")
+                .ConfigureAwait(false);
+            var issueSelect = hasIssueCol ? "b.IssueCategory" : "CAST(NULL AS NVARCHAR(120)) AS IssueCategory";
+
+            var sql = $@"
+SELECT b.RowId AS BookingId, b.WorkshopId, b.UserId, b.Status, b.PreferredDate, {issueSelect},
+       COALESCE(
+         NULLIF(LTRIM(RTRIM(ISNULL(br.Name, N'') + N' ' + ISNULL(m.Name, N''))), N''),
+         N'Автомобиль'
+       ) AS CarDisplayName
+FROM dbo.WorkshopOnlineBookings b
+LEFT JOIN dbo.UserCars uc ON uc.RowId = b.UserCarId
+LEFT JOIN dbo.Cars c ON c.RowId = uc.CarId
+LEFT JOIN dbo.Models m ON m.RowId = c.ModelId
+LEFT JOIN dbo.Brands br ON br.RowId = m.BrandId
+WHERE b.RowId = @id;";
+
+            return await db.Database.SqlQuery<BookingRow>(sql, new SqlParameter("@id", bookingId))
+                .FirstOrDefaultAsync().ConfigureAwait(false);
+        }
+
+        sealed class BookingRow
+        {
+            public Guid BookingId { get; set; }
+            public Guid WorkshopId { get; set; }
+            public Guid UserId { get; set; }
+            public byte Status { get; set; }
+            public DateTime? PreferredDate { get; set; }
+            public string IssueCategory { get; set; }
+            public string CarDisplayName { get; set; }
         }
 
         public static Task<WorkshopMapDetail> LoadWorkshopDetailAsync(Guid workshopId) =>

@@ -1,5 +1,6 @@
 using DriveCareCore.Bookings;
 using DriveCarePro.Services;
+using DriveCarePro.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,16 +12,28 @@ namespace DriveCarePro.Pages
     public partial class WorkshopOnlineBookingsPage : Page
     {
         readonly List<Guid> _workshopIds = new List<Guid>();
+        bool _pendingOnly = true;
 
         public WorkshopOnlineBookingsPage()
         {
             InitializeComponent();
+            FilterCombo.Items.Add("Ожидают");
+            FilterCombo.Items.Add("Все записи");
+            FilterCombo.SelectedIndex = 0;
             Loaded += async (_, __) => await ReloadAsync().ConfigureAwait(true);
         }
 
         private void Back_Click(object sender, RoutedEventArgs e) => ProNavigation.GoHome();
 
         private async void Refresh_Click(object sender, RoutedEventArgs e) => await ReloadAsync().ConfigureAwait(true);
+
+        private async void FilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!IsLoaded || FilterCombo.SelectedIndex < 0)
+                return;
+            _pendingOnly = FilterCombo.SelectedIndex == 0;
+            await ReloadAsync().ConfigureAwait(true);
+        }
 
         private async System.Threading.Tasks.Task ReloadAsync()
         {
@@ -30,66 +43,133 @@ namespace DriveCarePro.Pages
             else if (AppState.CurrentEmployee?.WorkshopId is Guid ws && ws != Guid.Empty)
                 _workshopIds.Add(ws);
 
-            var canConfirm = AppState.HasPermission(ProPermissions.ConfirmWorkshopBooking);
+            var canManage = AppState.HasPermission(ProPermissions.ConfirmWorkshopBooking)
+                            || AppState.IsCurrentEmployeeOwner;
 
             if (!WorkshopOnlineBookingService.TablesExist())
             {
                 HintText.Text = "Выполните SQL WorkshopOnlineBookings_Tables.sql на сервере БД.";
-                BookingsGrid.ItemsSource = null;
+                BookingsList.ItemsSource = null;
+                EmptyText.Visibility = Visibility.Visible;
                 return;
             }
 
             if (_workshopIds.Count == 0)
             {
                 HintText.Text = "Мастерская не назначена.";
-                BookingsGrid.ItemsSource = null;
+                BookingsList.ItemsSource = null;
+                EmptyText.Visibility = Visibility.Visible;
                 return;
             }
 
-            if (!canConfirm)
-            {
-                HintText.Text = "Просмотр записей. Кнопка «Подтвердить» доступна роли с разрешением CONFIRM_WORKSHOP_BOOKING.";
-            }
-            else
-            {
-                HintText.Text = "Подтвердите ожидающие записи клиентов с карты автосервисов.";
-            }
+            HintText.Text = canManage
+                ? "Примите или отклоните заявки. При принятии клиенту в чат DriveCare уйдёт сообщение, когда его ждут."
+                : "Просмотр заявок. Принять и отклонить могут сотрудники с правом CONFIRM_WORKSHOP_BOOKING.";
 
-            var list = await WorkshopOnlineBookingService.ListForWorkshopsAsync(_workshopIds, pendingOnly: false)
+            var list = await WorkshopOnlineBookingService.ListForWorkshopsAsync(_workshopIds, _pendingOnly)
                 .ConfigureAwait(true);
-            BookingsGrid.ItemsSource = list;
+
+            BookingsList.ItemsSource = list;
+            EmptyText.Visibility = list == null || list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private async void Confirm_Click(object sender, RoutedEventArgs e)
+        private bool EnsureCanManage()
         {
-            if (!AppState.HasPermission(ProPermissions.ConfirmWorkshopBooking))
+            if (AppState.HasPermission(ProPermissions.ConfirmWorkshopBooking) || AppState.IsCurrentEmployeeOwner)
+                return true;
+
+            MessageBox.Show(
+                "Нет разрешения на обработку записей.\n\nНазначьте роль «Подтверждение записей» или право CONFIRM_WORKSHOP_BOOKING.",
+                "Записи", MessageBoxButton.OK, MessageBoxImage.Information);
+            return false;
+        }
+
+        private static WorkshopOnlineBookingItem ResolveBooking(object sender)
+        {
+            if (sender is Button btn && btn.Tag is WorkshopOnlineBookingItem item)
+                return item;
+            return null;
+        }
+
+        private static string BuildSummary(WorkshopOnlineBookingItem b) =>
+            (b.ClientDisplayName ?? "Клиент") + "\n"
+            + (b.CarDisplayName ?? "Автомобиль") + " · " + b.IssueCategoryLabel
+            + (b.PreferredDate.HasValue ? "\nДень визита: " + b.PreferredDateLabel : string.Empty);
+
+        private static string DefaultVisitWhen(WorkshopOnlineBookingItem b) =>
+            b.PreferredDate.HasValue
+                ? b.PreferredDate.Value.ToString("dd.MM.yyyy") + " в 10:00"
+                : DateTime.Today.AddDays(1).ToString("dd.MM.yyyy") + " в 10:00";
+
+        private async void Accept_Click(object sender, RoutedEventArgs e)
+        {
+            if (!EnsureCanManage())
+                return;
+
+            var booking = ResolveBooking(sender);
+            var emp = AppState.CurrentEmployee;
+            if (booking == null || emp == null)
+                return;
+
+            var win = new BookingAcceptWindow(BuildSummary(booking), DefaultVisitWhen(booking))
             {
-                MessageBox.Show(
-                    "Нет разрешения на подтверждение записей.\n\nНазначьте роль «Подтверждение записей» или право CONFIRM_WORKSHOP_BOOKING.",
-                    "Записи", MessageBoxButton.OK, MessageBoxImage.Information);
+                Owner = Window.GetWindow(this)
+            };
+            if (win.ShowDialog() != true)
+                return;
+
+            var accept = await WorkshopOnlineBookingService.AcceptBookingAsync(
+                booking.BookingId, emp.RowId, win.VisitWhenText).ConfigureAwait(true);
+
+            if (accept == null || !accept.Ok)
+            {
+                MessageBox.Show(accept?.Error ?? "Не удалось принять запись.", "Записи",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var emp = AppState.CurrentEmployee;
-            if (emp == null)
-                return;
-
-            Guid bookingId = Guid.Empty;
-            if (sender is Button btn && btn.Tag is Guid tagId)
-                bookingId = tagId;
-            else if (BookingsGrid.SelectedItem is WorkshopOnlineBookingItem sel)
-                bookingId = sel.BookingId;
-            if (bookingId == Guid.Empty)
-                return;
-
-            var (ok, error) = await WorkshopOnlineBookingService.ConfirmBookingAsync(bookingId, emp.RowId)
-                .ConfigureAwait(true);
-
-            if (!ok)
+            if (!string.IsNullOrWhiteSpace(accept.ChatWarning))
             {
-                MessageBox.Show(error ?? "Не удалось подтвердить.", "Записи",
+                MessageBox.Show(
+                    "Запись принята, но сообщение в чат не отправлено:\n" + accept.ChatWarning,
+                    "Записи", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            await ReloadAsync().ConfigureAwait(true);
+        }
+
+        private async void Reject_Click(object sender, RoutedEventArgs e)
+        {
+            if (!EnsureCanManage())
+                return;
+
+            var booking = ResolveBooking(sender);
+            var emp = AppState.CurrentEmployee;
+            if (booking == null || emp == null)
+                return;
+
+            var win = new BookingRejectWindow(BuildSummary(booking))
+            {
+                Owner = Window.GetWindow(this)
+            };
+            if (win.ShowDialog() != true)
+                return;
+
+            var reject = await WorkshopOnlineBookingService.RejectBookingAsync(
+                booking.BookingId, emp.RowId, win.RejectReason).ConfigureAwait(true);
+
+            if (reject == null || !reject.Ok)
+            {
+                MessageBox.Show(reject?.Error ?? "Не удалось отклонить запись.", "Записи",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(reject.ChatWarning))
+            {
+                MessageBox.Show(
+                    "Запись отклонена, но сообщение в чат не отправлено:\n" + reject.ChatWarning,
+                    "Записи", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             await ReloadAsync().ConfigureAwait(true);

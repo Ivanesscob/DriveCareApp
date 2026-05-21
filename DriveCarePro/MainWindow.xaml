@@ -9,6 +9,7 @@
         Title="DriveCare Pro"
         Height="600"
         Width="900"
+        WindowState="Maximized"
         GlowBrush="{DynamicResource MahApps.Metro.Brushes.Accent}"
         BorderThickness="0"
         Background="{DynamicResource App.Brush.Background}">

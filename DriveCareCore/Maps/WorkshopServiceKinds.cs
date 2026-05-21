@@ -78,5 +78,55 @@ namespace DriveCareCore.Maps
                     return "islands#grayAutoIcon";
             }
         }
+
+        public static string BuildKindsLabel(IEnumerable<Guid> businessTypeIds)
+        {
+            if (businessTypeIds == null)
+                return "Автосервис";
+
+            var names = new List<string>();
+            foreach (var id in businessTypeIds.Distinct())
+            {
+                var item = All.FirstOrDefault(x => x.Id == id);
+                if (item != null && !names.Contains(item.Name))
+                    names.Add(item.Name);
+            }
+
+            return names.Count > 0 ? string.Join(" · ", names) : "Автосервис";
+        }
+
+        public static WorkshopServiceKindCode ResolvePrimaryIconCode(IEnumerable<Guid> businessTypeIds)
+        {
+            if (businessTypeIds == null)
+                return WorkshopServiceKindCode.Other;
+
+            var codes = businessTypeIds.Select(id => ResolveCode(id, null)).Distinct().ToList();
+            if (codes.Contains(WorkshopServiceKindCode.Painting))
+                return WorkshopServiceKindCode.Painting;
+            if (codes.Contains(WorkshopServiceKindCode.TireService))
+                return WorkshopServiceKindCode.TireService;
+            if (codes.Contains(WorkshopServiceKindCode.AutoService))
+                return WorkshopServiceKindCode.AutoService;
+            return WorkshopServiceKindCode.Other;
+        }
+
+        public static bool MatchesFilter(WorkshopMapPin pin, WorkshopServiceKindCode? filter)
+        {
+            if (!filter.HasValue)
+                return true;
+            if (pin == null)
+                return false;
+
+            if (pin.BusinessTypeIds != null && pin.BusinessTypeIds.Count > 0)
+            {
+                foreach (var id in pin.BusinessTypeIds)
+                {
+                    if (ResolveCode(id, null) == filter.Value)
+                        return true;
+                }
+            }
+
+            return ResolveCode(pin.BusinessTypeId, pin.ServiceKindName) == filter.Value;
+        }
     }
 }

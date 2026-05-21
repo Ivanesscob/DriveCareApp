@@ -107,6 +107,7 @@ namespace DriveCarePro.Pages
 
             AppState.SetControlVisible(BtnModerationCars, AppState.HasPermission(ProPermissions.ModerateSales));
             AppState.SetControlVisible(BtnModerationParts, hasAdmin);
+            AppState.SetControlVisible(BtnModerationWorkshopTypes, hasAdmin);
             AppState.SetControlVisible(BtnOrganizations, hasAdmin);
             AppState.SetControlVisible(BtnSystemRoles, AppState.HasPermission(ProPermissions.CreateRoles));
             AppState.SetControlVisible(BtnDirectories, hasAdmin);
@@ -132,10 +133,13 @@ namespace DriveCarePro.Pages
             var canServices = AppState.IsCurrentEmployeeOwner ||
                 AppState.HasAnyPermission(ProPermissions.CreateRepairs, ProPermissions.EditRepairs);
             AppState.SetControlVisible(BtnWorkshopServices, canServices);
+            AppState.SetControlVisible(BtnPaintShopSettings, canServices);
             AppState.SetControlVisible(BtnShop, AppState.CanAccessPurchaserShop);
             AppState.SetControlVisible(BtnOnlineBookings, AppState.CanAccessEmployeeWorkspace);
+            AppState.SetControlVisible(BtnWorkSchedule,
+                AppState.HasPermission(ProPermissions.ManageWorkshopSchedule) || AppState.IsCurrentEmployeeOwner);
 
-            UpdateSectionHeader(SectionWorkLabel, WorkActionsPanel, BtnBookRepair, BtnBookPainting, BtnRepairCars, BtnWorkshopServices, BtnShop, BtnOnlineBookings, BtnClientMessages);
+            UpdateSectionHeader(SectionWorkLabel, WorkActionsPanel, BtnBookRepair, BtnBookPainting, BtnRepairCars, BtnWorkshopServices, BtnPaintShopSettings, BtnShop, BtnOnlineBookings, BtnWorkSchedule, BtnClientMessages);
 
             var canTasks = AppState.CanAccessEmployeeTasks;
             AppState.SetControlVisible(EmployeeTasksSection, canTasks);
@@ -185,11 +189,17 @@ namespace DriveCarePro.Pages
         private void WorkshopServices_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new WorkshopServicesPage());
 
+        private void PaintShopSettings_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new WorkshopPaintShopSettingsPage());
+
         private void ClientMessages_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new WorkshopMessagesPage());
 
         private void OnlineBookings_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new WorkshopOnlineBookingsPage());
+
+        private void WorkSchedule_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new WorkshopWorkSchedulePage());
 
         private List<Guid> ResolveWorkshopIdsForMessages()
         {
@@ -401,6 +411,9 @@ namespace DriveCarePro.Pages
 
         private void ModerationParts_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new AdminPartsModerationPage());
+
+        private void ModerationWorkshopTypes_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new AdminWorkshopTypesModerationPage());
 
         private void AdminOrganizations_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new AdminOrganizationsPage());

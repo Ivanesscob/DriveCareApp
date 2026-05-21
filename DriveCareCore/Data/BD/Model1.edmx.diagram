@@ -106,6 +106,20 @@
         <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServices_Workshops1" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServiceUnits_Workshops" ManuallyRouted="false" />
         <AssociationConnector Association="DriveCareDBModel.FK_WorkshopServices_WorkshopServiceUnits" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="DriveCareDBModel.EmployeeNotification" Width="1.5" PointX="0.75" PointY="4.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.ServiceDocumentPartLine" Width="1.5" PointX="14.625" PointY="38.25" />
+        <EntityTypeShape EntityType="DriveCareDBModel.ServiceDocument" Width="1.5" PointX="12.375" PointY="35.375" />
+        <EntityTypeShape EntityType="DriveCareDBModel.ServiceDocumentServiceLine" Width="1.5" PointX="14.625" PointY="34.375" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserCarMaintenanceHistory" Width="1.5" PointX="2.75" PointY="4.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopConversation" Width="1.5" PointX="4.75" PointY="4.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopMessage" Width="1.5" PointX="5.75" PointY="0.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopOnlineBooking" Width="1.5" PointX="15.125" PointY="12.25" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopOnlineBookings_ConfirmedBy" />
+        <AssociationConnector Association="DriveCareDBModel.FK_ServiceDocumentPartLines_Document" />
+        <AssociationConnector Association="DriveCareDBModel.FK_ServiceDocuments_RootTask" />
+        <AssociationConnector Association="DriveCareDBModel.FK_ServiceDocumentServiceLines_Document" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopOnlineBookings_User" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopOnlineBookings_Workshop" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

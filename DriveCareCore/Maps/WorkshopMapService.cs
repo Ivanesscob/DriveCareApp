@@ -56,6 +56,9 @@ LEFT JOIN dbo.Addresses a ON a.RowId = w.AddressId
 ORDER BY w.Name;";
 
             var rows = await db.Database.SqlQuery<WorkshopMapRow>(sql).ToListAsync().ConfigureAwait(false);
+            var typesByWorkshop = await WorkshopBusinessTypesHelper.LoadTypeIdsByWorkshopAsync(db).ConfigureAwait(false);
+
+            var siteGroups = new Dictionary<string, List<WorkshopMapPin>>();
 
             foreach (var row in rows)
             {
@@ -93,22 +96,96 @@ ORDER BY w.Name;";
                     }
                 }
 
-                result.Pins.Add(new WorkshopMapPin
+                var typeIds = ResolveTypeIds(row.WorkshopId, row.BusinessTypeId, typesByWorkshop);
+                var pin = new WorkshopMapPin
                 {
                     WorkshopId = row.WorkshopId,
+                    WorkshopIds = new List<Guid> { row.WorkshopId },
                     WorkshopName = name,
                     CompanyName = row.CompanyName ?? string.Empty,
                     AddressLine = addressLine,
                     Phone = row.Phone ?? string.Empty,
                     Description = row.Description ?? string.Empty,
-                    BusinessTypeId = row.BusinessTypeId,
+                    BusinessTypeId = typeIds.Count > 0 ? typeIds[0] : row.BusinessTypeId,
+                    BusinessTypeIds = typeIds,
                     ServiceKindName = row.ServiceKindName ?? string.Empty,
+                    ServiceKindsLabel = WorkshopServiceKinds.BuildKindsLabel(typeIds),
+                    AddressId = row.AddressId,
                     Latitude = lat,
                     Longitude = lon
-                });
+                };
+
+                var siteKey = BuildSiteKey(row.AddressId, lat, lon);
+                if (!siteGroups.TryGetValue(siteKey, out var group))
+                {
+                    group = new List<WorkshopMapPin>();
+                    siteGroups[siteKey] = group;
+                }
+                group.Add(pin);
             }
 
+            foreach (var group in siteGroups.Values)
+                result.Pins.Add(MergeSitePins(group));
+
             return result;
+        }
+
+        static List<Guid> ResolveTypeIds(
+            Guid workshopId,
+            Guid? primaryTypeId,
+            Dictionary<Guid, List<Guid>> typesByWorkshop)
+        {
+            if (typesByWorkshop != null && typesByWorkshop.TryGetValue(workshopId, out var list) && list.Count > 0)
+                return new List<Guid>(list);
+            if (primaryTypeId.HasValue && primaryTypeId.Value != Guid.Empty)
+                return new List<Guid> { primaryTypeId.Value };
+            return new List<Guid>();
+        }
+
+        static string BuildSiteKey(Guid? addressId, double lat, double lon)
+        {
+            if (addressId.HasValue && addressId.Value != Guid.Empty)
+                return "A:" + addressId.Value.ToString("D");
+            return "G:" + lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)
+                   + ":" + lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        static WorkshopMapPin MergeSitePins(List<WorkshopMapPin> group)
+        {
+            if (group == null || group.Count == 0)
+                return null;
+            if (group.Count == 1)
+                return group[0];
+
+            var ordered = group.OrderBy(p => p.WorkshopName).ToList();
+            var primary = ordered[0];
+            var workshopIds = ordered.Select(p => p.WorkshopId).Distinct().ToList();
+            var typeIds = ordered.SelectMany(p => p.BusinessTypeIds ?? new List<Guid>()).Distinct().ToList();
+            if (typeIds.Count == 0 && primary.BusinessTypeId.HasValue)
+                typeIds.Add(primary.BusinessTypeId.Value);
+
+            var names = ordered.Select(p => p.WorkshopName).Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
+            var companies = ordered.Select(p => p.CompanyName).Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
+            var phones = ordered.Select(p => p.Phone).FirstOrDefault(p => !string.IsNullOrWhiteSpace(p)) ?? string.Empty;
+            var descriptions = ordered.Select(p => p.Description).Where(d => !string.IsNullOrWhiteSpace(d)).Distinct().ToList();
+
+            return new WorkshopMapPin
+            {
+                WorkshopId = primary.WorkshopId,
+                WorkshopIds = workshopIds,
+                WorkshopName = names.Count == 1 ? names[0] : string.Join(" / ", names),
+                CompanyName = companies.Count == 1 ? companies[0] : string.Join(" · ", companies),
+                AddressLine = primary.AddressLine,
+                Phone = phones,
+                Description = descriptions.Count > 0 ? string.Join("\n", descriptions) : primary.Description,
+                BusinessTypeId = typeIds.Count > 0 ? typeIds[0] : primary.BusinessTypeId,
+                BusinessTypeIds = typeIds,
+                ServiceKindName = WorkshopServiceKinds.BuildKindsLabel(typeIds),
+                ServiceKindsLabel = WorkshopServiceKinds.BuildKindsLabel(typeIds),
+                AddressId = primary.AddressId,
+                Latitude = primary.Latitude,
+                Longitude = primary.Longitude
+            };
         }
 
         static bool HasCoords(WorkshopMapRow row) =>

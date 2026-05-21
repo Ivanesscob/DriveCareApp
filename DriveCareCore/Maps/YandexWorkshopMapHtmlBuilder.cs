@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +27,15 @@ namespace DriveCareCore.Maps
         {
             var dtos = (pins ?? new List<WorkshopMapPin>()).Select(p =>
             {
-                var code = WorkshopServiceKinds.ResolveCode(p.BusinessTypeId, p.ServiceKindName);
+                var typeIds = p.BusinessTypeIds != null && p.BusinessTypeIds.Count > 0
+                    ? p.BusinessTypeIds
+                    : (p.BusinessTypeId.HasValue
+                        ? new List<System.Guid> { p.BusinessTypeId.Value }
+                        : new List<System.Guid>());
+                var code = WorkshopServiceKinds.ResolvePrimaryIconCode(typeIds);
+                var kindLabel = !string.IsNullOrWhiteSpace(p.ServiceKindsLabel)
+                    ? p.ServiceKindsLabel
+                    : WorkshopServiceKinds.BuildKindsLabel(typeIds);
                 return new MapPinDto
                 {
                     WorkshopId = p.WorkshopId.ToString("D"),
@@ -34,7 +43,7 @@ namespace DriveCareCore.Maps
                     CompanyName = p.CompanyName,
                     AddressLine = p.AddressLine,
                     Phone = p.Phone,
-                    ServiceKindName = WorkshopServiceKinds.GetDisplayName(p.BusinessTypeId, p.ServiceKindName),
+                    ServiceKindName = kindLabel,
                     ServiceKindCode = (int)code,
                     Latitude = p.Latitude,
                     Longitude = p.Longitude,

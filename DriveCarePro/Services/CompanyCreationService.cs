@@ -1,8 +1,8 @@
 using DriveCareCore.Data.BD;
 using DriveCareCore.Maps;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DriveCarePro.Services
 {
@@ -19,6 +19,7 @@ namespace DriveCarePro.Services
             public string WorkshopName { get; set; }
             public string WorkshopDescription { get; set; }
             public Guid? BusinessTypeId { get; set; }
+            public List<Guid> BusinessTypeIds { get; set; }
             public Guid CountryId { get; set; }
             public double? Latitude { get; set; }
             public double? Longitude { get; set; }
@@ -98,7 +99,16 @@ namespace DriveCarePro.Services
                 Description = Truncate(NullIfEmpty(input.CompanyDescription), 255)
             };
 
-            var businessTypeId = input.BusinessTypeId ?? WorkshopServiceKinds.AutoServiceId;
+            var typeIds = (input.BusinessTypeIds ?? new List<Guid>())
+                .Where(id => id != Guid.Empty)
+                .Distinct()
+                .ToList();
+            if (typeIds.Count == 0 && input.BusinessTypeId.HasValue && input.BusinessTypeId.Value != Guid.Empty)
+                typeIds.Add(input.BusinessTypeId.Value);
+            if (typeIds.Count == 0)
+                typeIds.Add(WorkshopServiceKinds.AutoServiceId);
+
+            var businessTypeId = typeIds[0];
             var workshop = new Workshop
             {
                 RowId = workshopId,
@@ -144,9 +154,20 @@ namespace DriveCarePro.Services
                     db.Employees.Add(employee);
                     db.EmployeeRolesMaps.Add(roleMap);
                     db.SaveChanges();
+                    if (WorkshopBusinessTypesHelper.JunctionTableExists())
+                    {
+                        foreach (var typeId in typeIds)
+                        {
+                            db.Database.ExecuteSqlCommand(@"
+IF NOT EXISTS (SELECT 1 FROM dbo.WorkshopBusinessTypes WHERE WorkshopId = @w AND BusinessTypeId = @t)
+    INSERT INTO dbo.WorkshopBusinessTypes (RowId, WorkshopId, BusinessTypeId) VALUES (NEWID(), @w, @t);",
+                                new System.Data.SqlClient.SqlParameter("@w", workshopId),
+                                new System.Data.SqlClient.SqlParameter("@t", typeId));
+                        }
+                    }
                     tx.Commit();
 
-                    Task.Run(async () =>
+                    System.Threading.Tasks.Task.Run(async () =>
                     {
                         try
                         {

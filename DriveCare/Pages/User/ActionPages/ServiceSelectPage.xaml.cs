@@ -4,6 +4,7 @@ using DriveCareCore.Bookings;
 using DriveCareCore.Maps;
 using DriveCareCore.Messaging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,17 +18,62 @@ namespace DriveCare.Pages.User.ActionPages
     {
         Guid _selectedWorkshopId = Guid.Empty;
         string _selectedPhone;
+        List<WorkshopMapPin> _allPins = new List<WorkshopMapPin>();
+        WorkshopServiceKindCode? _kindFilter;
 
         public ServiceSelectPage()
         {
             InitializeComponent();
             YandexMap.WorkshopSelected += (_, id) => _ = SelectWorkshopAsync(id);
-            Loaded += async (_, __) => await LoadMapAsync().ConfigureAwait(true);
+            Loaded += async (_, __) =>
+            {
+                _kindFilter = null;
+                UpdateFilterButtonStyles();
+                await LoadMapAsync().ConfigureAwait(true);
+            };
         }
 
         private void Back_Click(object sender, RoutedEventArgs e) => AppState.SetFrame<UserHomePage>();
 
         private async void Refresh_Click(object sender, RoutedEventArgs e) => await LoadMapAsync().ConfigureAwait(true);
+
+        private async void KindFilterButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+                SetKindFilterFromTag(btn.Tag as string);
+
+            UpdateFilterButtonStyles();
+            if (!IsLoaded || _allPins.Count == 0)
+                return;
+            await ApplyMapFilterAsync().ConfigureAwait(true);
+        }
+
+        void SetKindFilterFromTag(string tag)
+        {
+            if (string.IsNullOrEmpty(tag))
+                _kindFilter = null;
+            else if (Enum.TryParse(tag, out WorkshopServiceKindCode code))
+                _kindFilter = code;
+            else
+                _kindFilter = null;
+        }
+
+        WorkshopServiceKindCode? ReadKindFilter() => _kindFilter;
+
+        void UpdateFilterButtonStyles()
+        {
+            SetFilterStyle(FilterAll, _kindFilter == null);
+            SetFilterStyle(FilterAuto, _kindFilter == WorkshopServiceKindCode.AutoService);
+            SetFilterStyle(FilterPaint, _kindFilter == WorkshopServiceKindCode.Painting);
+            SetFilterStyle(FilterTire, _kindFilter == WorkshopServiceKindCode.TireService);
+        }
+
+        static void SetFilterStyle(Button button, bool active)
+        {
+            if (button == null)
+                return;
+            button.Style = (Style)button.FindResource(active ? "App.Button.Primary" : "App.Button.Outline");
+        }
 
         private async Task LoadMapAsync()
         {
@@ -37,17 +83,54 @@ namespace DriveCare.Pages.User.ActionPages
             try
             {
                 var data = await WorkshopMapService.LoadPinsForMapAsync().ConfigureAwait(true);
-                await YandexMap.LoadPinsAsync(data.Pins).ConfigureAwait(true);
+                _allPins = data.Pins ?? new List<WorkshopMapPin>();
+                _kindFilter = ReadKindFilter();
+                await ApplyMapFilterAsync(data).ConfigureAwait(true);
 
                 var skipped = data.SkippedNoAddress.Count + data.SkippedGeocodeFailed.Count;
-                StatusText.Text = data.Pins.Count > 0
-                    ? $"На карте: {data.Pins.Count}. Нажмите метку на Яндекс.Карте." +
+                var filterLabel = GetFilterLabel(_kindFilter);
+                StatusText.Text = _allPins.Count > 0
+                    ? $"На карте: {CountFilteredPins()} ({filterLabel}). Нажмите метку." +
                       (skipped > 0 ? $" Без координат: {skipped}." : string.Empty)
                     : "Нет точек. Добавьте адреса мастерским в базе.";
             }
             catch (Exception ex)
             {
                 StatusText.Text = "Ошибка: " + ex.Message;
+            }
+        }
+
+        async Task ApplyMapFilterAsync(WorkshopMapLoadResult data = null)
+        {
+            var filtered = FilterPins(_allPins);
+            await YandexMap.LoadPinsAsync(filtered).ConfigureAwait(true);
+
+            if (data != null)
+                return;
+
+            var filterLabel = GetFilterLabel(_kindFilter);
+            StatusText.Text = filtered.Count > 0
+                ? $"На карте: {filtered.Count} ({filterLabel}). Нажмите метку."
+                : $"Нет сервисов для фильтра «{filterLabel}». Выберите «Все» или другой тип.";
+        }
+
+        List<WorkshopMapPin> FilterPins(IReadOnlyList<WorkshopMapPin> pins) =>
+            (pins ?? Array.Empty<WorkshopMapPin>())
+            .Where(p => WorkshopServiceKinds.MatchesFilter(p, _kindFilter))
+            .ToList();
+
+        int CountFilteredPins() => FilterPins(_allPins).Count;
+
+        static string GetFilterLabel(WorkshopServiceKindCode? filter)
+        {
+            if (!filter.HasValue)
+                return "все типы";
+            switch (filter.Value)
+            {
+                case WorkshopServiceKindCode.Painting: return "покраска";
+                case WorkshopServiceKindCode.TireService: return "шиномонтаж";
+                case WorkshopServiceKindCode.AutoService: return "автосервис";
+                default: return "фильтр";
             }
         }
 
@@ -70,7 +153,11 @@ namespace DriveCare.Pages.User.ActionPages
                 return;
             }
 
-            DetailKindText.Text = WorkshopServiceKinds.GetDisplayName(detail.BusinessTypeId, detail.ServiceKindName);
+            var pin = _allPins.FirstOrDefault(p => p.WorkshopId == workshopId
+                || (p.WorkshopIds != null && p.WorkshopIds.Contains(workshopId)));
+            DetailKindText.Text = pin != null && !string.IsNullOrWhiteSpace(pin.ServiceKindsLabel)
+                ? pin.ServiceKindsLabel
+                : WorkshopServiceKinds.GetDisplayName(detail.BusinessTypeId, detail.ServiceKindName);
             DetailNameText.Text = detail.WorkshopName ?? "Автосервис";
             DetailCompanyText.Text = detail.CompanyName ?? string.Empty;
             DetailAddressText.Text = string.IsNullOrWhiteSpace(detail.AddressLine)

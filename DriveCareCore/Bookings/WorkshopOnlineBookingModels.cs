@@ -2,6 +2,19 @@ using System;
 
 namespace DriveCareCore.Bookings
 {
+    public sealed class BookingActionResult
+    {
+        public bool Ok { get; set; }
+        public string Error { get; set; }
+        public string ChatWarning { get; set; }
+
+        public static BookingActionResult Success(string chatWarning = null) =>
+            new BookingActionResult { Ok = true, ChatWarning = chatWarning };
+
+        public static BookingActionResult Fail(string error) =>
+            new BookingActionResult { Ok = false, Error = error };
+    }
+
     public enum WorkshopBookingStatus : byte
     {
         Pending = 0,
@@ -45,11 +58,36 @@ namespace DriveCareCore.Bookings
             }
         }
 
+        public string RejectReason { get; set; }
+
         public string PreferredDateLabel =>
-            PreferredDate.HasValue ? PreferredDate.Value.ToString("dd.MM.yyyy HH:mm") : "Согласуем позже";
+            PreferredDate.HasValue ? PreferredDate.Value.ToString("dd.MM.yyyy") : "—";
 
         public string CreatedAtLabel => CreatedAt.ToString("dd.MM.yyyy HH:mm");
-        public bool CanConfirm => StatusCode == (byte)WorkshopBookingStatus.Pending;
+
+        public bool IsPending => StatusCode == (byte)WorkshopBookingStatus.Pending;
+        public bool CanAccept => IsPending;
+        public bool CanReject => IsPending;
+        public bool CanConfirm => CanAccept;
+
+        public string StatusBadgeBrushKey
+        {
+            get
+            {
+                switch (Status)
+                {
+                    case WorkshopBookingStatus.Confirmed: return "App.Brush.AccentSoft";
+                    case WorkshopBookingStatus.RejectedByWorkshop: return "#33C62828";
+                    case WorkshopBookingStatus.CancelledByClient: return "App.Brush.SurfaceElevated";
+                    default: return "App.Brush.SurfaceElevated";
+                }
+            }
+        }
+
+        public string CardSubtitle =>
+            (string.IsNullOrWhiteSpace(CarDisplayName) ? "Автомобиль" : CarDisplayName.Trim())
+            + " · " + IssueCategoryLabel
+            + (PreferredDate.HasValue ? " · " + PreferredDateLabel : string.Empty);
     }
 
     public sealed class WorkshopMapDetail

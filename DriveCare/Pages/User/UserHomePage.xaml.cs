@@ -324,7 +324,7 @@ ORDER BY n.CreatedAt DESC;";
                     AppState.SetFrame<ServiceSelectPage>();
                     break;
                 case "PaintCar":
-                    AppState.SetFrame<PaintCarPage>();
+                    AppState.SetFrameWithoutBackStack<PaintCarPage>();
                     break;
                 case "ServiceCar":
                     AppState.SetFrame<ServiceCarPage>();

@@ -62,9 +62,10 @@
                         <TextBlock Text="Описание" Style="{StaticResource FieldLabel}"/>
                         <TextBox x:Name="WorkshopDescriptionBox" Style="{StaticResource App.FieldTextBox}"
                                  AcceptsReturn="True" TextWrapping="Wrap" MinHeight="40"/>
-                        <TextBlock Text="Тип услуг *" Style="{StaticResource FieldLabel}" Margin="0,8,0,0"/>
-                        <ComboBox x:Name="ServiceKindCombo" Height="36" Margin="0,4,0,0"
-                                  DisplayMemberPath="Name" SelectedValuePath="Id"/>
+                        <TextBlock Text="Типы услуг * (можно несколько)" Style="{StaticResource FieldLabel}" Margin="0,8,0,0"/>
+                        <CheckBox x:Name="ChkCreateAuto" Content="Автосервис" Margin="0,6,0,4" IsChecked="True"/>
+                        <CheckBox x:Name="ChkCreatePaint" Content="Покраска" Margin="0,0,0,4"/>
+                        <CheckBox x:Name="ChkCreateTire" Content="Шиномонтаж"/>
                     </StackPanel>
                 </Border>
 

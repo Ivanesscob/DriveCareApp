@@ -349,6 +349,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\WorkshopPaintColorEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\WorkshopPaintServiceEditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\ServiceRegisterUserWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -413,11 +421,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\WorkshopWorkSchedulePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\WorkshopMessagesPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\NewWorkshopMessageWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\BookingAcceptWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\BookingRejectWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -438,6 +458,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\WorkshopServicesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\WorkshopPaintShopSettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -478,6 +502,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\Admin\AdminBroadcastPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Admin\AdminWorkshopTypesModerationPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -530,6 +558,12 @@
     </Compile>
     <Compile Include="Windows\RoleEditWindow.xaml.cs">
       <DependentUpon>RoleEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\WorkshopPaintColorEditWindow.xaml.cs">
+      <DependentUpon>WorkshopPaintColorEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\WorkshopPaintServiceEditWindow.xaml.cs">
+      <DependentUpon>WorkshopPaintServiceEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\ServiceRegisterUserWindow.xaml.cs">
       <DependentUpon>ServiceRegisterUserWindow.xaml</DependentUpon>
@@ -626,11 +660,20 @@
     <Compile Include="Pages\WorkshopOnlineBookingsPage.xaml.cs">
       <DependentUpon>WorkshopOnlineBookingsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\WorkshopWorkSchedulePage.xaml.cs">
+      <DependentUpon>WorkshopWorkSchedulePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\WorkshopMessagesPage.xaml.cs">
       <DependentUpon>WorkshopMessagesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\NewWorkshopMessageWindow.xaml.cs">
       <DependentUpon>NewWorkshopMessageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\BookingAcceptWindow.xaml.cs">
+      <DependentUpon>BookingAcceptWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\BookingRejectWindow.xaml.cs">
+      <DependentUpon>BookingRejectWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\WorkshopBookServicePage.xaml.cs">
       <DependentUpon>WorkshopBookServicePage.xaml</DependentUpon>
@@ -646,6 +689,9 @@
     </Compile>
     <Compile Include="Pages\WorkshopServicesPage.xaml.cs">
       <DependentUpon>WorkshopServicesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\WorkshopPaintShopSettingsPage.xaml.cs">
+      <DependentUpon>WorkshopPaintShopSettingsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\CompletedTasksPage.xaml.cs">
       <DependentUpon>CompletedTasksPage.xaml</DependentUpon>
@@ -677,6 +723,9 @@
     <Compile Include="Pages\Admin\AdminReferenceTables.cs" />
     <Compile Include="Pages\Admin\AdminBroadcastPage.xaml.cs">
       <DependentUpon>AdminBroadcastPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AdminWorkshopTypesModerationPage.xaml.cs">
+      <DependentUpon>AdminWorkshopTypesModerationPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\AdminCarSaleModerationPage.xaml.cs">
       <DependentUpon>AdminCarSaleModerationPage.xaml</DependentUpon>

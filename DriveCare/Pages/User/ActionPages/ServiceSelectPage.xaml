@@ -24,8 +24,24 @@
                     Height="36" MinWidth="100" Click="Refresh_Click"/>
         </DockPanel>
 
-        <TextBlock x:Name="StatusText" Grid.Row="1" TextWrapping="Wrap" FontSize="12"
-                   Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,8"/>
+        <StackPanel Grid.Row="1" Margin="0,0,0,8">
+            <WrapPanel x:Name="KindFilterPanel" Margin="0,0,0,8">
+                <Button x:Name="FilterAll" Content="Все" Tag="" Margin="0,0,8,6"
+                        Style="{StaticResource App.Button.Primary}" Height="36" MinWidth="72"
+                        Click="KindFilterButton_Click"/>
+                <Button x:Name="FilterAuto" Content="Автосервис" Tag="AutoService" Margin="0,0,8,6"
+                        Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="110"
+                        Click="KindFilterButton_Click"/>
+                <Button x:Name="FilterPaint" Content="Покраска" Tag="Painting" Margin="0,0,8,6"
+                        Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="100"
+                        Click="KindFilterButton_Click"/>
+                <Button x:Name="FilterTire" Content="Шиномонтаж" Tag="TireService" Margin="0,0,8,6"
+                        Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="120"
+                        Click="KindFilterButton_Click"/>
+            </WrapPanel>
+            <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontSize="12"
+                       Foreground="{DynamicResource App.Brush.Muted}"/>
+        </StackPanel>
 
         <Grid x:Name="MapHostGrid" Grid.Row="2">
             <Grid.ColumnDefinitions>

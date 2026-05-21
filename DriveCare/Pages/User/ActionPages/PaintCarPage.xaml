@@ -1,12 +1,565 @@
 <Page x:Class="DriveCare.Pages.User.ActionPages.PaintCarPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Покраска">
-    <Grid Background="{DynamicResource App.Brush.Panel}">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24">
-            <TextBlock Text="Покраска" Foreground="{DynamicResource App.Brush.Foreground}" FontSize="26" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-            <TextBlock Text="Страница-заглушка" Foreground="{DynamicResource App.Brush.Muted}" FontSize="14" Margin="0,8,0,12" HorizontalAlignment="Center"/>
-            <Button Content="Назад на главную" Style="{StaticResource App.Button.Outline}" Width="220" Height="40" Click="Back_Click"/>
-        </StackPanel>
+      xmlns:data="clr-namespace:DriveCare.Data"
+      xmlns:controls="clr-namespace:DriveCare.Controls"
+      xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+      Title="Покраска"
+      Background="{DynamicResource App.Brush.PageBackground}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <LinearGradientBrush x:Key="Paint.HeroGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FF0D9488" Offset="0"/>
+            <GradientStop Color="#FF14B8A6" Offset="0.45"/>
+            <GradientStop Color="#FF5EEAD4" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="Paint.ColorCardGradient" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#20FFFFFF" Offset="0"/>
+            <GradientStop Color="#08FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="Paint.SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.Foreground}"/>
+        </Style>
+
+        <Style x:Key="Paint.SectionHint" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Brush.Muted}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style x:Key="Paint.ActionCard" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="16" Padding="18,16"
+                                Background="{DynamicResource App.Brush.SurfaceCard}"
+                                BorderBrush="{DynamicResource App.Brush.Border}"
+                                BorderThickness="1">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.12"
+                                                  Color="{DynamicResource App.Color.HeroShadow}"/>
+                            </Border.Effect>
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource App.Brush.Accent}"/>
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource App.Brush.MenuHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource App.Brush.Surface2}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Paint.HistoryCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource App.Brush.SurfaceCard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Шапка -->
+        <Border Grid.Row="0" Padding="24,20,24,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0"
+                        Content="← Назад"
+                        Style="{StaticResource App.Button.Outline}"
+                        Height="40" MinWidth="120"
+                        VerticalAlignment="Center"
+                        Click="Back_Click"/>
+                <StackPanel Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="40" Height="40" CornerRadius="12" Margin="0,0,12,0"
+                                Background="{StaticResource Paint.HeroGradient}">
+                            <iconPacks:PackIconModern Kind="DrawPaintbrush" Width="22" Height="22"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      Foreground="{DynamicResource App.Brush.TextOnAccent}"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Покраска"
+                                       Foreground="{DynamicResource App.Brush.Foreground}"
+                                       FontSize="24" FontWeight="SemiBold"/>
+                            <TextBlock Text="Журнал цвета, дисков и отдельных деталей"
+                                       Foreground="{DynamicResource App.Brush.Muted}"
+                                       FontSize="13" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,0,24,32">
+            <StackPanel MaxWidth="1100">
+
+                <Border CornerRadius="16" Padding="28,24" Margin="0,0,0,20"
+                        Visibility="{Binding NoCarsVisibility}"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                    <StackPanel HorizontalAlignment="Center" MaxWidth="420">
+                        <iconPacks:PackIconModern Kind="TransitCar" Width="48" Height="48"
+                                                  Foreground="{DynamicResource App.Brush.Muted}"
+                                                  HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                        <TextBlock Text="Нет автомобилей в гараже"
+                                   FontSize="17" FontWeight="SemiBold" TextAlignment="Center"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock Text="Добавьте машину в профиле — здесь появится журнал покраски и выбор цвета."
+                                   Style="{StaticResource Paint.SectionHint}" TextAlignment="Center" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Grid Visibility="{Binding CarPanelVisibility}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="320"/>
+                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="*" MinWidth="300"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Левая колонка: авто + текущий цвет -->
+                    <StackPanel Grid.Column="0">
+                        <Border CornerRadius="16" Padding="18"
+                                Background="{DynamicResource App.Brush.SurfaceCard}"
+                                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1" Margin="0,0,0,16">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.1"
+                                                  Color="{DynamicResource App.Color.HeroShadow}"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="Ваш автомобиль" Style="{StaticResource Paint.SectionHint}" Margin="0,0,0,8"/>
+                                <ComboBox ItemsSource="{Binding GarageCars}"
+                                          SelectedItem="{Binding SelectedCar, Mode=TwoWay}"
+                                          MinHeight="48">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0"
+                                                        Background="{DynamicResource App.Brush.PhotoMat}">
+                                                    <Image Source="{Binding Photo}" Stretch="Uniform" Margin="4"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource App.Brush.Foreground}"
+                                                           FontSize="15" FontWeight="SemiBold"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border CornerRadius="20" Padding="20" Margin="0,0,0,16"
+                                Background="{DynamicResource App.Brush.SurfaceCard}"
+                                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                                MinHeight="240">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="22" ShadowDepth="3" Opacity="0.14"
+                                                  Color="{DynamicResource App.Color.HeroShadow}"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Ellipse Width="200" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Opacity="0.35">
+                                    <Ellipse.Fill>
+                                        <RadialGradientBrush>
+                                            <GradientStop Color="#400D9488" Offset="0"/>
+                                            <GradientStop Color="#000D9488" Offset="1"/>
+                                        </RadialGradientBrush>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <Border CornerRadius="18" Padding="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Background="{DynamicResource App.Brush.PhotoMat}"
+                                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                                    <Image Source="{Binding CenterCarImage}" Width="200" Height="170"
+                                           Stretch="Uniform"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Текущий цвет -->
+                        <Border CornerRadius="18" Padding="20" ClipToBounds="True">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#FF0F766E" Offset="0"/>
+                                    <GradientStop Color="#FF0D9488" Offset="0.55"/>
+                                    <GradientStop Color="#FF115E59" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Color="#FF0D9488"/>
+                            </Border.Effect>
+                            <Grid>
+                                <Border CornerRadius="18" Background="{StaticResource Paint.ColorCardGradient}"/>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Width="72" Height="72" CornerRadius="36"
+                                            BorderBrush="#55FFFFFF" BorderThickness="3" Margin="0,0,18,0"
+                                            VerticalAlignment="Center">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#33FFFFFF"/>
+                                        </Border.Background>
+                                        <Ellipse Width="56" Height="56" Stroke="#AAFFFFFF" StrokeThickness="2">
+                                            <Ellipse.Fill>
+                                                <Binding Path="CurrentColorSwatch"/>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Текущий цвет кузова"
+                                                   Foreground="#CCFFFFFF" FontSize="12" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding CurrentColorText}"
+                                                   Foreground="{DynamicResource App.Brush.TextOnAccent}"
+                                                   FontSize="26" FontWeight="Bold" Margin="0,4,0,0"
+                                                   TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding CurrentColorSinceText}"
+                                                   Foreground="#E6FFFFFF" FontSize="13" Margin="0,6,0,0"
+                                                   Visibility="{Binding HasCurrentColorSince, Converter={StaticResource BoolToVis}}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Правая колонка: действия + история -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Новая покраска" Style="{StaticResource Paint.SectionTitle}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Выберите тип работ — цвет и детали укажете в следующем окне."
+                                   Style="{StaticResource Paint.SectionHint}" Margin="0,0,0,14"/>
+
+                        <Button Style="{StaticResource Paint.ActionCard}" Click="PaintWheels_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="14" Margin="0,0,14,0"
+                                        Background="{DynamicResource App.Brush.AccentSoft}">
+                                    <iconPacks:PackIconModern Kind="Ring" Width="28" Height="28"
+                                                              Foreground="{DynamicResource App.Brush.Accent}"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Покрасить диски" FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                    <TextBlock Text="Колёса и диски — отдельная запись в журнале"
+                                               FontSize="12" Margin="0,4,0,0"
+                                               Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <iconPacks:PackIconModern Grid.Column="2" Kind="ChevronRight" Width="20" Height="20"
+                                                          VerticalAlignment="Center"
+                                                          Foreground="{DynamicResource App.Brush.Muted}"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Style="{StaticResource Paint.ActionCard}" Click="PaintFullCar_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="14" Margin="0,0,14,0"
+                                        Background="#332563EB">
+                                    <iconPacks:PackIconModern Kind="TransitCar" Width="28" Height="28"
+                                                              Foreground="#FF2563EB"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Покрасить всю машину" FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                    <TextBlock Text="Обновит текущий цвет кузова в карточке слева"
+                                               FontSize="12" Margin="0,4,0,0"
+                                               Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <iconPacks:PackIconModern Grid.Column="2" Kind="ChevronRight" Width="20" Height="20"
+                                                          VerticalAlignment="Center"
+                                                          Foreground="{DynamicResource App.Brush.Muted}"/>
+                            </Grid>
+                        </Button>
+
+                        <Button x:Name="BtnRepaintDetail"
+                                Style="{StaticResource Paint.ActionCard}"
+                                Click="RepaintDetail_Click"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="14" Margin="0,0,14,0"
+                                        Background="#33EA580C">
+                                    <iconPacks:PackIconModern Kind="Tools" Width="26" Height="26"
+                                                              Foreground="#FFEA580C"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Перекрасить деталь" FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                    <TextBlock Text="Бампер, крыло, капот и любая другая деталь"
+                                               FontSize="12" Margin="0,4,0,0"
+                                               Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <iconPacks:PackIconModern Grid.Column="2" Kind="ChevronRight" Width="20" Height="20"
+                                                          VerticalAlignment="Center"
+                                                          Foreground="{DynamicResource App.Brush.Muted}"/>
+                            </Grid>
+                        </Button>
+
+                        <Grid Margin="0,4,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding HistoryHeaderText}"
+                                       Style="{StaticResource Paint.SectionTitle}" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Border CornerRadius="14" Padding="20,18" Margin="0,0,0,12"
+                                Visibility="{Binding EmptyHistoryVisibility}"
+                                Background="{DynamicResource App.Brush.Surface2}"
+                                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center">
+                                <iconPacks:PackIconModern Kind="ClipboardPaper" Width="36" Height="36"
+                                                          Foreground="{DynamicResource App.Brush.Muted}"
+                                                          HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <TextBlock Text="Журнал пуст"
+                                           FontWeight="SemiBold" FontSize="15" TextAlignment="Center"
+                                           Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                <TextBlock Text="После первой покраски здесь появится лента с датами и цветами."
+                                           Style="{StaticResource Paint.SectionHint}" TextAlignment="Center" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <ItemsControl ItemsSource="{Binding HistoryItems}"
+                                      Visibility="{Binding HistoryListVisibility}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type data:CarPaintHistoryItemVm}">
+                                    <Border Style="{StaticResource Paint.HistoryCard}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="6"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" CornerRadius="14,0,0,14"
+                                                    Background="{Binding KindAccentBrush}"/>
+                                            <Grid Grid.Column="1" Margin="16,14,16,14">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="22"
+                                                        BorderThickness="2" Margin="0,0,14,0"
+                                                        VerticalAlignment="Top">
+                                                    <Border.BorderBrush>
+                                                        <Binding Path="ColorSwatchBorderBrush"/>
+                                                    </Border.BorderBrush>
+                                                    <Border Width="34" Height="34" CornerRadius="17"
+                                                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Border.Background>
+                                                            <Binding Path="ColorSwatchBrush"/>
+                                                        </Border.Background>
+                                                    </Border>
+                                                </Border>
+                                                <StackPanel Grid.Column="1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{Binding KindTitle}"
+                                                                       FontSize="15" FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                                            <TextBlock Text="{Binding KindSubtitle}" FontSize="11"
+                                                                       Foreground="{DynamicResource App.Brush.Muted}"
+                                                                       Margin="0,2,0,0"/>
+                                                        </StackPanel>
+                                                        <Border Grid.Column="1" CornerRadius="8" Padding="8,4"
+                                                                VerticalAlignment="Top"
+                                                                Background="{DynamicResource App.Brush.Surface2}">
+                                                            <TextBlock Text="{Binding DateDisplay}" FontSize="11"
+                                                                       Foreground="{DynamicResource App.Brush.Muted}"/>
+                                                        </Border>
+                                                    </Grid>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                        <TextBlock Text="Цвет:" FontSize="13"
+                                                                   Foreground="{DynamicResource App.Brush.Muted}"
+                                                                   VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding ColorName}" FontSize="14" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource App.Brush.Foreground}"
+                                                                   Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding PartLine, StringFormat=Деталь: {0}}"
+                                                               FontSize="13" Margin="0,6,0,0"
+                                                               Foreground="{DynamicResource App.Brush.SecondaryText}"
+                                                               Visibility="{Binding HasPartLine, Converter={StaticResource BoolToVis}}"/>
+                                                    <TextBlock Text="{Binding NotesLine}" FontSize="12" Margin="0,6,0,0"
+                                                               Foreground="{DynamicResource App.Brush.Muted}"
+                                                               TextWrapping="Wrap"
+                                                               FontStyle="Italic"
+                                                               Visibility="{Binding HasNotesLine, Converter={StaticResource BoolToVis}}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Карта мастерских покраски -->
+                <Border Margin="0,36,0,0" Padding="0,28,0,0"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="0,1,0,0">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Мастерские покраски на карте"
+                                           Style="{StaticResource Paint.SectionTitle}" FontSize="20"/>
+                                <TextBlock Text="Выберите молярку — ниже появятся услуги, цвета и что именно красят."
+                                           Style="{StaticResource Paint.SectionHint}" Margin="0,6,0,0"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Обновить карту"
+                                    Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="130"
+                                    VerticalAlignment="Top" Click="MapRefresh_Click"/>
+                        </Grid>
+
+                        <TextBlock x:Name="MapStatusText" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,10"
+                                   Foreground="{DynamicResource App.Brush.Muted}"/>
+
+                        <Grid MinHeight="480">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="ShopPanelColumn" Width="0"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border x:Name="ShopDetailPanel" Grid.Column="0" Width="400" MaxWidth="420"
+                                    Visibility="Collapsed" Margin="0,0,12,0" CornerRadius="14" Padding="14"
+                                    Background="{DynamicResource App.Brush.SurfaceCard}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                                    Panel.ZIndex="2">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Top" Content="✕" HorizontalAlignment="Right"
+                                            Style="{StaticResource App.Button.Outline}" Width="36" Height="36"
+                                            Padding="0" Margin="0,0,0,8" Click="CloseShopPanel_Click"/>
+
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <StackPanel>
+                                            <Border CornerRadius="8" Padding="8,4" Margin="0,0,0,8"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{DynamicResource App.Brush.PriceChipBg}">
+                                                <TextBlock Text="Покраска" FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource App.Brush.Accent}"/>
+                                            </Border>
+                                            <TextBlock x:Name="ShopNameText" FontSize="18" FontWeight="SemiBold"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                            <TextBlock x:Name="ShopAddressText" FontSize="13" TextWrapping="Wrap"
+                                                       Margin="0,8,0,0"
+                                                       Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+
+                                            <TextBlock Text="Что красят" FontSize="14" FontWeight="SemiBold"
+                                                       Margin="0,16,0,8"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                            <ListBox x:Name="ShopServicesList" MinHeight="100" MaxHeight="160"
+                                                     BorderBrush="{DynamicResource App.Brush.Border}"
+                                                     BorderThickness="1"
+                                                     SelectionChanged="ShopServicesList_SelectionChanged">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Margin="4,2">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                                       FontSize="14"
+                                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                                            <TextBlock Text="{Binding Description}" FontSize="12"
+                                                                       Foreground="{DynamicResource App.Brush.Muted}"
+                                                                       TextWrapping="Wrap"/>
+                                                            <TextBlock Text="{Binding PriceDisplay}" FontSize="12"
+                                                                       Margin="0,2,0,0"
+                                                                       Foreground="{DynamicResource App.Brush.Accent}"
+                                                                       Visibility="{Binding HasPrice, Converter={StaticResource BoolToVis}}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+
+                                            <TextBlock Text="Цвет покраски" FontSize="14" FontWeight="SemiBold"
+                                                       Margin="0,14,0,6"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                            <ComboBox x:Name="ShopColorsCombo" MinHeight="42"
+                                                      DisplayMemberPath="ColorName"/>
+
+                                            <StackPanel x:Name="ShopPartPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                                <TextBlock Text="Деталь" FontSize="12"
+                                                           Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"/>
+                                                <TextBox x:Name="ShopPartNameBox" Style="{StaticResource App.FieldTextBox}"
+                                                         MinHeight="40"/>
+                                            </StackPanel>
+
+                                            <TextBlock Text="Комментарий" FontSize="12"
+                                                       Foreground="{DynamicResource App.Brush.Muted}"
+                                                       Margin="0,10,0,4"/>
+                                            <TextBox x:Name="ShopNotesBox" Style="{StaticResource App.FieldTextBox}"
+                                                     MinHeight="48" TextWrapping="Wrap" AcceptsReturn="True"/>
+
+                                            <Button Content="Отправить запрос в мастерскую"
+                                                    Style="{StaticResource App.Button.Primary}"
+                                                    Height="44" Margin="0,14,0,8"
+                                                    Click="SendShopInquiry_Click"/>
+                                            <Button x:Name="MapCallButton" Content="Позвонить"
+                                                    Style="{StaticResource App.Button.Outline}"
+                                                    Height="40" Margin="0,0,0,8" Click="MapCall_Click"
+                                                    Visibility="Collapsed"/>
+                                            <Button Content="Написать в чат" Style="{StaticResource App.Button.Outline}"
+                                                    Height="40" Margin="0,0,0,8" Click="MapChat_Click"/>
+                                            <Button Content="Записаться онлайн" Style="{StaticResource App.Button.Outline}"
+                                                    Height="40" Click="MapBook_Click"/>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </DockPanel>
+                            </Border>
+
+                            <Border Grid.Column="1" CornerRadius="12" ClipToBounds="True" MinHeight="480"
+                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                                    Background="{DynamicResource App.Brush.SurfaceCard}">
+                                <controls:YandexWorkshopMapView x:Name="YandexMap"/>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

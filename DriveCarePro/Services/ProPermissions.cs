@@ -73,6 +73,9 @@ namespace DriveCarePro.Services
         public static readonly Guid ConfirmWorkshopBookingId = new Guid("B8E2F4A1-3C5D-4E9F-A2B1-7D8E9F0A1B2C");
         public const string ConfirmWorkshopBooking = "CONFIRM_WORKSHOP_BOOKING";
 
+        public static readonly Guid ManageWorkshopScheduleId = new Guid("DC030001-0001-4001-8001-000000000001");
+        public const string ManageWorkshopSchedule = "MANAGE_WORKSHOP_SCHEDULE";
+
         /// <summary>Разрешения платформенного администратора.</summary>
         public static readonly string[] AdminPanelCodes =
         {
@@ -102,7 +105,8 @@ namespace DriveCarePro.Services
             CreateSales,
             ViewAnalytics,
             DeleteTasks,
-            ConfirmWorkshopBooking
+            ConfirmWorkshopBooking,
+            ManageWorkshopSchedule
         };
 
         public static bool IsAdminPanelCode(string code)

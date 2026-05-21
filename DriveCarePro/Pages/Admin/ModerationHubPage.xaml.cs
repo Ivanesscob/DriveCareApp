@@ -20,9 +20,11 @@ namespace DriveCarePro.Pages.Admin
                 if (ModerationContent.Content == null)
                     NavCars_Click(null, null);
                 else if (ModerationContent.Content is AdminCarSaleModerationPage)
-                    SetNavStyles(true);
+                    SetNavStyles(NavCars);
+                else if (ModerationContent.Content is AdminWorkshopTypesModerationPage)
+                    SetNavStyles(NavWorkshopTypes);
                 else
-                    SetNavStyles(false);
+                    SetNavStyles(NavParts);
             };
         }
 
@@ -32,23 +34,31 @@ namespace DriveCarePro.Pages.Admin
         private void NavCars_Click(object sender, RoutedEventArgs e)
         {
             ModerationContent.Navigate(new AdminCarSaleModerationPage());
-            SetNavStyles(true);
+            SetNavStyles(NavCars);
         }
 
         private void NavParts_Click(object sender, RoutedEventArgs e)
         {
             ModerationContent.Navigate(new AdminPartsModerationPage());
-            SetNavStyles(false);
+            SetNavStyles(NavParts);
         }
 
-        private void SetNavStyles(bool carsSelected)
+        private void NavWorkshopTypes_Click(object sender, RoutedEventArgs e)
+        {
+            ModerationContent.Navigate(new AdminWorkshopTypesModerationPage());
+            SetNavStyles(NavWorkshopTypes);
+        }
+
+        private void SetNavStyles(Button selected)
         {
             var primary = Application.Current.TryFindResource("App.Button.Primary") as Style;
             var outline = Application.Current.TryFindResource("App.Button.Outline") as Style;
             if (primary == null || outline == null)
                 return;
-            NavCars.Style = carsSelected ? primary : outline;
-            NavParts.Style = carsSelected ? outline : primary;
+
+            NavCars.Style = selected == NavCars ? primary : outline;
+            NavParts.Style = selected == NavParts ? primary : outline;
+            NavWorkshopTypes.Style = selected == NavWorkshopTypes ? primary : outline;
         }
     }
 }

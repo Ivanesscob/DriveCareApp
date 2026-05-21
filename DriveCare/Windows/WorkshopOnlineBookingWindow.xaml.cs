@@ -20,7 +20,34 @@ namespace DriveCare.Windows
             IssueCategoryCombo.ItemsSource = WorkshopBookingIssueCategories.All;
             if (IssueCategoryCombo.Items.Count > 0)
                 IssueCategoryCombo.SelectedIndex = 0;
-            Loaded += async (_, __) => await LoadCarsAsync().ConfigureAwait(true);
+            Loaded += async (_, __) =>
+            {
+                await LoadCarsAsync().ConfigureAwait(true);
+                await LoadAvailableDatesAsync().ConfigureAwait(true);
+            };
+        }
+
+        async System.Threading.Tasks.Task LoadAvailableDatesAsync()
+        {
+            if (!WorkshopOnlineBookingService.TablesExist())
+            {
+                ShowError("Онлайн-запись недоступна. Обратитесь к автосервису.");
+                return;
+            }
+
+            var dates = await WorkshopOnlineBookingCapacity.GetAvailableDatesAsync(_workshopId)
+                .ConfigureAwait(true);
+
+            VisitDateCombo.ItemsSource = dates;
+            if (dates.Count == 0)
+            {
+                ShowError("Нет свободных дней для записи. Выберите другой сервис или попробуйте позже.");
+                VisitDateCombo.IsEnabled = false;
+                return;
+            }
+
+            VisitDateCombo.SelectedIndex = 0;
+            VisitDateCombo.IsEnabled = true;
         }
 
         async System.Threading.Tasks.Task LoadCarsAsync()
@@ -105,6 +132,14 @@ namespace DriveCare.Windows
 
             var fullComment = string.Join("\n", commentParts);
 
+            if (!(VisitDateCombo.SelectedItem is WorkshopBookingDateOption dateOption) || dateOption.Date == default)
+            {
+                ShowError("Выберите день визита из списка.");
+                return;
+            }
+
+            var visitDate = dateOption.Date.Date;
+
             var (ok, error, _) = await WorkshopOnlineBookingService.CreateBookingAsync(
                 AppState.CurrentUserId,
                 _workshopId,
@@ -112,7 +147,7 @@ namespace DriveCare.Windows
                 categoryCode,
                 ResolveClientPhone(),
                 fullComment,
-                preferredDate: null).ConfigureAwait(true);
+                preferredDate: visitDate).ConfigureAwait(true);
 
             if (!ok)
             {
@@ -121,7 +156,7 @@ namespace DriveCare.Windows
             }
 
             MessageBox.Show(
-                "Заявка отправлена.\n\nАвтосервис подтвердит запись в DriveCare Pro. Время визита согласуете после подтверждения.",
+                "Заявка отправлена на " + visitDate.ToString("dd.MM.yyyy") + ".\n\nАвтосервис подтвердит запись в DriveCare Pro. Точное время согласуете после подтверждения.",
                 "Онлайн-запись",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);

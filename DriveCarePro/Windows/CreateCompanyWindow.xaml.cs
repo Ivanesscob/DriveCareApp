@@ -221,9 +221,17 @@ namespace DriveCarePro.Windows
                 return;
             }
 
-            if (!(ServiceKindCombo.SelectedValue is Guid serviceKindId) || serviceKindId == Guid.Empty)
+            var typeIds = new List<Guid>();
+            if (ChkCreateAuto.IsChecked == true)
+                typeIds.Add(WorkshopServiceKinds.AutoServiceId);
+            if (ChkCreatePaint.IsChecked == true)
+                typeIds.Add(WorkshopServiceKinds.PaintingId);
+            if (ChkCreateTire.IsChecked == true)
+                typeIds.Add(WorkshopServiceKinds.TireServiceId);
+
+            if (typeIds.Count == 0)
             {
-                AppMessageBox.Show("Выберите тип услуг (автосервис, покраска или шиномонтаж).",
+                AppMessageBox.Show("Отметьте хотя бы один тип: автосервис, покраска или шиномонтаж.",
                     "Проверьте данные", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -234,7 +242,8 @@ namespace DriveCarePro.Windows
                 CompanyDescription = CompanyDescriptionBox.Text.Trim(),
                 WorkshopName = WorkshopNameBox.Text.Trim(),
                 WorkshopDescription = WorkshopDescriptionBox.Text.Trim(),
-                BusinessTypeId = serviceKindId,
+                BusinessTypeId = typeIds[0],
+                BusinessTypeIds = typeIds,
                 CountryId = country.RowId,
                 AddressLine = AddressLineBox.Text.Trim(),
                 Latitude = _parsedLatitude,
