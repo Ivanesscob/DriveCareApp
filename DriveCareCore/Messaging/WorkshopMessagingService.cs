@@ -97,19 +97,23 @@ ORDER BY c.LastMessageAt DESC;";
                 return new List<ChatMessageItem>();
 
             const string sql = @"
-SELECT m.RowId AS MessageId, m.SenderKind, m.Body, m.CreatedAt,
+SELECT m.RowId AS MessageId,
+       m.SenderKind AS SenderKind,
        CASE WHEN m.SenderKind = 0 THEN
             COALESCE(NULLIF(LTRIM(RTRIM(u.Login)), N''), u.Email, N'Клиент')
        ELSE
             COALESCE(NULLIF(LTRIM(RTRIM(e.FirstName + N' ' + e.LastName)), N''), e.Login, N'Сотрудник')
-       END AS SenderName
+       END AS SenderName,
+       m.Body AS Body,
+       m.CreatedAt AS CreatedAt
 FROM dbo.WorkshopMessages m
 LEFT JOIN dbo.Users u ON u.RowId = m.SenderUserId
 LEFT JOIN dbo.Employees e ON e.RowId = m.SenderEmployeeId
-WHERE m.ConversationId = @cid
-ORDER BY m.CreatedAt ASC;";
+WHERE m.ConversationId = @p_cid
+ORDER BY m.CreatedAt ASC, m.RowId ASC;";
 
-            var rows = await db.Database.SqlQuery<ChatMessageRow>(sql, new SqlParameter("@cid", conversationId))
+            var rows = await db.Database.SqlQuery<ChatMessageRow>(sql,
+                    new SqlParameter("@p_cid", conversationId))
                 .ToListAsync().ConfigureAwait(false);
 
             if (forUserSide)
@@ -418,39 +422,35 @@ WHERE t.ClientUserId IS NOT NULL
             Guid? employeeId,
             string body)
         {
-            var now = DateTime.Now;
             var preview = BuildPreview(body);
             await db.Database.ExecuteSqlCommandAsync(
                 @"INSERT INTO dbo.WorkshopMessages
                   (RowId, ConversationId, SenderKind, SenderUserId, SenderEmployeeId, Body, CreatedAt)
-                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, @p_dt)",
+                  VALUES (@p_id, @p_cid, @p_kind, @p_uid, @p_eid, @p_body, GETDATE())",
                 new SqlParameter("@p_id", Guid.NewGuid()),
                 new SqlParameter("@p_cid", conversationId),
                 new SqlParameter("@p_kind", (byte)kind),
                 new SqlParameter("@p_uid", (object)userId ?? DBNull.Value),
                 new SqlParameter("@p_eid", (object)employeeId ?? DBNull.Value),
-                new SqlParameter("@p_body", body),
-                new SqlParameter("@p_dt", now)).ConfigureAwait(false);
+                new SqlParameter("@p_body", body)).ConfigureAwait(false);
 
             if (kind == MessageSenderKind.User)
             {
                 await db.Database.ExecuteSqlCommandAsync(
                     @"UPDATE dbo.WorkshopConversations
-                      SET LastMessageAt = @dt, LastMessagePreview = @pr, UnreadForWorkshop = UnreadForWorkshop + 1
-                      WHERE RowId = @cid",
-                    new SqlParameter("@dt", now),
-                    new SqlParameter("@pr", preview),
-                    new SqlParameter("@cid", conversationId)).ConfigureAwait(false);
+                      SET LastMessageAt = GETDATE(), LastMessagePreview = @p_pr, UnreadForWorkshop = UnreadForWorkshop + 1
+                      WHERE RowId = @p_cid",
+                    new SqlParameter("@p_pr", preview),
+                    new SqlParameter("@p_cid", conversationId)).ConfigureAwait(false);
             }
             else
             {
                 await db.Database.ExecuteSqlCommandAsync(
                     @"UPDATE dbo.WorkshopConversations
-                      SET LastMessageAt = @dt, LastMessagePreview = @pr, UnreadForUser = UnreadForUser + 1
-                      WHERE RowId = @cid",
-                    new SqlParameter("@dt", now),
-                    new SqlParameter("@pr", preview),
-                    new SqlParameter("@cid", conversationId)).ConfigureAwait(false);
+                      SET LastMessageAt = GETDATE(), LastMessagePreview = @p_pr, UnreadForUser = UnreadForUser + 1
+                      WHERE RowId = @p_cid",
+                    new SqlParameter("@p_pr", preview),
+                    new SqlParameter("@p_cid", conversationId)).ConfigureAwait(false);
             }
         }
 

@@ -166,10 +166,16 @@ namespace DriveCare.Pages.User
 
         private void ScheduleScrollToEnd()
         {
-            Dispatcher.BeginInvoke(new Action(() =>
+            void Scroll()
             {
+                if (MessagesScroll == null)
+                    return;
+                MessagesScroll.UpdateLayout();
                 MessagesScroll.ScrollToEnd();
-            }), DispatcherPriority.Loaded);
+            }
+
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(Scroll));
+            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(Scroll));
         }
 
         private async void Send_Click(object sender, RoutedEventArgs e) => await SendMessageAsync().ConfigureAwait(true);

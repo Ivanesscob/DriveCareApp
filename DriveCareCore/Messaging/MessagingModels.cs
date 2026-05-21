@@ -32,7 +32,18 @@ namespace DriveCareCore.Messaging
         public string Body { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsMine { get; set; }
-        public string TimeLabel => CreatedAt.ToString("dd.MM.yyyy HH:mm");
+        public string TimeLabel
+        {
+            get
+            {
+                if (CreatedAt <= new DateTime(1900, 1, 1))
+                    return string.Empty;
+                var local = CreatedAt.Kind == DateTimeKind.Utc
+                    ? CreatedAt.ToLocalTime()
+                    : DateTime.SpecifyKind(CreatedAt, DateTimeKind.Local);
+                return local.ToString("dd.MM.yyyy HH:mm");
+            }
+        }
         public bool IsFromWorkshop => SenderKind == MessageSenderKind.Employee;
     }
 }
