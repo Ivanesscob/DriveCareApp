@@ -102,7 +102,7 @@ class PhotoServer
 
                     int sent = await ChatHub.BroadcastNewMessageAsync(payload, stream).ConfigureAwait(false);
                     await WriteInt32Async(stream, 1).ConfigureAwait(false);
-                    Console.WriteLine($"CHAT_PUSH: уведомление отправлено {sent} активным TCP-подпискам (открытые приложения/вкладки, не число людей)");
+                    Console.WriteLine($"CHAT_PUSH: разослано {sent} подписчикам");
                 }
                 else if (command == "CHAT_PING")
                 {
