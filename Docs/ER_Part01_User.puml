@@ -1,0 +1,57 @@
+@startuml ER_Part01_User
+title Часть 1. Пользователь DriveCare (учётная запись)
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+top to bottom direction
+
+entity "Users" {
+  RowId *
+  Login
+  Password
+  Description
+  Email
+  BirthDate
+  Phone
+  CreatedAt
+}
+
+entity "UserRoles" {
+  RowId *
+  UserId
+  RoleId
+  Description
+}
+
+entity "Roles" {
+  RowId *
+  Name
+  Description
+  WorkshopId
+  IsActive
+  CompanyId
+}
+
+entity "UserNotifications" {
+  RowId *
+  UserId
+  NotificationId
+  IsRead
+  Description
+}
+
+entity "Notifications" {
+  RowId *
+  Title
+  Message
+  Description
+  CarId
+  CreatedAt
+  IsViewed
+}
+
+UserRoles }o--|| Users : UserId
+UserRoles }o--|| Roles : RoleId
+UserNotifications }o--|| Users : UserId
+UserNotifications }o--|| Notifications : NotificationId
+@enduml

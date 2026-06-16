@@ -1,0 +1,121 @@
+@startuml DriveCare_UseCase_Simple
+' Упрощённая диаграмма для отчёта (курсовая / диплом)
+' Открыть: https://www.plantuml.com/plantuml/uml/  или плагин PlantUML в VS Code
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #F5F8FF
+  BorderColor #2563EB
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+left to right direction
+
+actor "Клиент" as Client
+actor "Сотрудник\nмастерской" as Worker
+actor "Руководитель\nмастерской" as Owner
+actor "Администратор\nплатформы" as Admin
+
+rectangle "Информационная система DriveCare" as SYS {
+
+  usecase "Регистрация" as UC01
+  usecase "Авторизация" as UC02
+
+  package "DriveCare — клиентское приложение" {
+    usecase "Управление гаражом" as UC10
+    usecase "Учёт обслуживания авто" as UC11
+    usecase "Поиск мастерских" as UC12
+    usecase "Онлайн-запись на сервис" as UC13
+    usecase "Чат с мастерской" as UC14
+    usecase "Магазин запчастей" as UC15
+    usecase "Объявления о продаже авто" as UC18
+    usecase "Профиль и уведомления" as UC23
+  }
+
+  package "DriveCare Pro — операции" {
+    usecase "Выполнение заданий" as UC31
+    usecase "Завершение задания" as UC32
+    usecase "Закупка запчастей" as UC34
+    usecase "Автомобили в ремонте" as UC35
+    usecase "Чат с клиентом" as UC36
+    usecase "Онлайн-записи" as UC37
+    usecase "Заказ-наряд (DOCX)" as UC39
+  }
+
+  package "DriveCare Pro — управление" {
+    usecase "Запись клиента (Pro)" as UC50
+    usecase "Управление персоналом" as UC51
+    usecase "Конструктор ролей" as UC52
+    usecase "Каталог услуг" as UC53
+    usecase "Склад и магазин закупок" as UC55
+    usecase "Расписание работы" as UC56
+    usecase "Статистика организации" as UC57
+  }
+
+  package "Администрирование платформы" {
+    usecase "Модерация объявлений" as UC60
+    usecase "Модерация типов мастерских" as UC61
+    usecase "Управление организациями" as UC62
+    usecase "Справочники" as UC64
+    usecase "Системные роли и права" as UC65
+    usecase "Статистика платформы" as UC67
+  }
+}
+
+' --- Клиент ---
+Client --> UC01
+Client --> UC02
+Client --> UC10
+Client --> UC11
+Client --> UC12
+Client --> UC13
+Client --> UC14
+Client --> UC15
+Client --> UC18
+Client --> UC23
+
+' --- Сотрудник ---
+Worker --> UC02
+Worker --> UC31
+Worker --> UC32
+Worker --> UC34
+Worker --> UC35
+Worker --> UC36
+Worker --> UC37
+Worker --> UC39
+
+' --- Руководитель (владелец) ---
+Owner --> UC02
+Owner --> UC31
+Owner --> UC32
+Owner --> UC36
+Owner --> UC37
+Owner --> UC50
+Owner --> UC51
+Owner --> UC52
+Owner --> UC53
+Owner --> UC55
+Owner --> UC56
+Owner --> UC57
+
+' --- Администратор ---
+Admin --> UC02
+Admin --> UC60
+Admin --> UC61
+Admin --> UC62
+Admin --> UC64
+Admin --> UC65
+Admin --> UC67
+
+' --- Include / Extend ---
+UC10 ..> UC02 : <<include>>
+UC31 ..> UC02 : <<include>>
+UC50 ..> UC02 : <<include>>
+UC60 ..> UC02 : <<include>>
+UC18 ..> UC60 : <<extend>>
+
+@enduml

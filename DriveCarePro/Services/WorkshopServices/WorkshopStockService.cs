@@ -1,5 +1,6 @@
 using DriveCareCore.Data.BD;
 using DriveCareCore.Shop;
+using DriveCarePro.Services;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -12,6 +13,11 @@ namespace DriveCarePro.Services.WorkshopServices
 {
     internal static class WorkshopStockService
     {
+        public static Task<(bool ok, string error)> ReceiveShopCartAsync(
+            Guid workshopId,
+            IList<TaskPartLineRow> lines) =>
+            DatabaseExecutor.WithDbAsync(db => ReceivePurchaseLinesAsync(db, workshopId, lines));
+
         public static async Task<(bool ok, string error)> ReceivePurchaseLinesAsync(
             DriveCareDBEntities db,
             Guid workshopId,

@@ -22,6 +22,7 @@ namespace DriveCareCore.Data.BD
             this.UserCarSales = new HashSet<UserCarSale>();
             this.UserNotifications = new HashSet<UserNotification>();
             this.UserRoles = new HashSet<UserRole>();
+            this.WorkshopOnlineBookings = new HashSet<WorkshopOnlineBooking>();
         }
     
         public System.Guid RowId { get; set; }
@@ -43,5 +44,7 @@ namespace DriveCareCore.Data.BD
         public virtual ICollection<UserNotification> UserNotifications { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserRole> UserRoles { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopOnlineBooking> WorkshopOnlineBookings { get; set; }
     }
 }

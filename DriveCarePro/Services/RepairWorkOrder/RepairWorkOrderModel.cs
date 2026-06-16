@@ -33,6 +33,8 @@ namespace DriveCarePro.Services.RepairWorkOrder
 
         public List<RepairWorkOrderWorkLine> WorkLines { get; set; } = new List<RepairWorkOrderWorkLine>();
 
+        public List<RepairWorkOrderPartLine> PartLines { get; set; } = new List<RepairWorkOrderPartLine>();
+
         public string WorkCode { get; set; } = string.Empty;
         public string WorkName { get; set; } = string.Empty;
         public string WorkMultiplicity { get; set; } = string.Empty;

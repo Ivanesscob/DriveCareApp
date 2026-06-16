@@ -7,9 +7,10 @@ namespace DriveCareCore.Bookings
         public bool Ok { get; set; }
         public string Error { get; set; }
         public string ChatWarning { get; set; }
+        public Guid? TaskId { get; set; }
 
-        public static BookingActionResult Success(string chatWarning = null) =>
-            new BookingActionResult { Ok = true, ChatWarning = chatWarning };
+        public static BookingActionResult Success(string chatWarning = null, Guid? taskId = null) =>
+            new BookingActionResult { Ok = true, ChatWarning = chatWarning, TaskId = taskId };
 
         public static BookingActionResult Fail(string error) =>
             new BookingActionResult { Ok = false, Error = error };
@@ -20,7 +21,8 @@ namespace DriveCareCore.Bookings
         Pending = 0,
         Confirmed = 1,
         CancelledByClient = 2,
-        RejectedByWorkshop = 3
+        RejectedByWorkshop = 3,
+        ClientNoShow = 4
     }
 
     public sealed class WorkshopOnlineBookingItem
@@ -38,6 +40,7 @@ namespace DriveCareCore.Bookings
         public byte StatusCode { get; set; }
         public WorkshopBookingStatus Status => (WorkshopBookingStatus)StatusCode;
         public DateTime CreatedAt { get; set; }
+        public Guid? TaskId { get; set; }
 
         public string IssueCategoryLabel =>
             string.IsNullOrWhiteSpace(IssueCategory)
@@ -53,6 +56,7 @@ namespace DriveCareCore.Bookings
                     case WorkshopBookingStatus.Confirmed: return "Подтверждена";
                     case WorkshopBookingStatus.CancelledByClient: return "Отменена клиентом";
                     case WorkshopBookingStatus.RejectedByWorkshop: return "Отклонена";
+                    case WorkshopBookingStatus.ClientNoShow: return "Клиент не явился";
                     default: return "Ожидает подтверждения";
                 }
             }
@@ -69,6 +73,7 @@ namespace DriveCareCore.Bookings
         public bool CanAccept => IsPending;
         public bool CanReject => IsPending;
         public bool CanConfirm => CanAccept;
+        public bool CanMarkNoShow => StatusCode == (byte)WorkshopBookingStatus.Confirmed;
 
         public string StatusBadgeBrushKey
         {

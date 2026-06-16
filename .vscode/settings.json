@@ -2,5 +2,12 @@
   "dotnet.defaultSolution": "DriveCareApp.sln",
   "omnisharp.useModernNet": false,
   "omnisharp.enableMsBuildLoadProjectsOnDemand": false,
-  "omnisharp.projectLoadTimeout": 120
+  "omnisharp.projectLoadTimeout": 120,
+  "plantuml.render": "Local",
+  "plantuml.exportFormat": "png",
+  "plantuml.exportOutDir": "Docs/out",
+  "plantuml.exportSubFolder": false,
+  "plantuml.previewAutoUpdate": true,
+  "plantuml.commandArgs": "-charset UTF-8",
+  "plantuml.graphvizDot": "C:\\Users\\ivanessco\\tools\\graphviz\\Graphviz-12.2.1-win64\\bin\\dot.exe"
 }

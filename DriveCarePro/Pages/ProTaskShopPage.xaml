@@ -103,7 +103,8 @@
                                         </Border>
                                         <Button Grid.Column="1" Content="В корзину" Margin="8,0,0,0" Padding="8,4"
                                                 Tag="{Binding}" Click="AddToCart_Click"
-                                                Style="{StaticResource App.Button.Outline}"/>
+                                                Style="{StaticResource App.Button.Outline}"
+                                                IsEnabled="{Binding IsActive}"/>
                                     </Grid>
                                 </Grid>
                             </Border>
@@ -139,10 +140,16 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                    <TextBlock x:Name="EmptyCartText" Grid.Row="1" Margin="0,10,0,10"
+                               Text="Корзина пуста. Нажмите «В корзину» у нужной запчасти."
+                               TextWrapping="Wrap" FontSize="12"
+                               Foreground="{DynamicResource App.Brush.Muted}"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBlock x:Name="CartTotalText" Grid.Row="2" FontWeight="SemiBold" FontSize="14"
                                Foreground="{DynamicResource App.Brush.Foreground}"/>
-                    <Button x:Name="RequestPurchaseButton" Grid.Row="3" Content="Запросить покупку" Margin="0,12,0,0" Height="40"
-                            Style="{StaticResource App.Button.Primary}" Click="RequestPurchase_Click"/>
+                    <Button x:Name="PurchaseButton" Grid.Row="3" Content="Купить" Margin="0,12,0,0" Height="40"
+                            Style="{StaticResource App.Button.Primary}" Click="Purchase_Click"
+                            IsEnabled="False"/>
                 </Grid>
             </Border>
         </Grid>

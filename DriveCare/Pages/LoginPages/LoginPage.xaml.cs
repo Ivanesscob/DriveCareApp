@@ -58,6 +58,8 @@ namespace DriveCare.Pages.LoginPages
                 if (user != null)
                 {
                     AppState.SignInUser(user);
+                    DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                        DriveCareCore.Analytics.ActivityEventCodes.UserLogin, user.RowId);
                     AppState.SetFrame<UserHomePage>();
                 }
                 else

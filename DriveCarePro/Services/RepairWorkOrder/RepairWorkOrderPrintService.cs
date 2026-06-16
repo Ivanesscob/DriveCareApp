@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -28,6 +29,17 @@ namespace DriveCarePro.Services.RepairWorkOrder
             RepairWorkOrderTokens.WorkExecutor
         };
 
+        private static readonly string[] PartsRowTokens =
+        {
+            RepairWorkOrderTokens.PartsNumber,
+            RepairWorkOrderTokens.PartsName,
+            RepairWorkOrderTokens.PartsUnit,
+            RepairWorkOrderTokens.PartsQuantity,
+            RepairWorkOrderTokens.PartsPrice,
+            RepairWorkOrderTokens.PartsDiscount,
+            RepairWorkOrderTokens.PartsAmount
+        };
+
         private static readonly IReadOnlyDictionary<string, string> LegacyCompanyReplacements =
             new Dictionary<string, string>(StringComparer.Ordinal)
             {
@@ -45,7 +57,67 @@ namespace DriveCarePro.Services.RepairWorkOrder
             foreach (var c in Path.GetInvalidFileNameChars())
                 safeBase = safeBase.Replace(c, '_');
 
-            return Path.Combine(desktop, safeBase + "_" + DateTime.Now.ToString("yyyyMMdd_HHmm") + ".docx");
+            return Path.Combine(desktop, safeBase + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".docx");
+        }
+
+        /// <summary>Сохраняет заказ-наряд; при занятом файле подбирает другое имя.</summary>
+        public static (bool success, string savedPath, string error) TryGenerateFilled(
+            RepairWorkOrderModel model,
+            string preferredPath)
+        {
+            if (model == null)
+                return (false, null, "Нет данных для заказ-наряда.");
+
+            try
+            {
+                var path = string.IsNullOrWhiteSpace(preferredPath)
+                    ? GetDesktopOrderPath("Zakaz-naryad-vydacha")
+                    : preferredPath;
+                path = GenerateFilled(model, path);
+                return (true, path, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, null, ex.Message);
+            }
+        }
+
+        public static void OpenDocument(string path)
+        {
+            TryOpenDocument(path, out _);
+        }
+
+        /// <summary>Открывает DOCX через систему; не бросает исключений (файл уже открыт в Word и т.п.).</summary>
+        public static bool TryOpenDocument(string path, out string errorMessage)
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                errorMessage = "Файл не найден.";
+                return false;
+            }
+
+            try
+            {
+                var psi = new ProcessStartInfo(path)
+                {
+                    UseShellExecute = true,
+                    Verb = "open"
+                };
+                Process.Start(psi);
+                return true;
+            }
+            catch (Win32Exception ex)
+            {
+                errorMessage = "Не удалось открыть документ. Закройте файл в Word или откройте вручную:\n" + path
+                    + "\n\n" + ex.Message;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "Не удалось открыть документ:\n" + ex.Message + "\n\nПуть:\n" + path;
+                return false;
+            }
         }
 
         public static string GenerateEmptyForPrint(RepairWorkOrderModel model, string targetPath)
@@ -62,7 +134,7 @@ namespace DriveCarePro.Services.RepairWorkOrder
                     values[token] = string.Empty;
             }
 
-            return FillAndSave(values, targetPath, workLines: null);
+            return FillAndSave(values, targetPath, workLines: null, partLines: null);
         }
 
         public static string GenerateFilled(RepairWorkOrderModel model, string targetPath)
@@ -73,22 +145,20 @@ namespace DriveCarePro.Services.RepairWorkOrder
                 throw new ArgumentException("Укажите путь для сохранения.", nameof(targetPath));
 
             var values = model.ToTokenMap(includeWorkRowTokens: false);
-            // При записи на сервис — только клиент, авто и причина; таблицы работ/запчастей пустые.
-            return FillAndSave(values, targetPath, workLines: null);
-        }
-
-        public static void OpenDocument(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-                return;
-
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            var workLines = model.WorkLines != null && model.WorkLines.Count > 0
+                ? (IReadOnlyList<RepairWorkOrderWorkLine>)model.WorkLines
+                : null;
+            var partLines = model.PartLines != null && model.PartLines.Count > 0
+                ? (IReadOnlyList<RepairWorkOrderPartLine>)model.PartLines
+                : null;
+            return FillAndSave(values, targetPath, workLines, partLines);
         }
 
         private static string FillAndSave(
             IDictionary<string, string> tokenValues,
             string targetPath,
-            IReadOnlyList<RepairWorkOrderWorkLine> workLines)
+            IReadOnlyList<RepairWorkOrderWorkLine> workLines,
+            IReadOnlyList<RepairWorkOrderPartLine> partLines)
         {
             var templatePath = ResolveTemplatePath(TokensTemplateFile);
             var legacyTemplate = false;
@@ -101,11 +171,12 @@ namespace DriveCarePro.Services.RepairWorkOrder
             if (!File.Exists(templatePath))
                 throw new FileNotFoundException("Не найден шаблон заказ-наряда.", templatePath);
 
+            targetPath = ResolveWritableTargetPath(targetPath);
             var directory = Path.GetDirectoryName(targetPath);
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
 
-            File.Copy(templatePath, targetPath, overwrite: true);
+            CopyTemplateToTarget(templatePath, targetPath);
 
             using (var archive = ZipFile.Open(targetPath, ZipArchiveMode.Update))
             {
@@ -124,13 +195,15 @@ namespace DriveCarePro.Services.RepairWorkOrder
                 }
 
                 foreach (var pair in tokenValues
-                             .Where(p => !string.IsNullOrEmpty(p.Key) && !WorkRowTokens.Contains(p.Key))
+                             .Where(p => !string.IsNullOrEmpty(p.Key)
+                                 && !WorkRowTokens.Contains(p.Key)
+                                 && !PartsRowTokens.Contains(p.Key))
                              .OrderByDescending(p => p.Key.Length))
                 {
                     ReplaceTextInDocument(document, pair.Key, pair.Value ?? string.Empty);
                 }
 
-                ClearWorkAndPartsTableRows(document, workLines);
+                FillWorkAndPartsTableRows(document, workLines, partLines);
 
                 var entryPath = entry.FullName;
                 entry.Delete();
@@ -142,15 +215,20 @@ namespace DriveCarePro.Services.RepairWorkOrder
             return targetPath;
         }
 
-        /// <summary>Очищает строки таблиц работ и запчастей (заполняются позже вручную или из системы).</summary>
-        private static void ClearWorkAndPartsTableRows(XDocument document, IReadOnlyList<RepairWorkOrderWorkLine> workLines)
+        private static void FillWorkAndPartsTableRows(
+            XDocument document,
+            IReadOnlyList<RepairWorkOrderWorkLine> workLines,
+            IReadOnlyList<RepairWorkOrderPartLine> partLines)
         {
             if (workLines != null && workLines.Count > 0)
                 FillWorkTable(document, workLines);
             else
-                ClearTableRowByToken(document, RepairWorkOrderTokens.WorkName, CreateRowTokenMap(new RepairWorkOrderWorkLine()));
+                ClearTableRowByToken(document, RepairWorkOrderTokens.WorkName, CreateWorkRowTokenMap(new RepairWorkOrderWorkLine()));
 
-            ClearTableRowByToken(document, RepairWorkOrderTokens.PartsName, CreatePartsRowTokenMap());
+            if (partLines != null && partLines.Count > 0)
+                FillPartsTable(document, partLines);
+            else
+                ClearTableRowByToken(document, RepairWorkOrderTokens.PartsName, CreatePartsRowTokenMap(new RepairWorkOrderPartLine()));
         }
 
         private static void FillWorkTable(XDocument document, IReadOnlyList<RepairWorkOrderWorkLine> workLines)
@@ -165,13 +243,42 @@ namespace DriveCarePro.Services.RepairWorkOrder
             var lines = workLines ?? Array.Empty<RepairWorkOrderWorkLine>();
             if (lines.Count == 0)
             {
-                ReplaceInRow(templateRow, CreateRowTokenMap(new RepairWorkOrderWorkLine()));
+                ReplaceInRow(templateRow, CreateWorkRowTokenMap(new RepairWorkOrderWorkLine()));
                 return;
             }
 
+            DuplicateAndFillTableRows(templateRow, lines.Count, (row, index) =>
+                ReplaceInRow(row, CreateWorkRowTokenMap(lines[index])));
+        }
+
+        private static void FillPartsTable(XDocument document, IReadOnlyList<RepairWorkOrderPartLine> partLines)
+        {
+            var templateRow = document
+                .Descendants(W + "tr")
+                .FirstOrDefault(row => RowContainsToken(row, RepairWorkOrderTokens.PartsName));
+
+            if (templateRow == null)
+                return;
+
+            var lines = partLines ?? Array.Empty<RepairWorkOrderPartLine>();
+            if (lines.Count == 0)
+            {
+                ReplaceInRow(templateRow, CreatePartsRowTokenMap(new RepairWorkOrderPartLine()));
+                return;
+            }
+
+            DuplicateAndFillTableRows(templateRow, lines.Count, (row, index) =>
+                ReplaceInRow(row, CreatePartsRowTokenMap(lines[index])));
+        }
+
+        private static void DuplicateAndFillTableRows(
+            XElement templateRow,
+            int lineCount,
+            Action<XElement, int> fillRow)
+        {
             var rows = new List<XElement> { templateRow };
             var insertAfter = templateRow;
-            for (var i = 1; i < lines.Count; i++)
+            for (var i = 1; i < lineCount; i++)
             {
                 var clone = new XElement(templateRow);
                 insertAfter.AddAfterSelf(clone);
@@ -179,8 +286,8 @@ namespace DriveCarePro.Services.RepairWorkOrder
                 rows.Add(clone);
             }
 
-            for (var i = 0; i < lines.Count; i++)
-                ReplaceInRow(rows[i], CreateRowTokenMap(lines[i]));
+            for (var i = 0; i < lineCount; i++)
+                fillRow(rows[i], i);
         }
 
         private static void ClearTableRowByToken(XDocument document, string markerToken, IDictionary<string, string> emptyValues)
@@ -193,17 +300,18 @@ namespace DriveCarePro.Services.RepairWorkOrder
                 ReplaceInRow(row, emptyValues);
         }
 
-        private static Dictionary<string, string> CreatePartsRowTokenMap()
+        private static Dictionary<string, string> CreatePartsRowTokenMap(RepairWorkOrderPartLine line)
         {
+            line = line ?? new RepairWorkOrderPartLine();
             return new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                [RepairWorkOrderTokens.PartsNumber] = string.Empty,
-                [RepairWorkOrderTokens.PartsName] = string.Empty,
-                [RepairWorkOrderTokens.PartsUnit] = string.Empty,
-                [RepairWorkOrderTokens.PartsQuantity] = string.Empty,
-                [RepairWorkOrderTokens.PartsPrice] = string.Empty,
-                [RepairWorkOrderTokens.PartsDiscount] = string.Empty,
-                [RepairWorkOrderTokens.PartsAmount] = string.Empty
+                [RepairWorkOrderTokens.PartsNumber] = line.Number ?? string.Empty,
+                [RepairWorkOrderTokens.PartsName] = line.Name ?? string.Empty,
+                [RepairWorkOrderTokens.PartsUnit] = line.Unit ?? string.Empty,
+                [RepairWorkOrderTokens.PartsQuantity] = line.Quantity ?? string.Empty,
+                [RepairWorkOrderTokens.PartsPrice] = line.Price ?? string.Empty,
+                [RepairWorkOrderTokens.PartsDiscount] = line.Discount ?? string.Empty,
+                [RepairWorkOrderTokens.PartsAmount] = line.Amount ?? string.Empty
             };
         }
 
@@ -218,7 +326,7 @@ namespace DriveCarePro.Services.RepairWorkOrder
             return false;
         }
 
-        private static Dictionary<string, string> CreateRowTokenMap(RepairWorkOrderWorkLine line)
+        private static Dictionary<string, string> CreateWorkRowTokenMap(RepairWorkOrderWorkLine line)
         {
             line = line ?? new RepairWorkOrderWorkLine();
             return new Dictionary<string, string>(StringComparer.Ordinal)
@@ -283,6 +391,58 @@ namespace DriveCarePro.Services.RepairWorkOrder
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             return Path.Combine(baseDir, "Resources", "Words", fileName);
+        }
+
+        private static void CopyTemplateToTarget(string templatePath, string targetPath)
+        {
+            try
+            {
+                File.Copy(templatePath, targetPath, overwrite: true);
+            }
+            catch (IOException ex)
+            {
+                throw new IOException(
+                    "Не удалось сохранить заказ-наряд: файл занят другой программой (часто Word). " +
+                    "Закройте документ или сохраните под другим именем.\n" + ex.Message, ex);
+            }
+        }
+
+        /// <summary>Если целевой файл открыт в Word — сохраняем копию с другим именем.</summary>
+        private static string ResolveWritableTargetPath(string targetPath)
+        {
+            if (string.IsNullOrWhiteSpace(targetPath))
+                return GetDesktopOrderPath("Zakaz-naryad");
+
+            if (!File.Exists(targetPath) || CanOverwriteFile(targetPath))
+                return targetPath;
+
+            var dir = Path.GetDirectoryName(targetPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var baseName = Path.GetFileNameWithoutExtension(targetPath) ?? "Zakaz-naryad";
+            var ext = Path.GetExtension(targetPath);
+            if (string.IsNullOrEmpty(ext))
+                ext = ".docx";
+
+            for (var i = 2; i < 50; i++)
+            {
+                var candidate = Path.Combine(dir, baseName + "_" + i + ext);
+                if (!File.Exists(candidate) || CanOverwriteFile(candidate))
+                    return candidate;
+            }
+
+            return Path.Combine(dir, baseName + "_" + Guid.NewGuid().ToString("N").Substring(0, 8) + ext);
+        }
+
+        private static bool CanOverwriteFile(string path)
+        {
+            try
+            {
+                using (new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+                    return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

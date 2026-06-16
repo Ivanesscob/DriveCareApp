@@ -1,0 +1,52 @@
+{
+  "ER_Part01_User": {
+    "title": "Часть 1. Пользователь DriveCare (учётная запись)",
+    "caption": "Подмодель пользователя — регистрация, роли, уведомления",
+    "tables": ["Users", "UserRoles", "Roles", "UserNotifications", "Notifications"]
+  },
+  "ER_Part02_Employee_Rights": {
+    "title": "Часть 2. Сотрудники и права доступа (DriveCare Pro)",
+    "caption": "Подмодель сотрудников мастерской и RBAC",
+    "tables": ["Employees", "EmployeeRolesMap", "EmployeeNotifications", "Roles", "Permissions", "PermissionGroups", "RolePermissionsMap", "RolePermissions", "Notifications"]
+  },
+  "ER_Part03_References": {
+    "title": "Часть 3. Справочники",
+    "caption": "Подмодель справочной информации",
+    "tables": ["Countries", "Brands", "Models", "CarTypes", "FuelTypes", "Colors", "BusinessTypes", "Statuses", "RepairCategories", "Parts", "PartManufacturers", "Addresses", "OrderPickupPoints", "WarehouseManagers"]
+  },
+  "ER_Part04_User_Garage": {
+    "title": "Часть 4. Гараж пользователя и обслуживание авто",
+    "caption": "Подмодель личного гаража и истории ремонтов",
+    "tables": ["Users", "Cars", "Models", "CarTypes", "FuelTypes", "Brands", "CarColors", "Colors", "UserCars", "UserCarMaintenanceHistory", "UserCarComponentStatuses", "RepairHistory", "RepairCategories", "Statuses", "Employees"]
+  },
+  "ER_Part05_Workshop_Structure": {
+    "title": "Часть 5. Организация и мастерская",
+    "caption": "Подмодель компании, филиала, расписания и типов услуг",
+    "tables": ["Companies", "Workshops", "Addresses", "Countries", "BusinessTypes", "WorkshopServiceUnits", "WorkshopBusinessTypes", "WorkshopBusinessTypeChangeRequests", "WorkshopBusinessTypeChangeRequestTypes", "WorkshopWorkSchedules", "WorkshopOnlineBookingSettings", "WarehouseManagers", "Roles"]
+  },
+  "ER_Part06_Workshop_Tasks": {
+    "title": "Часть 6. Работа мастерской (задачи и документы)",
+    "caption": "Подмодель заказ-нарядов, услуг, склада и актов",
+    "tables": ["Workshops", "Employees", "Users", "Cars", "Statuses", "Tasks", "TaskServiceLines", "TaskPartLines", "TaskPurchaseRequests", "TaskPurchaseRequestLines", "WorkshopServices", "WorkshopParts", "WorkshopServiceUnits", "ServiceDocuments", "ServiceDocumentServiceLines", "ServiceDocumentPartLines", "RepairHistory"]
+  },
+  "ER_Part07_Clients_Chat_Booking": {
+    "title": "Часть 7. Клиенты мастерской, чат и онлайн-запись",
+    "caption": "Подмодель CRM мастерской и коммуникаций",
+    "tables": ["Workshops", "Users", "Employees", "WorkshopServiceClients", "WorkshopGuestCars", "Cars", "RepairHistory", "WorkshopConversations", "WorkshopMessages", "WorkshopOnlineBookings", "UserCars"]
+  },
+  "ER_Part08_CarSales_Paint": {
+    "title": "Часть 8. Объявления о продаже авто и покраска",
+    "caption": "Подмодель маркетплейса и запросов на покраску",
+    "tables": ["Users", "UserCars", "Cars", "Colors", "CarSales", "CarSalePrices", "UserCarSales", "Statuses", "Employees", "Workshops", "WorkshopPaintServices", "WorkshopPaintColors", "UserWorkshopPaintInquiries"]
+  },
+  "ER_Part09_Store": {
+    "title": "Часть 9. Интернет-магазин",
+    "caption": "Подмодель заказов и пунктов выдачи",
+    "tables": ["Users", "StoreOrders", "StoreOrderLines", "OrderPickupPoints", "Parts"]
+  },
+  "ER_Part10_Analytics": {
+    "title": "Часть 10. Статистика действий",
+    "caption": "Подмодель журнала событий",
+    "tables": ["AppActivityEvents", "Users", "Employees", "Workshops", "Companies"]
+  }
+}

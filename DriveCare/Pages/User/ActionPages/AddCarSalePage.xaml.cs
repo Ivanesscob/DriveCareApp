@@ -150,6 +150,12 @@ namespace DriveCare.Pages.User.ActionPages
                 return;
             }
 
+            DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                DriveCareCore.Analytics.ActivityEventCodes.CarSaleCreate,
+                AppState.CurrentUserId,
+                entityType: "CarSale",
+                entityId: saleId);
+
             MessageBox.Show("Объявление отправлено на модерацию. После проверки администратором оно появится в каталоге.", "DriveCare", MessageBoxButton.OK, MessageBoxImage.Information);
             AppState.SetFrame<BuyCarPage>();
         }

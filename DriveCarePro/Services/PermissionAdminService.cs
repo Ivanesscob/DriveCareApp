@@ -61,7 +61,11 @@ namespace DriveCarePro.Services
 
                 var ownerGrants = 0;
                 if (IsServicePermissionGroup(group))
-                    ownerGrants = GrantPermissionToOwnerRoles(db, rowId);
+                {
+                    var perm = db.Permissions.AsNoTracking().FirstOrDefault(p => p.RowId == rowId);
+                    if (perm != null && OrganizationPermissionRules.IsGrantableToWorkshopOwner(perm, group))
+                        ownerGrants = GrantPermissionToOwnerRoles(db, rowId);
+                }
 
                 return (true, null, ownerGrants);
             }
@@ -121,6 +125,36 @@ namespace DriveCarePro.Services
             {
                 return FormatSaveError(ex);
             }
+        }
+
+        /// <summary>
+        /// Выдаёт роли «Владелец автосервиса» все разрешения Pro, кроме админских и клиентских (Users).
+        /// </summary>
+        public static int SyncWorkshopOwnerRolePermissions(DriveCareDBEntities db)
+        {
+            var roleId = CompanyCreationService.WorkshopOwnerRoleId;
+            if (!db.Roles.AsNoTracking().Any(r => r.RowId == roleId))
+                return 0;
+
+            var rows = (
+                from p in db.Permissions.AsNoTracking()
+                join g in db.PermissionGroups.AsNoTracking() on p.PermissionGroupId equals g.RowId into groups
+                from g in groups.DefaultIfEmpty()
+                select new { Permission = p, Group = g }
+            ).ToList();
+
+            var added = 0;
+            foreach (var row in rows)
+            {
+                if (!OrganizationPermissionRules.IsGrantableToWorkshopOwner(row.Permission, row.Group))
+                    continue;
+                if (RolePermissionMapExists(db, roleId, row.Permission.RowId))
+                    continue;
+                if (InsertRolePermissionMap(db, roleId, row.Permission.RowId))
+                    added++;
+            }
+
+            return added;
         }
 
         /// <summary>Выдаёт разрешение всем ролям владельца (только SQL).</summary>

@@ -237,7 +237,7 @@ ORDER BY b.Name, m.Name;";
             if (!CarsHaveVinPlateColumns() || carId == Guid.Empty)
                 return;
             db.Database.ExecuteSqlCommand(
-                "UPDATE dbo.Cars SET Vin = @v, PlateNumber = @p WHERE RowId = @id;",
+                "UPDATE dbo.Cars SET Vin = @p0, PlateNumber = @p1 WHERE RowId = @p2;",
                 TrimOrNull(vin, 50) ?? (object)DBNull.Value,
                 TrimOrNull(plate, 20) ?? (object)DBNull.Value,
                 carId);

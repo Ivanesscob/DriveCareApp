@@ -1,0 +1,127 @@
+@startuml ER_Part05_Workshop_Structure
+title Часть 5. Организация и мастерская
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+top to bottom direction
+
+entity "Companies" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Workshops" {
+  RowId *
+  Name
+  CompanyId
+  AddressId
+  Description
+  BusinessTypeId
+}
+
+entity "Addresses" {
+  RowId *
+  CountryId
+  City
+  Street
+  House
+  Apartment
+  FullAddress
+  Description
+  Latitude
+  Longitude
+}
+
+entity "Countries" {
+  RowId *
+  Name
+  Code
+  Description
+}
+
+entity "BusinessTypes" {
+  RowId *
+  Name
+  Description
+}
+
+entity "WorkshopServiceUnits" {
+  RowId *
+  WorkshopId
+  Name
+  IsActive
+  CreatedAt
+}
+
+entity "WorkshopBusinessTypes" {
+  RowId *
+  WorkshopId
+  BusinessTypeId
+}
+
+entity "WorkshopBusinessTypeChangeRequests" {
+  RowId *
+  WorkshopId
+  RequestedByEmployeeId
+  Status
+  OwnerComment
+  ModerationComment
+  ModeratedByEmployeeId
+  CreatedAt
+  ModeratedAt
+}
+
+entity "WorkshopBusinessTypeChangeRequestTypes" {
+  RequestId *
+  BusinessTypeId *
+}
+
+entity "WorkshopWorkSchedules" {
+  RowId *
+  WorkshopId
+  DayOfWeek
+  IsClosed
+  OpenTime
+  CloseTime
+}
+
+entity "WorkshopOnlineBookingSettings" {
+  WorkshopId *
+  MaxBookingsPerDay
+}
+
+entity "WarehouseManagers" {
+  RowId *
+  FirstName
+  LastName
+  MidName
+  Phone
+  Email
+  Description
+}
+
+entity "Roles" {
+  RowId *
+  Name
+  Description
+  WorkshopId
+  IsActive
+  CompanyId
+}
+
+Workshops }o--|| Addresses : AddressId
+Workshops }o--|| Companies : CompanyId
+Workshops }o--|| BusinessTypes : BusinessTypeId
+Addresses }o--|| Countries : CountryId
+WorkshopServiceUnits }o--|| Workshops : WorkshopId
+WorkshopBusinessTypes }o--|| Workshops : WorkshopId
+WorkshopBusinessTypes }o--|| BusinessTypes : BusinessTypeId
+WorkshopBusinessTypeChangeRequests }o--|| Workshops : WorkshopId
+WorkshopBusinessTypeChangeRequestTypes }o--|| BusinessTypes : BusinessTypeId
+WorkshopBusinessTypeChangeRequestTypes }o--|| WorkshopBusinessTypeChangeRequests : RequestId
+WorkshopWorkSchedules }o--|| Workshops : WorkshopId
+WorkshopOnlineBookingSettings }o--|| Workshops : WorkshopId
+Roles }o--|| Companies : CompanyId
+Roles }o--|| Workshops : WorkshopId
+@enduml

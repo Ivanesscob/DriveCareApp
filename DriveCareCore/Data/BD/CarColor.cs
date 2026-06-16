@@ -20,6 +20,8 @@ namespace DriveCareCore.Data.BD
         public System.DateTime StartDate { get; set; }
         public Nullable<System.DateTime> EndDate { get; set; }
         public string Description { get; set; }
+        public Nullable<byte> PaintKind { get; set; }
+        public string PartName { get; set; }
     
         public virtual Car Car { get; set; }
         public virtual Color Color { get; set; }

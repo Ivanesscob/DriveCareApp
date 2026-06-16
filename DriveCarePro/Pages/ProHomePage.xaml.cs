@@ -137,14 +137,16 @@ namespace DriveCarePro.Pages
             AppState.SetControlVisible(BtnSystemRoles, AppState.HasPermission(ProPermissions.CreateRoles));
             AppState.SetControlVisible(BtnDirectories, hasAdmin);
             AppState.SetControlVisible(BtnNotifications, AppState.HasPermission(ProPermissions.ViewNotifications));
+            AppState.SetControlVisible(BtnStatisticsAdmin, AppState.CanAccessStatistics);
         }
 
         private void ApplyEmployeePanelButtons()
         {
             AppState.SetControlVisible(BtnManageEmployees, AppState.CanManageOrganizationEmployees);
-            AppState.SetControlVisible(BtnRolesConstructor, AppState.HasPermission(ProPermissions.CreateRoles));
+            AppState.SetControlVisible(BtnRolesConstructor, AppState.CanAccessOrganizationRolesConstructor);
+            AppState.SetControlVisible(BtnStatisticsOrg, AppState.CanAccessStatistics);
 
-            UpdateSectionHeader(SectionOrgLabel, OrgActionsPanel, BtnManageEmployees, BtnRolesConstructor);
+            UpdateSectionHeader(SectionOrgLabel, OrgActionsPanel, BtnManageEmployees, BtnRolesConstructor, BtnStatisticsOrg);
 
             var canRepairs = AppState.HasAnyPermission(
                 ProPermissions.ViewRepairs,
@@ -201,6 +203,9 @@ namespace DriveCarePro.Pages
 
         private void AdminSystemRoles_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new OwnerRolesConstructorPage(systemRolesMode: true));
+
+        private void Statistics_Click(object sender, RoutedEventArgs e) =>
+            AppState.Navigate(new StatisticsPage());
 
         private void BookRepair_Click(object sender, RoutedEventArgs e) =>
             AppState.Navigate(new WorkshopClientLookupPage(ServiceBookingContext.Create(ServiceBookingKind.Repair)));

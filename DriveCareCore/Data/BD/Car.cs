@@ -32,6 +32,8 @@ namespace DriveCareCore.Data.BD
         public System.Guid FuelTypeId { get; set; }
         public Nullable<int> Year { get; set; }
         public string Description { get; set; }
+        public string Vin { get; set; }
+        public string PlateNumber { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CarColor> CarColors { get; set; }

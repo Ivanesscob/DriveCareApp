@@ -465,6 +465,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\StatisticsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\CompletedTasksPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -597,8 +601,10 @@
     <Compile Include="Services\PermissionAdminService.cs" />
     <Compile Include="Services\EmployeePermissionService.cs" />
     <Compile Include="Services\GeoapifyAutocompleteService.cs" />
+    <Compile Include="Services\StatisticsQueryService.cs" />
     <Compile Include="Services\ContactValidation.cs" />
     <Compile Include="Services\CompanyCreationService.cs" />
+    <Compile Include="Services\OrganizationPermissionRules.cs" />
     <Compile Include="Services\DatabaseExecutor.cs" />
     <Compile Include="Services\EmployeeManagementService.cs" />
     <Compile Include="Services\OwnerEmployeesDataService.cs" />
@@ -617,13 +623,16 @@
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderDataService.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderModel.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderWorkLine.cs" />
+    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderPartLine.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderPrintService.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderTokens.cs" />
     <Compile Include="Services\ServiceBooking\ServiceBookingContext.cs" />
     <Compile Include="Services\ServiceBooking\ServiceClientLookupService.cs" />
     <Compile Include="Services\ServiceBooking\ServiceBookingPersistenceService.cs" />
     <Compile Include="Services\ServiceBooking\ServiceBookingTaskService.cs" />
+    <Compile Include="Services\ServiceBooking\WorkshopOnlineBookingAcceptanceService.cs" />
     <Compile Include="Services\ServiceBooking\ServiceBookingWorkOrderBuilder.cs" />
+    <Compile Include="Services\ServiceBooking\TaskRepairLinkResolver.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopServiceCatalogService.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopPartCatalogService.cs" />
     <Compile Include="Services\WorkshopServices\WorkshopStockService.cs" />
@@ -697,6 +706,9 @@
     </Compile>
     <Compile Include="Pages\CompletedTasksPage.xaml.cs">
       <DependentUpon>CompletedTasksPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\StatisticsPage.xaml.cs">
+      <DependentUpon>StatisticsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\OwnerEmployeesManagePage.xaml.cs">
       <DependentUpon>OwnerEmployeesManagePage.xaml</DependentUpon>

@@ -31,7 +31,7 @@
         <StackPanel Grid.Row="0" Margin="0,0,0,12">
             <TextBlock Text="Новая компания" FontSize="20" FontWeight="SemiBold"
                        Foreground="{DynamicResource App.Brush.Foreground}"/>
-            <TextBlock Text="Обязательные поля отмечены *. Адрес — одной строкой (подсказки Geoapify), квартира отдельно. Будут созданы компания, мастерская и владелец (сотрудник с ролью владельца автосервиса)."
+            <TextBlock Text="Обязательные поля отмечены *. Адрес: введите в поиске и выберите из списка, квартира — отдельно. Будут созданы компания, мастерская и владелец (сотрудник с ролью владельца автосервиса)."
                        FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
                        Foreground="{DynamicResource App.Brush.Muted}"/>
         </StackPanel>
@@ -74,34 +74,38 @@
                         BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
                     <StackPanel>
                         <TextBlock Text="Адрес" Style="{StaticResource SectionTitle}"/>
-                        <TextBlock Text="Адрес (город, улица, дом) *" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="AddressLineBox" Style="{StaticResource App.FieldTextBox}"
-                                 MinHeight="36" TextChanged="AddressLineBox_TextChanged"
-                                 LostFocus="AddressLineBox_LostFocus"/>
+                        <TextBlock Text="Поиск адреса (город, улица, дом) *" Style="{StaticResource FieldLabel}"/>
+                        <TextBlock FontSize="11" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,4"
+                                   TextWrapping="Wrap"
+                                   Text="Например: Санкт-Петербург, СПб, Москва, Невский проспект 1"/>
+                        <TextBox x:Name="AddressSearchBox" Style="{StaticResource App.FieldTextBox}"
+                                 MinHeight="36" TextChanged="AddressSearchBox_TextChanged"/>
 
-                        <Popup x:Name="SuggestionsPopup" PlacementTarget="{Binding ElementName=AddressLineBox}"
-                               Placement="Bottom" StaysOpen="True" AllowsTransparency="True"
-                               PopupAnimation="Fade" MaxHeight="220" MinWidth="{Binding ActualWidth, ElementName=AddressLineBox}">
-                            <Border Background="{DynamicResource App.Brush.SurfaceCard}"
-                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
-                                    CornerRadius="8" Padding="2" MinWidth="300">
-                                <ListBox x:Name="AddressSuggestionsList" BorderThickness="0"
-                                         Background="Transparent" MaxHeight="200"
-                                         SelectionChanged="AddressSuggestionsList_SelectionChanged"
-                                         PreviewKeyDown="AddressSuggestionsList_PreviewKeyDown">
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Label}" TextWrapping="Wrap" Padding="8,6"
-                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </Border>
-                        </Popup>
+                        <Border x:Name="SuggestionsPanel" Margin="0,6,0,0" MaxHeight="200"
+                                Background="{DynamicResource App.Brush.SurfaceCard}"
+                                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                                CornerRadius="8" Visibility="Collapsed">
+                            <ListBox x:Name="AddressSuggestionsList" BorderThickness="0"
+                                     Background="Transparent" MaxHeight="190"
+                                     SelectionChanged="AddressSuggestionsList_SelectionChanged"
+                                     MouseLeftButtonUp="AddressSuggestionsList_MouseLeftButtonUp"
+                                     PreviewKeyDown="AddressSuggestionsList_PreviewKeyDown">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" TextWrapping="Wrap" Padding="8,6"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
 
                         <TextBlock x:Name="AddressSearchStatus" FontSize="11"
-                                   Foreground="{DynamicResource App.Brush.Muted}" Margin="0,6,0,10"
+                                   Foreground="{DynamicResource App.Brush.Muted}" Margin="0,6,0,6"
                                    TextWrapping="Wrap"/>
+
+                        <TextBlock Text="Выбранный адрес" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="AddressLineBox" Style="{StaticResource App.FieldTextBox}"
+                                 MinHeight="36" IsReadOnly="True" Margin="0,0,0,10"/>
 
                         <TextBlock Text="Квартира / офис" Style="{StaticResource FieldLabel}"/>
                         <TextBox x:Name="ApartmentBox" Style="{StaticResource App.FieldTextBox}" Margin="0,0,0,10"/>

@@ -280,5 +280,24 @@ namespace DriveCarePro.Services.WorkshopServices
                     Cost = l.LineAmount.ToString("0.00")
                 })
                 .ToList();
+
+        public static List<RepairWorkOrderPartLine> ToWorkOrderPartLines(IEnumerable<TaskPartLineRow> lines) =>
+            (lines ?? Enumerable.Empty<TaskPartLineRow>())
+                .Where(l => !string.IsNullOrWhiteSpace(l.PartName))
+                .Select((l, i) =>
+                {
+                    l.RecalculateAmount();
+                    return new RepairWorkOrderPartLine
+                    {
+                        Number = (i + 1).ToString(),
+                        Name = l.PartName.Trim(),
+                        Unit = string.IsNullOrWhiteSpace(l.UnitName) ? "шт." : l.UnitName.Trim(),
+                        Quantity = l.Quantity.ToString("0.###"),
+                        Price = l.UnitPrice.ToString("0.00"),
+                        Discount = string.Empty,
+                        Amount = l.LineAmount.ToString("0.00")
+                    };
+                })
+                .ToList();
     }
 }

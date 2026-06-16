@@ -3,6 +3,7 @@ using DriveCarePro.Services.RepairWorkOrder;
 using DriveCarePro.Services;
 using DriveCarePro.Services.WorkshopServices;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -64,13 +65,38 @@ namespace DriveCarePro.Services.ServiceBooking
                 "SELECT TOP 1 RowId FROM Tasks WHERE RepairHistoryId = @p0", repairHistoryId).FirstOrDefaultAsync().ConfigureAwait(false);
             if (taskId.HasValue)
             {
-                var lines = await TaskReportService.LoadServiceLinesAsync(taskId.Value).ConfigureAwait(false);
-                var workLines = TaskReportService.ToWorkOrderLines(lines);
+                var serviceLines = await TaskReportService.LoadServiceLinesAsync(taskId.Value).ConfigureAwait(false);
+                var workLines = TaskReportService.ToWorkOrderLines(serviceLines);
                 if (workLines.Count > 0)
                     model.WorkLines = workLines;
+
+                var partRows = await TaskReportService.LoadPartLinesAsync(taskId.Value).ConfigureAwait(false);
+                ApplyPartLinesToModel(model, partRows);
             }
 
             return model;
+        }
+
+        public static void ApplyPartLinesToModel(RepairWorkOrderModel model, IList<TaskPartLineRow> partRows)
+        {
+            if (model == null)
+                return;
+
+            var partLines = TaskReportService.ToWorkOrderPartLines(partRows);
+            if (partLines.Count == 0)
+                return;
+
+            model.PartLines = partLines;
+            var sum = (partRows ?? Array.Empty<TaskPartLineRow>())
+                .Where(r => !string.IsNullOrWhiteSpace(r?.PartName))
+                .Sum(r =>
+                {
+                    r.RecalculateAmount();
+                    return r.LineAmount;
+                });
+            var sumText = sum.ToString("N2");
+            model.PartsTotal = sumText;
+            model.PartsCostSum = sumText;
         }
     }
 }

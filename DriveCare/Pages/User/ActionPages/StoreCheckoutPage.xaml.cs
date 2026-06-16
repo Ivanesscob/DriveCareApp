@@ -154,6 +154,11 @@ namespace DriveCare.Pages.User.ActionPages
 
                 _pendingOrderId = created.orderId;
                 _pendingOrderNumber = created.orderNumber;
+                DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                    DriveCareCore.Analytics.ActivityEventCodes.StoreOrderCreate,
+                    AppState.CurrentUserId,
+                    entityType: "StoreOrder",
+                    entityId: created.orderId);
                 QrImage.Source = DemoQrCodeHelper.Create(
                     StoreCheckoutSession.BuildQrPayload(_pendingOrderNumber, _selectedPickup.RowId), 160);
             }

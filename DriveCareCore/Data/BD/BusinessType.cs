@@ -18,6 +18,8 @@ namespace DriveCareCore.Data.BD
         public BusinessType()
         {
             this.Workshops = new HashSet<Workshop>();
+            this.WorkshopBusinessTypes = new HashSet<WorkshopBusinessType>();
+            this.WorkshopBusinessTypeChangeRequests = new HashSet<WorkshopBusinessTypeChangeRequest>();
         }
     
         public System.Guid RowId { get; set; }
@@ -26,5 +28,9 @@ namespace DriveCareCore.Data.BD
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Workshop> Workshops { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopBusinessType> WorkshopBusinessTypes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopBusinessTypeChangeRequest> WorkshopBusinessTypeChangeRequests { get; set; }
     }
 }

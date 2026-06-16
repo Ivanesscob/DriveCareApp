@@ -202,6 +202,13 @@ WHERE cs.RowId = @p0;";
                 }
 
                 db.SaveChanges();
+                DriveCareCore.Analytics.ActivityTracker.TrackEmployee(
+                    approve
+                        ? DriveCareCore.Analytics.ActivityEventCodes.CarSaleModerateApprove
+                        : DriveCareCore.Analytics.ActivityEventCodes.CarSaleModerateReject,
+                    AppState.CurrentEmployee?.RowId,
+                    entityType: "CarSale",
+                    entityId: _saleId);
                 return true;
             }
             catch (Exception ex)

@@ -153,6 +153,7 @@ namespace DriveCarePro.Services
                     db.Workshops.Add(workshop);
                     db.Employees.Add(employee);
                     db.EmployeeRolesMaps.Add(roleMap);
+                    PermissionAdminService.SyncWorkshopOwnerRolePermissions(db);
                     db.SaveChanges();
                     if (WorkshopBusinessTypesHelper.JunctionTableExists())
                     {
@@ -186,6 +187,14 @@ IF NOT EXISTS (SELECT 1 FROM dbo.WorkshopBusinessTypes WHERE WorkshopId = @w AND
                         {
                         }
                     });
+
+                    DriveCareCore.Analytics.ActivityTracker.TrackEmployee(
+                        DriveCareCore.Analytics.ActivityEventCodes.CompanyCreate,
+                        employeeId,
+                        workshopId,
+                        companyId,
+                        entityType: "Company",
+                        entityId: companyId);
 
                     return new CreateCompanyResult
                     {

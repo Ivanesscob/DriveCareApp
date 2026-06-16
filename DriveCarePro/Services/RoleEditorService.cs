@@ -162,9 +162,7 @@ namespace DriveCarePro.Services
 
                 rows = rows
 
-                    .Where(r => !IsAdminPermissionGroup(r.Group))
-
-                    .Where(r => !IsAdminPermissionCode(r.Permission?.Code))
+                    .Where(r => OrganizationPermissionRules.IsGrantableToWorkshopOwner(r.Permission, r.Group))
 
                     .ToList();
 
@@ -595,54 +593,6 @@ namespace DriveCarePro.Services
                 return "Не удалось удалить: " + ex.Message;
 
             }
-
-        }
-
-
-
-        private static bool IsAdminPermissionGroup(PermissionGroup group)
-
-        {
-
-            if (group == null)
-
-                return false;
-
-            return MatchesAdminToken(group.Code) || MatchesAdminToken(group.Name);
-
-        }
-
-
-
-        private static bool IsAdminPermissionCode(string code) =>
-
-            MatchesAdminToken(code);
-
-
-
-        private static bool MatchesAdminToken(string value)
-
-        {
-
-            if (string.IsNullOrWhiteSpace(value))
-
-                return false;
-
-            var n = value.Trim().ToLowerInvariant();
-
-            if (n.Contains("админ") || n.Contains("admin"))
-
-                return true;
-
-            if (n.Contains("модерац") || n.Contains("moderation"))
-
-                return true;
-
-            if (n.StartsWith("pro.") && (n.Contains("admin") || n.Contains("moderation")))
-
-                return true;
-
-            return n == "platform" || n == "proadmin" || n == "pro_admin";
 
         }
 

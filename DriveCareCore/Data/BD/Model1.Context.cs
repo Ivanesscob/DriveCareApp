@@ -68,5 +68,24 @@ namespace DriveCareCore.Data.BD
         public virtual DbSet<WorkshopServiceClient> WorkshopServiceClients { get; set; }
         public virtual DbSet<WorkshopService> WorkshopServices { get; set; }
         public virtual DbSet<WorkshopServiceUnit> WorkshopServiceUnits { get; set; }
+        public virtual DbSet<EmployeeNotification> EmployeeNotifications { get; set; }
+        public virtual DbSet<OrderPickupPoint> OrderPickupPoints { get; set; }
+        public virtual DbSet<ServiceDocumentPartLine> ServiceDocumentPartLines { get; set; }
+        public virtual DbSet<ServiceDocument> ServiceDocuments { get; set; }
+        public virtual DbSet<ServiceDocumentServiceLine> ServiceDocumentServiceLines { get; set; }
+        public virtual DbSet<StoreOrderLine> StoreOrderLines { get; set; }
+        public virtual DbSet<StoreOrder> StoreOrders { get; set; }
+        public virtual DbSet<UserCarComponentStatus> UserCarComponentStatuses { get; set; }
+        public virtual DbSet<UserCarMaintenanceHistory> UserCarMaintenanceHistories { get; set; }
+        public virtual DbSet<UserWorkshopPaintInquiry> UserWorkshopPaintInquiries { get; set; }
+        public virtual DbSet<WorkshopBusinessTypeChangeRequest> WorkshopBusinessTypeChangeRequests { get; set; }
+        public virtual DbSet<WorkshopBusinessType> WorkshopBusinessTypes { get; set; }
+        public virtual DbSet<WorkshopConversation> WorkshopConversations { get; set; }
+        public virtual DbSet<WorkshopMessage> WorkshopMessages { get; set; }
+        public virtual DbSet<WorkshopOnlineBooking> WorkshopOnlineBookings { get; set; }
+        public virtual DbSet<WorkshopOnlineBookingSetting> WorkshopOnlineBookingSettings { get; set; }
+        public virtual DbSet<WorkshopPaintColor> WorkshopPaintColors { get; set; }
+        public virtual DbSet<WorkshopPaintService> WorkshopPaintServices { get; set; }
+        public virtual DbSet<WorkshopWorkSchedule> WorkshopWorkSchedules { get; set; }
     }
 }

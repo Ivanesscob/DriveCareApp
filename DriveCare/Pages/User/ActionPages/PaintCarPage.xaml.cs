@@ -277,6 +277,12 @@ namespace DriveCare.Pages.User.ActionPages
                 return;
             }
 
+            DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                DriveCareCore.Analytics.ActivityEventCodes.PaintInquiryCreate,
+                AppState.CurrentUserId,
+                workshopId: _mapSelectedWorkshopId,
+                entityType: "PaintInquiry");
+
             var paintResult = _vm.TryRecordPaint(
                 svc.PaintKind,
                 color?.ColorId,

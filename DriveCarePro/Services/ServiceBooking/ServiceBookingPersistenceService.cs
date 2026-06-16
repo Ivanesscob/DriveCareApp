@@ -1,4 +1,6 @@
+using DriveCareCore.Analytics;
 using DriveCareCore.Data.BD;
+using DriveCarePro;
 using System;
 using System.Data.Entity;
 using System.Data.SqlClient;
@@ -77,6 +79,14 @@ namespace DriveCarePro.Services.ServiceBooking
             var taskId = await ServiceBookingTaskService.CreateForBookingAsync(db, ctx, carId, repairId, workshopId)
                 .ConfigureAwait(false);
             ctx.CreatedTaskId = taskId;
+
+            ActivityTracker.TrackEmployee(
+                ActivityEventCodes.ProServiceBookingCreate,
+                AppState.CurrentEmployee?.RowId,
+                workshopId,
+                entityType: "RepairHistory",
+                entityId: repairId,
+                payloadJson: taskId.HasValue ? "{\"taskId\":\"" + taskId.Value + "\"}" : null);
 
             return SaveBookingResult.Ok(repairId, carId, clientId, taskId);
         }

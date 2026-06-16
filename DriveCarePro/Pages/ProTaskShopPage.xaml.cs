@@ -46,12 +46,22 @@ namespace DriveCarePro.Pages
             Loaded += ProTaskShopPage_Loaded;
             _cart.CollectionChanged += (_, __) => RefreshCartUi();
 
-            if (!_fromTask)
+            if (_fromTask)
             {
-                ShopHintText.Text = "Каталог запчастей для закупщика. Позиции из заданий на закупку открывайте в «Мои задания».";
-                CartPanel.Visibility = Visibility.Collapsed;
+                ShopHintText.Text =
+                    "Каталог запчастей для задания. Добавьте позиции в корзину и отправьте запрос закупщику.";
+                PurchaseButton.Content = "Запросить покупку";
+                BackButton.Content = "← Назад к заданию";
+            }
+            else
+            {
+                ShopHintText.Text =
+                    "Выберите запчасти и добавьте в корзину. Кнопка «Купить» добавит их на склад вашей мастерской.";
+                PurchaseButton.Content = "Купить";
                 BackButton.Content = "← На главную";
             }
+
+            RefreshCartUi();
         }
 
         private async void ProTaskShopPage_Loaded(object sender, RoutedEventArgs e)
@@ -66,6 +76,19 @@ namespace DriveCarePro.Pages
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
                 AppState.Navigate(new ProHomePage());
+                return;
+            }
+
+            if (_workshopId == Guid.Empty)
+            {
+                MessageBox.Show(
+                    "Не определена мастерская для склада.\n\nПривяжите сотрудника к мастерской в карточке персонала.",
+                    "Магазин",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                AppState.Navigate(_fromTask && _taskId.HasValue
+                    ? (Page)new EmployeeTaskCardPage(_taskId.Value)
+                    : new ProHomePage());
                 return;
             }
 
@@ -111,6 +134,8 @@ namespace DriveCarePro.Pages
 
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
+
             var part = (sender as FrameworkElement)?.Tag as WorkshopPartItem;
             if (part == null)
                 return;
@@ -124,6 +149,7 @@ namespace DriveCarePro.Pages
                     Name = part.Name,
                     UnitName = part.UnitName,
                     Price = part.Price,
+                    Category = part.Category,
                     Quantity = 1
                 });
             }
@@ -131,11 +157,15 @@ namespace DriveCarePro.Pages
             {
                 item.Quantity++;
             }
+
+            CartPanel.Visibility = Visibility.Visible;
             RefreshCartUi();
         }
 
         private void RemoveFromCart_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
+
             var item = (sender as FrameworkElement)?.Tag as ProShopCartItemVm;
             if (item == null)
                 return;
@@ -145,16 +175,65 @@ namespace DriveCarePro.Pages
             RefreshCartUi();
         }
 
-        private async void RequestPurchase_Click(object sender, RoutedEventArgs e)
+        private async void Purchase_Click(object sender, RoutedEventArgs e)
         {
-            if (!_fromTask || !_taskId.HasValue)
-                return;
-
             if (_cart.Count == 0)
             {
                 MessageBox.Show("Добавьте позиции в корзину.", "Магазин", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+
+            if (_fromTask && _taskId.HasValue)
+                await RequestPurchaseForTaskAsync().ConfigureAwait(true);
+            else
+                await BuyToWorkshopStockAsync().ConfigureAwait(true);
+        }
+
+        private async Task BuyToWorkshopStockAsync()
+        {
+            var lines = BuildCartLines();
+            var totalQty = lines.Sum(l => l.Quantity);
+            var totalSum = _cart.Sum(c => c.LineTotal);
+
+            if (MessageBox.Show(
+                    $"Оформить покупку?\n\nПозиций: {lines.Count}, количество: {totalQty:0.###}\nСумма: {totalSum:N2} ₽\n\nЗапчасти будут добавлены на склад мастерской.",
+                    "Магазин",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                var (ok, error) = await WorkshopStockService.ReceiveShopCartAsync(_workshopId, lines)
+                    .ConfigureAwait(true);
+
+                if (!ok)
+                {
+                    MessageBox.Show(error ?? "Не удалось добавить запчасти на склад.", "Магазин",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                MessageBox.Show(
+                    $"Покупка оформлена.\n\n{lines.Count} поз. ({totalQty:0.###} шт.) записаны на склад мастерской.",
+                    "Магазин",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                _cart.Clear();
+                RefreshCartUi();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при покупке: " + ex.Message, "Магазин",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task RequestPurchaseForTaskAsync()
+        {
+            if (!_taskId.HasValue)
+                return;
 
             var emp = AppState.CurrentEmployee;
             if (emp == null)
@@ -175,14 +254,7 @@ namespace DriveCarePro.Pages
             if (win.ShowDialog() != true || win.SelectedEmployee == null)
                 return;
 
-            var lines = _cart.Select(c => new TaskPartLineRow
-            {
-                WorkshopPartId = c.PartId,
-                PartName = c.Name,
-                Quantity = c.Quantity,
-                UnitName = c.UnitName ?? "шт.",
-                UnitPrice = c.Price
-            }).ToList();
+            var lines = BuildCartLines();
 
             var (ok, error, _) = await TaskPurchaseRequestService.CreatePurchaseRequestAsync(
                 _taskId.Value, emp.RowId, win.SelectedEmployee.EmployeeId, lines).ConfigureAwait(true);
@@ -204,11 +276,27 @@ namespace DriveCarePro.Pages
             AppState.Navigate(new EmployeeTaskCardPage(_taskId.Value));
         }
 
+        private System.Collections.Generic.List<TaskPartLineRow> BuildCartLines() =>
+            _cart.Select(c => new TaskPartLineRow
+            {
+                WorkshopPartId = c.PartId,
+                PartName = c.Name,
+                Quantity = c.Quantity,
+                UnitName = c.UnitName ?? "шт.",
+                UnitPrice = c.Price
+            }).ToList();
+
         private void RefreshCartUi()
         {
             _cartTotal = _cart.Sum(i => i.LineTotal);
-            CartTitleText.Text = $"Корзина ({_cart.Sum(i => i.Quantity)} шт.)";
-            CartTotalText.Text = $"Итого: {_cartTotal:N2} ₽";
+            var qty = _cart.Sum(i => i.Quantity);
+            CartTitleText.Text = qty > 0 ? $"Корзина ({qty} шт.)" : "Корзина";
+            CartTotalText.Text = qty > 0 ? $"Итого: {_cartTotal:N2} ₽" : string.Empty;
+            CartTotalText.Visibility = qty > 0 ? Visibility.Visible : Visibility.Collapsed;
+            CartList.Visibility = qty > 0 ? Visibility.Visible : Visibility.Collapsed;
+            EmptyCartText.Visibility = qty > 0 ? Visibility.Collapsed : Visibility.Visible;
+            PurchaseButton.IsEnabled = qty > 0;
+            CartPanel.Visibility = Visibility.Visible;
             OnPropertyChanged(nameof(CartTotalText));
         }
 
@@ -223,6 +311,7 @@ namespace DriveCarePro.Pages
         public Guid PartId { get; set; }
         public string Name { get; set; }
         public string UnitName { get; set; }
+        public string Category { get; set; }
         public decimal Price { get; set; }
 
         private int _quantity = 1;

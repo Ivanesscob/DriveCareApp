@@ -158,10 +158,19 @@ namespace DriveCarePro
                 ProPermissions.CreateEmployees,
                 ProPermissions.DeleteEmployees);
 
+        /// <summary>Конструктор ролей своей организации (не системные роли платформы).</summary>
+        public static bool CanAccessOrganizationRolesConstructor =>
+            CanAccessEmployeeWorkspace &&
+            (IsCurrentEmployeeOwner || CanManageOrganizationEmployees);
+
         /// <summary>Таблица и карточки заданий на главной Pro.</summary>
         public static bool CanAccessEmployeeTasks =>
             CanAccessEmployeeWorkspace &&
             HasAnyPermission(ProPermissions.ViewTasks, ProPermissions.EditTasks, ProPermissions.CreateTasks);
+
+        /// <summary>Вкладка статистики: админы платформы и сотрудники с VIEW_ANALYTICS (владелец и др.).</summary>
+        public static bool CanAccessStatistics =>
+            HasPermission(ProPermissions.ViewAnalytics) || HasPermission(ProPermissions.AdminPanel);
 
         private static bool IsServiceRoleName(string name)
         {

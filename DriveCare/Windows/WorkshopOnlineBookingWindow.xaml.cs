@@ -155,6 +155,12 @@ namespace DriveCare.Windows
                 return;
             }
 
+            DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                DriveCareCore.Analytics.ActivityEventCodes.WorkshopOnlineBookingCreate,
+                AppState.CurrentUserId,
+                workshopId: _workshopId,
+                entityType: "WorkshopOnlineBooking");
+
             MessageBox.Show(
                 "Заявка отправлена на " + visitDate.ToString("dd.MM.yyyy") + ".\n\nАвтосервис подтвердит запись в DriveCare Pro. Точное время согласуете после подтверждения.",
                 "Онлайн-запись",

@@ -24,6 +24,10 @@ namespace DriveCareCore.Data.BD
             this.WorkshopServiceClients = new HashSet<WorkshopServiceClient>();
             this.WorkshopServices = new HashSet<WorkshopService>();
             this.WorkshopServiceUnits = new HashSet<WorkshopServiceUnit>();
+            this.WorkshopBusinessTypeChangeRequests = new HashSet<WorkshopBusinessTypeChangeRequest>();
+            this.WorkshopBusinessTypes = new HashSet<WorkshopBusinessType>();
+            this.WorkshopOnlineBookings = new HashSet<WorkshopOnlineBooking>();
+            this.WorkshopWorkSchedules = new HashSet<WorkshopWorkSchedule>();
         }
     
         public System.Guid RowId { get; set; }
@@ -50,5 +54,14 @@ namespace DriveCareCore.Data.BD
         public virtual ICollection<WorkshopService> WorkshopServices { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<WorkshopServiceUnit> WorkshopServiceUnits { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopBusinessTypeChangeRequest> WorkshopBusinessTypeChangeRequests { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopBusinessType> WorkshopBusinessTypes { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopOnlineBooking> WorkshopOnlineBookings { get; set; }
+        public virtual WorkshopOnlineBookingSetting WorkshopOnlineBookingSetting { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopWorkSchedule> WorkshopWorkSchedules { get; set; }
     }
 }

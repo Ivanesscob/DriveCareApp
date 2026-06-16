@@ -85,6 +85,13 @@ WHERE cs.RowId = @p0;";
                 if (row == null)
                     return;
 
+                var userId = AppState.CurrentUserId;
+                DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                    DriveCareCore.Analytics.ActivityEventCodes.CarSaleDetailView,
+                    userId == Guid.Empty ? (Guid?)null : userId,
+                    entityType: "CarSale",
+                    entityId: _saleId);
+
                 var brand = Safe(row.BrandName, "Марка");
                 var model = Safe(row.ModelName, "Модель");
                 var year = row.CarYear.HasValue ? $" {row.CarYear.Value}" : string.Empty;

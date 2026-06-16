@@ -79,6 +79,8 @@ namespace DriveCarePro.Pages
 
         private Guid? _rootTaskId;
 
+        private Guid? _onlineBookingId;
+
         private bool _isLoadingTask;
 
         private bool _isPageBusy;
@@ -201,8 +203,8 @@ namespace DriveCarePro.Pages
         {
             if (_partLines.Any(v => !v.IsPurchaseLine &&
                     (!v.WorkshopPartId.HasValue || v.WorkshopPartId.Value == Guid.Empty)))
-            {
-                MessageBox.Show(
+        {
+            MessageBox.Show(
                     "Сначала выберите деталь в текущей строке из списка.",
                     "Детали", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
@@ -888,9 +890,9 @@ namespace DriveCarePro.Pages
 
                         MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                    AppState.Navigate(new ProHomePage());
+                AppState.Navigate(new ProHomePage());
 
-                    return;
+                return;
 
                 }
 
@@ -913,6 +915,7 @@ namespace DriveCarePro.Pages
 
                 ApplyTaskData(data, serviceRows, partRows, purchaseRequest, purchaseStatus);
 
+                await UpdateOnlineBookingNoShowUiAsync(taskId).ConfigureAwait(true);
                 await LoadDocumentAsync(taskId).ConfigureAwait(true);
                 await UpdateRootTaskNavigationAsync(taskId).ConfigureAwait(true);
 
@@ -986,7 +989,11 @@ namespace DriveCarePro.Pages
 
             var hasCar = task.CarId.HasValue && task.CarId.Value != Guid.Empty;
             var serviceKind = extra?.ServiceKind;
-            var isRepairOrPainting = IsRepairOrPaintingKind(serviceKind);
+            var isRepairOrPainting = IsRepairOrPaintingKind(serviceKind)
+                || (hasCar && IsRepairOrPaintingKind(task.Title));
+
+            var repairHistoryId = await TaskRepairLinkResolver.ResolveRepairHistoryIdAsync(
+                db, taskId, task.CarId, extra?.RepairHistoryId).ConfigureAwait(false);
 
             return new TaskCardData
             {
@@ -997,7 +1004,7 @@ namespace DriveCarePro.Pages
                 ClientInfoText = BuildClientSummary(db, task.ClientUserId, extra),
                 ReportText = task.ReportText ?? string.Empty,
                 IsCompleted = task.IsCompleted,
-                RepairHistoryId = extra?.RepairHistoryId,
+                RepairHistoryId = repairHistoryId,
                 HasCar = hasCar,
                 ShowCarSection = hasCar && isRepairOrPainting,
                 CanDelegate = delegation.CanDelegate,
@@ -1169,9 +1176,11 @@ namespace DriveCarePro.Pages
             if (_archiveView)
                 WorkOrderButton.Content = "Скачать заказ-наряд";
 
-            var showWorkOrder = data.ShowCarSection && _repairHistoryId.HasValue && !_isPurchaseTask;
+            var showWorkOrder = _repairHistoryId.HasValue && !_isPurchaseTask;
             WorkOrderButton.Visibility = showWorkOrder ? Visibility.Visible : Visibility.Collapsed;
             WorkOrderButton.IsEnabled = showWorkOrder;
+            if (!showWorkOrder && !_isPurchaseTask)
+                WorkOrderButton.ToolTip = "Заказ-наряд доступен для заданий с записью на ремонт/покраску (нужна связь с RepairHistory в БД).";
 
             var reportEditable = !data.IsCompleted && !_archiveView;
             SaveReportButton.Visibility = reportEditable ? Visibility.Visible : Visibility.Collapsed;
@@ -1249,6 +1258,70 @@ namespace DriveCarePro.Pages
             Dispatcher.BeginInvoke(new Action(RefreshLineComboDisplays), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
+        private async Task UpdateOnlineBookingNoShowUiAsync(Guid taskId)
+        {
+            _onlineBookingId = null;
+            ClientNoShowButton.Visibility = Visibility.Collapsed;
+            OnlineBookingHintText.Visibility = Visibility.Collapsed;
+
+            if (_archiveView || _isCompleted || _isPurchaseTask)
+                return;
+
+            var bookingId = await WorkshopOnlineBookingAcceptanceService.TryFindConfirmedBookingIdByTaskAsync(taskId)
+                .ConfigureAwait(true);
+            if (!bookingId.HasValue || bookingId.Value == Guid.Empty)
+                return;
+
+            _onlineBookingId = bookingId;
+            ClientNoShowButton.Visibility = Visibility.Visible;
+            OnlineBookingHintText.Visibility = Visibility.Visible;
+        }
+
+        private async void ClientNoShow_Click(object sender, RoutedEventArgs e)
+        {
+            var emp = AppState.CurrentEmployee;
+            if (emp == null || !_onlineBookingId.HasValue || _isPageBusy)
+                return;
+
+            if (MessageBox.Show(
+                    "Клиент не пришёл на приём?\n\nЗадание будет удалено, онлайн-запись получит статус «Клиент не явился».",
+                    "Задание",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
+            SetPageBusy(true, "Отмечаем неявку…");
+            try
+            {
+                var result = await WorkshopOnlineBookingAcceptanceService.MarkClientNoShowByTaskAsync(
+                    _taskId, emp.RowId).ConfigureAwait(true);
+
+                if (result == null || !result.Ok)
+                {
+                    MessageBox.Show(result?.Error ?? "Не удалось отметить неявку.", "Задание",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(result.ChatWarning))
+                {
+                    MessageBox.Show(
+                        "Неявка зафиксирована, но сообщение в чат не отправлено:\n" + result.ChatWarning,
+                        "Задание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                AppState.Navigate(new ProHomePage());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка: " + ex.Message, "Задание", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                SetPageBusy(false);
+            }
+        }
+
         private void RefreshLineComboDisplays()
         {
             foreach (var vm in _serviceLines)
@@ -1271,7 +1344,7 @@ namespace DriveCarePro.Pages
             foreach (var item in _partLines.Where(v => !v.IsPurchaseLine))
             {
                 var row = PartsGrid.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
-                if (row == null)
+            if (row == null)
                     continue;
 
                 var combo = FindVisualChild<ComboBox>(row);
@@ -1529,106 +1602,100 @@ namespace DriveCarePro.Pages
 
 
 
-        private async void WorkOrder_Click(object sender, RoutedEventArgs e)
+        private bool CanGenerateWorkOrderDocx => !_isPurchaseTask && _repairHistoryId.HasValue;
 
+        /// <summary>Собирает DOCX заказ-наряда; при openDocument — открывает без падения приложения.</summary>
+        private async Task<(bool success, string savedPath, string error)> TryBuildAndSaveWorkOrderDocxAsync(bool openDocument)
         {
-
             if (!_repairHistoryId.HasValue)
+                return (false, null, "Нет связи задания с записью ремонта (RepairHistoryId).");
 
+            var scope = await OwnerOrganizationScope.TryResolveAsync().ConfigureAwait(true);
+            if (!scope.ok)
+                return (false, null, scope.error);
+
+            var repairId = _repairHistoryId.Value;
+            var model = await DatabaseExecutor.WithDbAsync(db =>
+                    ServiceBookingWorkOrderBuilder.BuildFromRepairAsync(db, repairId, scope.scope))
+                .ConfigureAwait(true);
+
+            if (model == null)
+                return (false, null, "Не удалось собрать данные для заказ-наряда.");
+
+            var workLines = TaskReportService.ToWorkOrderLines(_serviceLines.Select(v => v.ToRow()).ToList());
+            if (workLines.Count > 0)
+                model.WorkLines = workLines;
+
+            var partRows = _partLines
+                .Where(v => !v.IsPurchaseLine)
+                .Select(v => { v.Recalculate(); return v.ToRow(); })
+                .Where(r => !string.IsNullOrWhiteSpace(r.PartName))
+                .ToList();
+            if (partRows.Count == 0)
+                partRows = await TaskReportService.LoadPartLinesAsync(_taskId).ConfigureAwait(true);
+            ServiceBookingWorkOrderBuilder.ApplyPartLinesToModel(model, partRows);
+
+            var preferredPath = RepairWorkOrderPrintService.GetDesktopOrderPath("Zakaz-naryad-vydacha");
+            var (genOk, savedPath, genError) = await Task.Run(() =>
+                    RepairWorkOrderPrintService.TryGenerateFilled(model, preferredPath))
+                .ConfigureAwait(true);
+
+            if (!genOk)
+                return (false, null, genError);
+
+            if (!openDocument)
+                return (true, savedPath, null);
+
+            if (RepairWorkOrderPrintService.TryOpenDocument(savedPath, out var openError))
+                return (true, savedPath, null);
+
+            return (true, savedPath, openError);
+        }
+
+        private async void WorkOrder_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_repairHistoryId.HasValue)
             {
-
-                MessageBox.Show("Нет связи с записью ремонта в базе.", "Заказ-наряд",
-
+                MessageBox.Show(
+                    "Нет связи задания с записью ремонта (RepairHistoryId).\n\n" +
+                    "Обычно поле заполняется при «Записать машину на ремонт/покраску».\n" +
+                    "Если задание старое — выполните SQL Tasks_Add_ServiceBookingFields.sql и пересоздайте запись, " +
+                    "либо откройте корневое задание цепочки.",
+                    "Заказ-наряд",
                     MessageBoxButton.OK, MessageBoxImage.Information);
-
                 return;
-
             }
-
-
 
             WorkOrderButton.IsEnabled = false;
-
             try
-
             {
-
-                var scope = await OwnerOrganizationScope.TryResolveAsync().ConfigureAwait(true);
-
-                if (!scope.ok)
-
+                var (ok, path, error) = await TryBuildAndSaveWorkOrderDocxAsync(openDocument: true).ConfigureAwait(true);
+                if (!ok)
                 {
-
-                    MessageBox.Show(scope.error, "Заказ-наряд", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                    return;
-
-                }
-
-
-
-                var repairId = _repairHistoryId.Value;
-
-                var model = await DatabaseExecutor.WithDbAsync(db =>
-
-                    ServiceBookingWorkOrderBuilder.BuildFromRepairAsync(db, repairId, scope.scope))
-
-                    .ConfigureAwait(true);
-
-
-
-                if (model == null)
-
-                {
-
-                    MessageBox.Show("Не удалось собрать данные для заказ-наряда.", "Заказ-наряд",
-
+                    MessageBox.Show(error ?? "Не удалось сформировать заказ-наряд.", "Заказ-наряд",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
-
                     return;
-
                 }
 
-
-
-                var workLines = TaskReportService.ToWorkOrderLines(_serviceLines.Select(v => v.ToRow()).ToList());
-
-                if (workLines.Count > 0)
-
-                    model.WorkLines = workLines;
-
-
-
-                var path = RepairWorkOrderPrintService.GetDesktopOrderPath("Zakaz-naryad-vydacha");
-
-                await Task.Run(() => RepairWorkOrderPrintService.GenerateFilled(model, path)).ConfigureAwait(true);
-
-                RepairWorkOrderPrintService.OpenDocument(path);
-
-
+                if (!string.IsNullOrEmpty(error))
+                {
+                    MessageBox.Show(
+                        error + "\n\nФайл сохранён на рабочем столе:\n" + path,
+                        "Заказ-наряд", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
 
                 MessageBox.Show("Заказ-наряд для выдачи сохранён на рабочий стол:\n" + path,
-
                     "Заказ-наряд", MessageBoxButton.OK, MessageBoxImage.Information);
-
             }
-
             catch (Exception ex)
-
             {
-
                 MessageBox.Show("Ошибка: " + ex.Message, "Заказ-наряд", MessageBoxButton.OK, MessageBoxImage.Warning);
-
             }
-
             finally
-
             {
-
                 WorkOrderButton.IsEnabled = _repairHistoryId.HasValue;
-
             }
-
         }
 
 
@@ -1647,13 +1714,13 @@ namespace DriveCarePro.Pages
 
                 {
 
-                    var login = string.IsNullOrWhiteSpace(u.Login) ? "—" : u.Login.Trim();
+            var login = string.IsNullOrWhiteSpace(u.Login) ? "—" : u.Login.Trim();
 
-                    var phone = string.IsNullOrWhiteSpace(u.Phone) ? "—" : u.Phone.Trim();
+            var phone = string.IsNullOrWhiteSpace(u.Phone) ? "—" : u.Phone.Trim();
 
-                    var email = string.IsNullOrWhiteSpace(u.Email) ? "—" : u.Email.Trim();
+            var email = string.IsNullOrWhiteSpace(u.Email) ? "—" : u.Email.Trim();
 
-                    return $"Логин: {login}\nТелефон: {phone}\nEmail: {email}";
+            return $"Логин: {login}\nТелефон: {phone}\nEmail: {email}";
 
                 }
 
@@ -1706,7 +1773,7 @@ namespace DriveCarePro.Pages
                     {
                         MessageBox.Show(error ?? "Не удалось завершить задание.", "Задание",
                             MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
+                return;
                     }
 
                     MessageBox.Show(
@@ -1796,8 +1863,8 @@ namespace DriveCarePro.Pages
                                     .ConfigureAwait(false);
                             }
 
-                            task.IsCompleted = true;
-                            task.EndDate = DateTime.Now;
+            task.IsCompleted = true;
+            task.EndDate = DateTime.Now;
 
                             var parentName = AppState.FormatEmployeeDisplayName(emp);
                             var isRootTask = docInfo != null && docInfo.IsCurrentTaskRoot
@@ -1867,6 +1934,38 @@ namespace DriveCarePro.Pages
                     msg = "Задание отмечено как выполненное.";
 
                 MessageBox.Show(msg, "Задание", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                DriveCareCore.Analytics.ActivityTracker.TrackEmployee(
+                    DriveCareCore.Analytics.ActivityEventCodes.TaskComplete,
+                    emp.RowId,
+                    AppState.CurrentEmployee?.WorkshopId,
+                    entityType: "Task",
+                    entityId: taskId);
+
+                if (CanGenerateWorkOrderDocx)
+                {
+                    var openAsk = MessageBox.Show(
+                        "Открыть заказ-наряд для выдачи?",
+                        "Заказ-наряд",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    if (openAsk == MessageBoxResult.Yes)
+                    {
+                        var (docOk, docPath, docErr) = await TryBuildAndSaveWorkOrderDocxAsync(openDocument: true)
+                            .ConfigureAwait(true);
+                        if (!docOk)
+                        {
+                            MessageBox.Show(docErr ?? "Не удалось сформировать заказ-наряд.", "Заказ-наряд",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                        else if (!string.IsNullOrEmpty(docErr))
+                        {
+                            MessageBox.Show(
+                                docErr + "\n\nФайл сохранён на рабочем столе:\n" + docPath,
+                                "Заказ-наряд", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                }
 
                 AppState.Navigate(new ProHomePage());
 

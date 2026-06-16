@@ -120,6 +120,24 @@
         <AssociationConnector Association="DriveCareDBModel.FK_ServiceDocumentServiceLines_Document" />
         <AssociationConnector Association="DriveCareDBModel.FK_WorkshopOnlineBookings_User" />
         <AssociationConnector Association="DriveCareDBModel.FK_WorkshopOnlineBookings_Workshop" />
+        <EntityTypeShape EntityType="DriveCareDBModel.OrderPickupPoint" Width="1.5" PointX="0.75" PointY="4.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.StoreOrderLine" Width="1.5" PointX="2.75" PointY="4.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.StoreOrder" Width="1.5" PointX="4.75" PointY="4.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserCarComponentStatus" Width="1.5" PointX="5.75" PointY="0.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.UserWorkshopPaintInquiry" Width="1.5" PointX="7.75" PointY="0.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopBusinessTypeChangeRequest" Width="1.5" PointX="18.125" PointY="25" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopBusinessType" Width="1.5" PointX="12.875" PointY="34.5" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopOnlineBookingSetting" Width="1.5" PointX="7.875" PointY="32.125" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopPaintColor" Width="1.5" PointX="0.75" PointY="8.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopPaintService" Width="1.5" PointX="2.75" PointY="8.75" />
+        <EntityTypeShape EntityType="DriveCareDBModel.WorkshopWorkSchedule" Width="1.5" PointX="7.875" PointY="51.25" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopBusinessTypes_BusinessType" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WBTCR_Employee" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WBTCR_Workshop" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopBusinessTypes_Workshop" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopOnlineBookingSettings_Workshop" />
+        <AssociationConnector Association="DriveCareDBModel.FK_WorkshopWorkSchedules_Workshop" />
+        <AssociationConnector Association="DriveCareDBModel.WorkshopBusinessTypeChangeRequestTypes" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

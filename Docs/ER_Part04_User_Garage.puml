@@ -1,0 +1,166 @@
+@startuml ER_Part04_User_Garage
+title Часть 4. Гараж пользователя и обслуживание авто
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+top to bottom direction
+
+entity "Users" {
+  RowId *
+  Login
+  Password
+  Description
+  Email
+  BirthDate
+  Phone
+  CreatedAt
+}
+
+entity "Cars" {
+  RowId *
+  ModelId
+  CarTypeId
+  FuelTypeId
+  Year
+  Description
+  Vin
+  PlateNumber
+}
+
+entity "Models" {
+  RowId *
+  Name
+  BrandId
+  Description
+  MaxSpeed
+  FuelConsumption
+  FuelType
+  HorsePower
+  EngineVolume
+  Acceleration
+}
+
+entity "CarTypes" {
+  RowId *
+  Name
+  Description
+}
+
+entity "FuelTypes" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Brands" {
+  RowId *
+  Name
+  Description
+}
+
+entity "CarColors" {
+  RowId *
+  CarId
+  ColorId
+  StartDate
+  EndDate
+  Description
+  PaintKind
+  PartName
+}
+
+entity "Colors" {
+  RowId *
+  Name
+  Description
+}
+
+entity "UserCars" {
+  RowId *
+  UserId
+  CarId
+  Description
+}
+
+entity "UserCarMaintenanceHistory" {
+  RowId *
+  UserCarRowId
+  ServiceDate
+  MileageKm
+  Title
+  Notes
+  ComponentCode
+  WorkshopName
+  SeverityAfter
+}
+
+entity "UserCarComponentStatuses" {
+  RowId *
+  UserCarRowId
+  ComponentCode
+  StatusLevel
+  LastServiceDate
+  LastMileageKm
+  RemainingKmHint
+  ShortHint
+  UpdatedAt
+}
+
+entity "RepairHistory" {
+  RowId *
+  CarId
+  EmployeeId
+  Title
+  Description
+  RepairDate
+  EndDate
+  Mileage
+  Cost
+  StatusId
+  CreatedAt
+  CategoryId
+}
+
+entity "RepairCategories" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Statuses" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Employees" {
+  RowId *
+  FirstName
+  LastName
+  MidName
+  Login
+  Password
+  Email
+  Phone
+  BirthDate
+  HireDate
+  IsActive
+  Description
+  WorkshopId
+}
+
+Cars }o--|| Models : ModelId
+Cars }o--|| FuelTypes : FuelTypeId
+Cars }o--|| CarTypes : CarTypeId
+Models }o--|| Brands : BrandId
+CarColors }o--|| Cars : CarId
+CarColors }o--|| Colors : ColorId
+UserCars }o--|| Cars : CarId
+UserCars }o--|| Users : UserId
+UserCarMaintenanceHistory }o--|| UserCars : UserCarRowId
+UserCarComponentStatuses }o--|| UserCars : UserCarRowId
+RepairHistory }o--|| Statuses : StatusId
+RepairHistory }o--|| Employees : EmployeeId
+RepairHistory }o--|| RepairCategories : CategoryId
+RepairHistory }o--|| Cars : CarId
+@enduml

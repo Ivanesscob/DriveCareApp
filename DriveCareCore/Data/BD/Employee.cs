@@ -23,6 +23,8 @@ namespace DriveCareCore.Data.BD
             this.TaskPurchaseRequests = new HashSet<TaskPurchaseRequest>();
             this.TaskPurchaseRequests1 = new HashSet<TaskPurchaseRequest>();
             this.Tasks = new HashSet<Task>();
+            this.WorkshopBusinessTypeChangeRequests = new HashSet<WorkshopBusinessTypeChangeRequest>();
+            this.WorkshopOnlineBookings = new HashSet<WorkshopOnlineBooking>();
         }
     
         public System.Guid RowId { get; set; }
@@ -52,5 +54,9 @@ namespace DriveCareCore.Data.BD
         public virtual ICollection<TaskPurchaseRequest> TaskPurchaseRequests1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Task> Tasks { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopBusinessTypeChangeRequest> WorkshopBusinessTypeChangeRequests { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<WorkshopOnlineBooking> WorkshopOnlineBookings { get; set; }
     }
 }

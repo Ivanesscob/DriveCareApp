@@ -51,7 +51,7 @@
             <TextBox x:Name="CommentBox" Grid.Row="10" Style="{StaticResource App.FieldTextBox}" MinHeight="48"
                      AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-            <TextBlock Grid.Row="11" Text="Точное время визита согласуете с автосервисом после подтверждения."
+            <TextBlock Grid.Row="11" Text=""
                        FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,10"/>
 
             <TextBlock x:Name="ErrorText" Grid.Row="12" Foreground="#C62828" TextWrapping="Wrap"

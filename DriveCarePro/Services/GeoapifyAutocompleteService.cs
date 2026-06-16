@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +22,8 @@ namespace DriveCarePro.Services
         public bool HasHouseNumber { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public string ResultType { get; set; } = string.Empty;
+        public double RankScore { get; set; }
     }
 
     /// <summary>Подсказки адреса Geoapify (до уровня дома).</summary>
@@ -27,11 +32,23 @@ namespace DriveCarePro.Services
         private const string ApiKey = "6cecc8b686624b8ba329a80705d57a60";
         private static readonly HttpClient Client = CreateClient();
 
+        static GeoapifyAutocompleteService()
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
         private static HttpClient CreateClient()
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
-            client.Timeout = TimeSpan.FromSeconds(15);
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json; charset=utf-8");
+            client.Timeout = TimeSpan.FromSeconds(20);
             return client;
         }
 
@@ -39,29 +56,161 @@ namespace DriveCarePro.Services
             string text,
             CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(text) || text.Trim().Length < 3)
+            if (string.IsNullOrWhiteSpace(text) || text.Trim().Length < 2)
                 return Array.Empty<GeoapifyAddressSuggestion>();
 
-            var query = Uri.EscapeDataString(text.Trim());
-            // format=json → ответ с массивом "results" (не GeoJSON "features")
-            var url = "https://api.geoapify.com/v1/geocode/autocomplete" +
-                      $"?text={query}&apiKey={ApiKey}&lang=ru&limit=12&format=json" +
-                      "&filter=countrycode:ru,by,kz,ua";
+            var query = NormalizeQuery(text.Trim());
 
-            using (var response = await Client.GetAsync(url, cancellationToken).ConfigureAwait(false))
+            var list = await FetchAndParseAsync(query, useCountryBias: true, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (list.Count == 0)
+            {
+                list = await FetchAndParseAsync(query, useCountryBias: false, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            return SortAndTrim(list, 12);
+        }
+
+        /// <summary>Расширяем популярные сокращения и исправляем частый ввод без дефиса.</summary>
+        private static string NormalizeQuery(string text)
+        {
+            var t = text.Trim();
+            var lower = t.ToLowerInvariant();
+
+            if (lower == "спб")
+                return "Санкт-Петербург";
+            if (lower.StartsWith("спб ", StringComparison.Ordinal))
+                return "Санкт-Петербург, " + t.Substring(4).TrimStart();
+
+            if (lower == "питер" || lower == "питерburg")
+                return "Санкт-Петербург";
+            if (lower.StartsWith("питер ", StringComparison.Ordinal))
+                return "Санкт-Петербург, " + t.Substring(6).TrimStart();
+
+            if (lower == "ленинград")
+                return "Санкт-Петербург";
+            if (lower.StartsWith("ленинград ", StringComparison.Ordinal))
+                return "Санкт-Петербург, " + t.Substring(10).TrimStart();
+
+            if (lower == "мск")
+                return "Москва";
+            if (lower.StartsWith("мск ", StringComparison.Ordinal))
+                return "Москва, " + t.Substring(4).TrimStart();
+
+            // «санкт петербург», «санкт-петербург невский» → единый формат
+            if (lower.StartsWith("санкт", StringComparison.Ordinal) && lower.Contains("петербург"))
+            {
+                var piterIdx = lower.IndexOf("петербург", StringComparison.Ordinal);
+                var after = piterIdx >= 0
+                    ? t.Substring(piterIdx + "петербург".Length).Trim(' ', ',', '-', '–')
+                    : string.Empty;
+                return string.IsNullOrWhiteSpace(after)
+                    ? "Санкт-Петербург"
+                    : "Санкт-Петербург, " + after;
+            }
+
+            // частая опечатка «зпетербург»
+            if (lower.Contains("зпетербург"))
+                t = t.Replace("зпетербург", "Петербург").Replace("Зпетербург", "Петербург");
+
+            return CollapseSpaces(t);
+        }
+
+        private static string CollapseSpaces(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+            var sb = new StringBuilder(text.Length);
+            var prevSpace = false;
+            foreach (var ch in text.Trim())
+            {
+                if (char.IsWhiteSpace(ch))
+                {
+                    if (!prevSpace)
+                    {
+                        sb.Append(' ');
+                        prevSpace = true;
+                    }
+                }
+                else
+                {
+                    sb.Append(ch);
+                    prevSpace = false;
+                }
+            }
+            return sb.ToString();
+        }
+
+        private static async Task<List<GeoapifyAddressSuggestion>> FetchAndParseAsync(
+            string query,
+            bool useCountryBias,
+            CancellationToken cancellationToken)
+        {
+            var encoded = Uri.EscapeDataString(query);
+            var url = new StringBuilder("https://api.geoapify.com/v1/geocode/autocomplete?")
+                .Append("text=").Append(encoded)
+                .Append("&apiKey=").Append(ApiKey)
+                .Append("&lang=ru")
+                .Append("&limit=20")
+                .Append("&format=json");
+
+            if (useCountryBias)
+                url.Append("&bias=countrycode:ru,by,kz,ua");
+
+            using (var response = await Client.GetAsync(url.ToString(), cancellationToken).ConfigureAwait(false))
             {
                 var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
+                {
+                    var detail = TruncateForMessage(json, 200);
                     throw new InvalidOperationException(
-                        $"Geoapify: {(int)response.StatusCode} {response.ReasonPhrase}");
+                        $"Geoapify: {(int)response.StatusCode} {response.ReasonPhrase}"
+                        + (string.IsNullOrWhiteSpace(detail) ? string.Empty : " — " + detail));
+                }
 
                 return Parse(json);
             }
         }
 
-        private static IReadOnlyList<GeoapifyAddressSuggestion> Parse(string json)
+        private static IReadOnlyList<GeoapifyAddressSuggestion> SortAndTrim(
+            List<GeoapifyAddressSuggestion> list,
+            int maxCount)
+        {
+            if (list == null || list.Count == 0)
+                return Array.Empty<GeoapifyAddressSuggestion>();
+
+            return list
+                .OrderBy(s => GetTypeSortOrder(s.ResultType))
+                .ThenByDescending(s => s.RankScore)
+                .ThenBy(s => s.Label?.Length ?? 0)
+                .Take(maxCount)
+                .ToList();
+        }
+
+        private static int GetTypeSortOrder(string resultType)
+        {
+            switch ((resultType ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "country": return 0;
+                case "state": return 1;
+                case "city": return 2;
+                case "locality": return 3;
+                case "postcode": return 4;
+                case "street": return 5;
+                case "building": return 6;
+                case "suburb": return 7;
+                case "district": return 8;
+                case "amenity": return 15;
+                default: return 10;
+            }
+        }
+
+        private static List<GeoapifyAddressSuggestion> Parse(string json)
         {
             var list = new List<GeoapifyAddressSuggestion>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (string.IsNullOrWhiteSpace(json))
                 return list;
 
@@ -75,18 +224,17 @@ namespace DriveCarePro.Services
                         results.ValueKind == JsonValueKind.Array)
                     {
                         foreach (var item in results.EnumerateArray())
-                            TryAddFromResultItem(list, item);
+                            TryAddFromResultItem(list, seen, item);
                         return list;
                     }
 
-                    // Запасной вариант: GeoJSON features
                     if (root.TryGetProperty("features", out var features) &&
                         features.ValueKind == JsonValueKind.Array)
                     {
                         foreach (var feature in features.EnumerateArray())
                         {
                             if (feature.TryGetProperty("properties", out var props))
-                                TryAddFromResultItem(list, props);
+                                TryAddFromResultItem(list, seen, props);
                         }
                     }
                 }
@@ -99,9 +247,13 @@ namespace DriveCarePro.Services
             return list;
         }
 
-        private static void TryAddFromResultItem(List<GeoapifyAddressSuggestion> list, JsonElement item)
+        private static void TryAddFromResultItem(
+            List<GeoapifyAddressSuggestion> list,
+            HashSet<string> seen,
+            JsonElement item)
         {
             var formatted = GetString(item, "formatted");
+            var resultType = GetString(item, "result_type") ?? string.Empty;
             var street = FirstNonEmpty(
                 GetString(item, "street"),
                 GetString(item, "address_line1"));
@@ -110,12 +262,16 @@ namespace DriveCarePro.Services
                 GetString(item, "city"),
                 GetString(item, "town"),
                 GetString(item, "village"),
-                GetString(item, "municipality"),
-                GetString(item, "state"),
-                GetString(item, "county"));
+                GetString(item, "municipality"));
+            var state = GetString(item, "state");
+            if (string.IsNullOrWhiteSpace(city) && !string.IsNullOrWhiteSpace(state) &&
+                (resultType == "city" || resultType == "state" || resultType == "locality"))
+                city = state;
+
             var name = GetString(item, "name");
 
-            if (string.IsNullOrWhiteSpace(street) && !string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(street) && !string.IsNullOrWhiteSpace(name) &&
+                resultType != "city" && resultType != "state")
                 street = name;
 
             if (string.IsNullOrWhiteSpace(formatted) &&
@@ -130,8 +286,13 @@ namespace DriveCarePro.Services
             if (string.IsNullOrWhiteSpace(label))
                 return;
 
+            var dedupeKey = (resultType + "|" + label).ToLowerInvariant();
+            if (!seen.Add(dedupeKey))
+                return;
+
             double? lat = TryGetDouble(item, "lat");
             double? lon = TryGetDouble(item, "lon");
+            var rankScore = TryGetRankScore(item);
 
             list.Add(new GeoapifyAddressSuggestion
             {
@@ -144,8 +305,28 @@ namespace DriveCarePro.Services
                 Postcode = GetString(item, "postcode") ?? string.Empty,
                 HasHouseNumber = !string.IsNullOrWhiteSpace(housenumber),
                 Latitude = lat,
-                Longitude = lon
+                Longitude = lon,
+                ResultType = resultType,
+                RankScore = rankScore
             });
+        }
+
+        private static double TryGetRankScore(JsonElement item)
+        {
+            if (!item.TryGetProperty("rank", out var rank) || rank.ValueKind != JsonValueKind.Object)
+                return 0;
+
+            if (rank.TryGetProperty("importance", out var imp) &&
+                imp.ValueKind == JsonValueKind.Number &&
+                imp.TryGetDouble(out var importance))
+                return importance;
+
+            if (rank.TryGetProperty("confidence", out var conf) &&
+                conf.ValueKind == JsonValueKind.Number &&
+                conf.TryGetDouble(out var confidence))
+                return confidence;
+
+            return 0;
         }
 
         private static string BuildLabel(string city, string street, string house)
@@ -192,6 +373,14 @@ namespace DriveCarePro.Services
                     return v.Trim();
             }
             return null;
+        }
+
+        private static string TruncateForMessage(string text, int maxLen)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+            var t = text.Trim().Replace("\r", " ").Replace("\n", " ");
+            return t.Length <= maxLen ? t : t.Substring(0, maxLen) + "…";
         }
     }
 }

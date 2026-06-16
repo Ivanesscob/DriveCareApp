@@ -19,6 +19,7 @@ namespace DriveCarePro.Windows
 
         private readonly DispatcherTimer _searchDebounce = new DispatcherTimer();
         private CancellationTokenSource _searchCts;
+        private int _searchGeneration;
         private bool _suppressSearch;
         private bool _addressPickedFromGeo;
         private List<Country> _countries = new List<Country>();
@@ -33,7 +34,7 @@ namespace DriveCarePro.Windows
         public CreateCompanyWindow()
         {
             InitializeComponent();
-            _searchDebounce.Interval = TimeSpan.FromMilliseconds(350);
+            _searchDebounce.Interval = TimeSpan.FromMilliseconds(450);
             _searchDebounce.Tick += SearchDebounce_Tick;
             Loaded += CreateCompanyWindow_Loaded;
         }
@@ -41,6 +42,8 @@ namespace DriveCarePro.Windows
         private void CreateCompanyWindow_Loaded(object sender, RoutedEventArgs e)
         {
             LoadCountries();
+            AddressSearchStatus.Text = "Введите адрес в поле поиска — ниже появятся подсказки.";
+            AddressLineBox.Text = string.Empty;
 
             var maxBirth = DateTime.Today.AddYears(-MinOwnerAgeYears);
             BirthDatePicker.DisplayDateEnd = maxBirth;
@@ -66,23 +69,28 @@ namespace DriveCarePro.Windows
             }
         }
 
-        private void AddressLineBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void AddressSearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (_suppressSearch)
                 return;
             _addressPickedFromGeo = false;
+            AddressLineBox.Text = string.Empty;
             _searchDebounce.Stop();
             _searchDebounce.Start();
         }
 
-        private void AddressLineBox_LostFocus(object sender, RoutedEventArgs e)
+        private void HideSuggestions()
         {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (!AddressLineBox.IsKeyboardFocusWithin &&
-                    !AddressSuggestionsList.IsKeyboardFocusWithin)
-                    SuggestionsPopup.IsOpen = false;
-            }), DispatcherPriority.Input);
+            SuggestionsPanel.Visibility = Visibility.Collapsed;
+            AddressSuggestionsList.ItemsSource = null;
+        }
+
+        private void ShowSuggestions(IReadOnlyList<GeoapifyAddressSuggestion> items)
+        {
+            AddressSuggestionsList.ItemsSource = items;
+            SuggestionsPanel.Visibility = items != null && items.Count > 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void SearchDebounce_Tick(object sender, EventArgs e)
@@ -93,40 +101,44 @@ namespace DriveCarePro.Windows
 
         private async void RunAddressSearch()
         {
-            var query = AddressLineBox?.Text?.Trim() ?? string.Empty;
-            if (query.Length < 3)
+            var query = AddressSearchBox?.Text?.Trim() ?? string.Empty;
+            if (query.Length < 2)
             {
-                SuggestionsPopup.IsOpen = false;
+                HideSuggestions();
                 if (query.Length == 0)
-                    AddressSearchStatus.Text = "Начните вводить адрес — появятся подсказки.";
+                    AddressSearchStatus.Text = "Введите адрес в поле поиска — ниже появятся подсказки.";
                 else
-                    AddressSearchStatus.Text = "Введите ещё символы для поиска (минимум 3).";
+                    AddressSearchStatus.Text = "Введите ещё символ для поиска.";
                 return;
             }
 
             _searchCts?.Cancel();
             _searchCts = new CancellationTokenSource();
             var token = _searchCts.Token;
+            var generation = System.Threading.Interlocked.Increment(ref _searchGeneration);
             AddressSearchStatus.Text = "Поиск адресов…";
 
             try
             {
                 var items = await GeoapifyAutocompleteService.SearchAsync(query, token).ConfigureAwait(true);
-                if (token.IsCancellationRequested)
+                if (token.IsCancellationRequested || generation != _searchGeneration)
                     return;
 
-                AddressSuggestionsList.ItemsSource = items;
+                ShowSuggestions(items);
                 var hasItems = items != null && items.Count > 0;
-                SuggestionsPopup.IsOpen = hasItems;
                 AddressSearchStatus.Text = hasItems
-                    ? "Выберите адрес из списка."
-                    : "Ничего не найдено. Уточните запрос.";
+                    ? "Выберите адрес из списка (город, улица или дом)."
+                    : "Ничего не найдено. Попробуйте: «Санкт-Петербург», «СПб, Невский» или полный адрес.";
+            }
+            catch (OperationCanceledException)
+            {
+                // новый ввод — не показываем ошибку
             }
             catch (Exception ex)
             {
-                if (!token.IsCancellationRequested)
+                if (!token.IsCancellationRequested && generation == _searchGeneration)
                 {
-                    SuggestionsPopup.IsOpen = false;
+                    HideSuggestions();
                     AddressSearchStatus.Text = "Ошибка поиска: " + ex.Message;
                 }
             }
@@ -134,8 +146,12 @@ namespace DriveCarePro.Windows
 
         private void AddressSuggestionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!SuggestionsPopup.IsOpen)
-                return;
+            if (AddressSuggestionsList.SelectedItem is GeoapifyAddressSuggestion item)
+                ApplyAddressSuggestion(item);
+        }
+
+        private void AddressSuggestionsList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
             if (AddressSuggestionsList.SelectedItem is GeoapifyAddressSuggestion item)
                 ApplyAddressSuggestion(item);
         }
@@ -158,6 +174,7 @@ namespace DriveCarePro.Windows
             try
             {
                 AddressLineBox.Text = item.Label;
+                AddressSearchBox.Text = item.Label;
                 _parsedCity = item.City ?? string.Empty;
                 _parsedStreet = item.Street ?? string.Empty;
                 _parsedHouse = item.House ?? string.Empty;
@@ -165,7 +182,7 @@ namespace DriveCarePro.Windows
                 _parsedLongitude = item.Longitude;
                 TrySelectCountry(item.CountryCode, item.CountryName);
                 _addressPickedFromGeo = true;
-                SuggestionsPopup.IsOpen = false;
+                HideSuggestions();
                 AddressSearchStatus.Text = item.HasHouseNumber
                     ? "Адрес выбран. При необходимости укажите квартиру."
                     : "Адрес выбран. Проверьте, что указан номер дома.";
@@ -290,7 +307,7 @@ namespace DriveCarePro.Windows
             if (string.IsNullOrWhiteSpace(AddressLineBox?.Text))
                 list.Add("• Адрес (одной строкой)");
             else if (!_addressPickedFromGeo)
-                list.Add("• Выберите адрес из подсказок Geoapify");
+                list.Add("• Выберите адрес из списка подсказок");
 
             if (CountryCombo.SelectedItem == null)
                 list.Add("• Страна");
@@ -345,7 +362,7 @@ namespace DriveCarePro.Windows
         {
             _searchCts?.Cancel();
             _searchDebounce.Stop();
-            SuggestionsPopup.IsOpen = false;
+            HideSuggestions();
             base.OnClosed(e);
         }
     }

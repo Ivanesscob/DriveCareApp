@@ -182,13 +182,14 @@ namespace DriveCareCore.Bookings
 
         public static Task<List<WorkshopOnlineBookingItem>> ListForWorkshopsAsync(
             IList<Guid> workshopIds,
-            bool pendingOnly) =>
-            WithDb(db => ListForWorkshopsAsync(db, workshopIds, pendingOnly));
+            int filterMode) =>
+            WithDb(db => ListForWorkshopsAsync(db, workshopIds, filterMode));
 
+        /// <param name="filterMode">0 — ожидают, 1 — подтверждённые, 2 — все.</param>
         public static async Task<List<WorkshopOnlineBookingItem>> ListForWorkshopsAsync(
             DriveCareDBEntities db,
             IList<Guid> workshopIds,
-            bool pendingOnly)
+            int filterMode)
         {
             if (!TablesExist() || workshopIds == null)
                 return new List<WorkshopOnlineBookingItem>();
@@ -201,24 +202,35 @@ namespace DriveCareCore.Bookings
                 .ConfigureAwait(false);
             var hasRejectCol = await ColumnExistsAsync(db, "WorkshopOnlineBookings", "RejectReason")
                 .ConfigureAwait(false);
+            var hasTaskCol = await ColumnExistsAsync(db, "WorkshopOnlineBookings", "TaskId")
+                .ConfigureAwait(false);
 
             var paramNames = Enumerable.Range(0, ids.Count).Select(i => "@w" + i).ToArray();
             var inClause = string.Join(",", paramNames);
             if (string.IsNullOrEmpty(inClause))
                 return new List<WorkshopOnlineBookingItem>();
 
-            var statusFilter = pendingOnly ? " AND b.Status = 0 " : string.Empty;
+            string statusFilter;
+            if (filterMode == 0)
+                statusFilter = " AND b.Status = 0 ";
+            else if (filterMode == 1)
+                statusFilter = " AND b.Status = 1 ";
+            else
+                statusFilter = string.Empty;
             var issueCol = hasIssueCol
                 ? "b.IssueCategory AS IssueCategory"
                 : "CAST(NULL AS NVARCHAR(120)) AS IssueCategory";
             var rejectCol = hasRejectCol
                 ? "b.RejectReason AS RejectReason"
                 : "CAST(NULL AS NVARCHAR(500)) AS RejectReason";
+            var taskCol = hasTaskCol
+                ? "b.TaskId AS TaskId"
+                : "CAST(NULL AS UNIQUEIDENTIFIER) AS TaskId";
 
             var sql = @"
 SELECT b.RowId AS BookingId, b.WorkshopId, w.Name AS WorkshopName, b.UserId,
        COALESCE(NULLIF(LTRIM(RTRIM(u.Login)), N''), u.Email, N'Клиент') AS ClientDisplayName,
-       b.ClientPhone, b.ClientComment, " + issueCol + @", " + rejectCol + @",
+       b.ClientPhone, b.ClientComment, " + issueCol + @", " + rejectCol + @", " + taskCol + @",
        COALESCE(
          NULLIF(LTRIM(RTRIM(ISNULL(br.Name, N'') + N' ' + ISNULL(m.Name, N''))), N''),
          N'Автомобиль'

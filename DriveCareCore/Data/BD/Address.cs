@@ -28,6 +28,8 @@ namespace DriveCareCore.Data.BD
         public string Apartment { get; set; }
         public string FullAddress { get; set; }
         public string Description { get; set; }
+        public Nullable<double> Latitude { get; set; }
+        public Nullable<double> Longitude { get; set; }
     
         public virtual Country Country { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

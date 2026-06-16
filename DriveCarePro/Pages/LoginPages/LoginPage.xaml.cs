@@ -69,6 +69,10 @@ namespace DriveCarePro.Pages.LoginPages
                 if (user != null)
                 {
                     await AppState.SignInEmployeeAsync(user).ConfigureAwait(true);
+                    DriveCareCore.Analytics.ActivityTracker.TrackEmployee(
+                        DriveCareCore.Analytics.ActivityEventCodes.ProEmployeeLogin,
+                        user.RowId,
+                        user.WorkshopId);
                     AppState.SetFrame<ProHomePage>();
                 }
                 else

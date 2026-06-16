@@ -67,7 +67,13 @@ namespace DriveCare.Pages.User.ActionPages
         {
             InitializeComponent();
             DataContext = this;
-            Loaded += async (_, __) => await LoadSalesAsync();
+            Loaded += async (_, __) =>
+            {
+                DriveCareCore.Analytics.ActivityTracker.TrackUser(
+                    DriveCareCore.Analytics.ActivityEventCodes.CarSaleCatalogView,
+                    AppState.CurrentUserId == Guid.Empty ? (Guid?)null : AppState.CurrentUserId);
+                await LoadSalesAsync();
+            };
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)

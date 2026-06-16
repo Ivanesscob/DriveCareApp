@@ -317,6 +317,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\AppState.cs" />
+    <Compile Include="Data\BD\EmployeeNotification.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\OrderPickupPoint.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\ServiceDocument.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\ServiceDocumentPartLine.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\ServiceDocumentServiceLine.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\StoreOrder.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\StoreOrderLine.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\TaskPartLine.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -329,6 +350,39 @@
     <Compile Include="Data\BD\TaskServiceLine.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BD\UserCarComponentStatus.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\UserCarMaintenanceHistory.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\UserWorkshopPaintInquiry.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopBusinessType.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopBusinessTypeChangeRequest.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopConversation.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopMessage.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopOnlineBooking.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopOnlineBookingSetting.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopPaintColor.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopPaintService.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\BD\WorkshopPart.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -336,6 +390,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BD\WorkshopServiceUnit.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BD\WorkshopWorkSchedule.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Shop\ToolsStoreCatalog.cs" />
@@ -362,6 +419,9 @@
     <Compile Include="Maps\WorkshopServiceKinds.cs" />
     <Compile Include="Maps\CoordinateHelper.cs" />
     <Compile Include="Maps\AddressCoordinatesHelper.cs" />
+    <Compile Include="Analytics\ActivityEventCodes.cs" />
+    <Compile Include="Analytics\ActivityEventService.cs" />
+    <Compile Include="Analytics\ActivityTracker.cs" />
     <Compile Include="Bookings\WorkshopOnlineBookingModels.cs" />
     <Compile Include="Bookings\WorkshopOnlineBookingService.cs" />
     <Compile Include="Bookings\WorkshopWorkScheduleService.cs" />

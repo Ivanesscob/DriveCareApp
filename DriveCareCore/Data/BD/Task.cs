@@ -21,6 +21,7 @@ namespace DriveCareCore.Data.BD
             this.TaskPurchaseRequests = new HashSet<TaskPurchaseRequest>();
             this.TaskPurchaseRequests1 = new HashSet<TaskPurchaseRequest>();
             this.TaskServiceLines = new HashSet<TaskServiceLine>();
+            this.ServiceDocuments = new HashSet<ServiceDocument>();
         }
     
         public System.Guid RowId { get; set; }
@@ -37,6 +38,7 @@ namespace DriveCareCore.Data.BD
         public string ReportText { get; set; }
         public Nullable<System.Guid> ClientUserId { get; set; }
         public Nullable<System.Guid> CarId { get; set; }
+        public Nullable<System.Guid> DocumentId { get; set; }
     
         public virtual Car Car { get; set; }
         public virtual Employee Employee { get; set; }
@@ -50,5 +52,7 @@ namespace DriveCareCore.Data.BD
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<TaskServiceLine> TaskServiceLines { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ServiceDocument> ServiceDocuments { get; set; }
     }
 }

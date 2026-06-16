@@ -1,0 +1,130 @@
+@startuml ER_Part03_References
+title Часть 3. Справочники
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+top to bottom direction
+
+entity "Countries" {
+  RowId *
+  Name
+  Code
+  Description
+}
+
+entity "Brands" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Models" {
+  RowId *
+  Name
+  BrandId
+  Description
+  MaxSpeed
+  FuelConsumption
+  FuelType
+  HorsePower
+  EngineVolume
+  Acceleration
+}
+
+entity "CarTypes" {
+  RowId *
+  Name
+  Description
+}
+
+entity "FuelTypes" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Colors" {
+  RowId *
+  Name
+  Description
+}
+
+entity "BusinessTypes" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Statuses" {
+  RowId *
+  Name
+  Description
+}
+
+entity "RepairCategories" {
+  RowId *
+  Name
+  Description
+}
+
+entity "Parts" {
+  RowId *
+  Name
+  Article
+  PartManufacturerId
+  ColorId
+  StatusId
+  Description
+}
+
+entity "PartManufacturers" {
+  RowId *
+  Name
+  CountryId
+  Description
+}
+
+entity "Addresses" {
+  RowId *
+  CountryId
+  City
+  Street
+  House
+  Apartment
+  FullAddress
+  Description
+  Latitude
+  Longitude
+}
+
+entity "OrderPickupPoints" {
+  RowId *
+  Code
+  Name
+  District
+  AddressLine
+  City
+  Latitude
+  Longitude
+  SortOrder
+  IsActive
+  CreatedAt
+}
+
+entity "WarehouseManagers" {
+  RowId *
+  FirstName
+  LastName
+  MidName
+  Phone
+  Email
+  Description
+}
+
+Models }o--|| Brands : BrandId
+Parts }o--|| PartManufacturers : PartManufacturerId
+Parts }o--|| Statuses : StatusId
+Parts }o--|| Colors : ColorId
+PartManufacturers }o--|| Countries : CountryId
+Addresses }o--|| Countries : CountryId
+@enduml
