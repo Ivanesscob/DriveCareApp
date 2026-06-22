@@ -136,7 +136,7 @@ namespace DriveCarePro.Services
                 return;
 
             node.IsReadyToComplete = true;
-            node.StatusDisplay = ReadyToCompleteStatus;
+            node.StatusDisplay = DelegateDoneStatus;
         }
 
         public static bool AllDescendantsCompletedInTree(TaskTreeNodeVm node)
@@ -163,7 +163,7 @@ namespace DriveCarePro.Services
             {
                 row.IsReadyToComplete = true;
                 row.IsPartnerDone = true;
-                row.StatusDisplay = ReadyToCompleteStatus;
+                row.StatusDisplay = DelegateDoneStatus;
                 return;
             }
 

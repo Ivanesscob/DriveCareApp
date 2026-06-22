@@ -15,6 +15,23 @@ namespace DriveCarePro.Windows
             ServicesGrid.ItemsSource = preview?.Services;
             PartsGrid.ItemsSource = preview?.Parts;
             ReportTextBox.Text = preview?.ReportText ?? string.Empty;
+            RefreshActiveGrid();
+        }
+
+        void RefreshActiveGrid()
+        {
+            if (PreviewTabs?.SelectedItem is System.Windows.Controls.TabItem tab)
+            {
+                if (tab.Header as string == "Запчасти")
+                    PartsGrid?.Items.Refresh();
+                else if (tab.Header as string == "Услуги")
+                    ServicesGrid?.Items.Refresh();
+            }
+        }
+
+        private void PreviewTabs_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            RefreshActiveGrid();
         }
 
         public static void Show(Window owner, ServiceDocumentPreview preview)

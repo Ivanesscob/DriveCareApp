@@ -3,6 +3,7 @@ using DriveCare.Windows;
 using DriveCareCore.Bookings;
 using DriveCareCore.Maps;
 using DriveCareCore.Messaging;
+using DriveCareCore.Reviews;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,10 +17,15 @@ namespace DriveCare.Pages.User.ActionPages
 {
     public partial class ServiceSelectPage : Page
     {
+        enum ViewMode { Map, List }
+
         Guid _selectedWorkshopId = Guid.Empty;
         string _selectedPhone;
         List<WorkshopMapPin> _allPins = new List<WorkshopMapPin>();
         WorkshopServiceKindCode? _kindFilter;
+        int? _minStarFilter;
+        ViewMode _viewMode = ViewMode.Map;
+        bool _suppressListSelection;
 
         public ServiceSelectPage()
         {
@@ -28,7 +34,10 @@ namespace DriveCare.Pages.User.ActionPages
             Loaded += async (_, __) =>
             {
                 _kindFilter = null;
+                _minStarFilter = null;
                 UpdateFilterButtonStyles();
+                UpdateStarFilterButtonStyles();
+                UpdateViewModeUi();
                 await LoadMapAsync().ConfigureAwait(true);
             };
         }
@@ -37,15 +46,69 @@ namespace DriveCare.Pages.User.ActionPages
 
         private async void Refresh_Click(object sender, RoutedEventArgs e) => await LoadMapAsync().ConfigureAwait(true);
 
+        private void ViewModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is string tag)
+                _viewMode = tag == "List" ? ViewMode.List : ViewMode.Map;
+            UpdateViewModeUi();
+            if (_viewMode == ViewMode.List)
+                ApplyListFilter();
+            else if (_allPins.Count > 0)
+                _ = ApplyMapFilterAsync();
+        }
+
+        void UpdateViewModeUi()
+        {
+            var isMap = _viewMode == ViewMode.Map;
+            ViewMapButton.Style = (Style)ViewMapButton.FindResource(isMap ? "App.Button.Primary" : "App.Button.Outline");
+            ViewListButton.Style = (Style)ViewListButton.FindResource(isMap ? "App.Button.Outline" : "App.Button.Primary");
+            MapPanel.Visibility = isMap ? Visibility.Visible : Visibility.Collapsed;
+            ListPanel.Visibility = isMap ? Visibility.Collapsed : Visibility.Visible;
+            SubtitleText.Text = isMap
+                ? "Яндекс.Карта · нажмите метку автосервиса"
+                : "Список автосервисов · выберите строку";
+        }
+
         private async void KindFilterButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn)
                 SetKindFilterFromTag(btn.Tag as string);
 
             UpdateFilterButtonStyles();
+            await ApplyCurrentViewFilterAsync().ConfigureAwait(true);
+        }
+
+        private async void StarFilterButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                var tag = btn.Tag as string;
+                if (string.IsNullOrEmpty(tag))
+                    _minStarFilter = null;
+                else if (int.TryParse(tag, out var min))
+                    _minStarFilter = min;
+                else
+                    _minStarFilter = null;
+            }
+
+            UpdateStarFilterButtonStyles();
+            await ApplyCurrentViewFilterAsync().ConfigureAwait(true);
+        }
+
+        async Task ApplyCurrentViewFilterAsync()
+        {
             if (!IsLoaded || _allPins.Count == 0)
                 return;
-            await ApplyMapFilterAsync().ConfigureAwait(true);
+
+            if (_viewMode == ViewMode.List)
+            {
+                ApplyListFilter();
+                UpdateStatusText();
+            }
+            else
+            {
+                await ApplyMapFilterAsync().ConfigureAwait(true);
+            }
         }
 
         void SetKindFilterFromTag(string tag)
@@ -58,14 +121,20 @@ namespace DriveCare.Pages.User.ActionPages
                 _kindFilter = null;
         }
 
-        WorkshopServiceKindCode? ReadKindFilter() => _kindFilter;
-
         void UpdateFilterButtonStyles()
         {
             SetFilterStyle(FilterAll, _kindFilter == null);
             SetFilterStyle(FilterAuto, _kindFilter == WorkshopServiceKindCode.AutoService);
             SetFilterStyle(FilterPaint, _kindFilter == WorkshopServiceKindCode.Painting);
             SetFilterStyle(FilterTire, _kindFilter == WorkshopServiceKindCode.TireService);
+        }
+
+        void UpdateStarFilterButtonStyles()
+        {
+            SetFilterStyle(StarFilterAll, !_minStarFilter.HasValue);
+            SetFilterStyle(StarFilter5, _minStarFilter == 5);
+            SetFilterStyle(StarFilter4, _minStarFilter == 4);
+            SetFilterStyle(StarFilter3, _minStarFilter == 3);
         }
 
         static void SetFilterStyle(Button button, bool active)
@@ -85,19 +154,30 @@ namespace DriveCare.Pages.User.ActionPages
                 var data = await WorkshopMapService.LoadPinsForMapAsync().ConfigureAwait(true);
                 _allPins = data.Pins ?? new List<WorkshopMapPin>();
                 _kindFilter = ReadKindFilter();
-                await ApplyMapFilterAsync(data).ConfigureAwait(true);
+                await ApplyCurrentViewFilterAsync().ConfigureAwait(true);
 
                 var skipped = data.SkippedNoAddress.Count + data.SkippedGeocodeFailed.Count;
-                var filterLabel = GetFilterLabel(_kindFilter);
-                StatusText.Text = _allPins.Count > 0
-                    ? $"На карте: {CountFilteredPins()} ({filterLabel}). Нажмите метку." +
-                      (skipped > 0 ? $" Без координат: {skipped}." : string.Empty)
-                    : "Нет точек. Добавьте адреса мастерским в базе.";
+                UpdateStatusText(skipped);
             }
             catch (Exception ex)
             {
                 StatusText.Text = "Ошибка: " + ex.Message;
             }
+        }
+
+        WorkshopServiceKindCode? ReadKindFilter() => _kindFilter;
+
+        void UpdateStatusText(int skipped = 0)
+        {
+            var filtered = FilterPins(_allPins);
+            var filterLabel = GetFilterLabel(_kindFilter);
+            var starLabel = GetStarFilterLabel(_minStarFilter);
+            var modeLabel = _viewMode == ViewMode.Map ? "На карте" : "В списке";
+
+            StatusText.Text = filtered.Count > 0
+                ? $"{modeLabel}: {filtered.Count} ({filterLabel}, {starLabel}). Выберите сервис." +
+                  (skipped > 0 ? $" Без координат: {skipped}." : string.Empty)
+                : $"Нет сервисов для фильтра «{filterLabel}» / «{starLabel}». Измените фильтры.";
         }
 
         async Task ApplyMapFilterAsync(WorkshopMapLoadResult data = null)
@@ -108,18 +188,37 @@ namespace DriveCare.Pages.User.ActionPages
             if (data != null)
                 return;
 
-            var filterLabel = GetFilterLabel(_kindFilter);
-            StatusText.Text = filtered.Count > 0
-                ? $"На карте: {filtered.Count} ({filterLabel}). Нажмите метку."
-                : $"Нет сервисов для фильтра «{filterLabel}». Выберите «Все» или другой тип.";
+            UpdateStatusText();
+        }
+
+        void ApplyListFilter()
+        {
+            var filtered = FilterPins(_allPins);
+            _suppressListSelection = true;
+            WorkshopListView.ItemsSource = filtered;
+            _suppressListSelection = false;
         }
 
         List<WorkshopMapPin> FilterPins(IReadOnlyList<WorkshopMapPin> pins) =>
             (pins ?? Array.Empty<WorkshopMapPin>())
             .Where(p => WorkshopServiceKinds.MatchesFilter(p, _kindFilter))
+            .Where(p => MatchesStarFilter(p))
+            .OrderByDescending(p => p.ReviewCount)
+            .ThenByDescending(p => p.AvgRating ?? 0)
+            .ThenBy(p => p.WorkshopName)
             .ToList();
 
-        int CountFilteredPins() => FilterPins(_allPins).Count;
+        bool MatchesStarFilter(WorkshopMapPin pin)
+        {
+            if (!_minStarFilter.HasValue)
+                return true;
+            if (pin == null || !pin.HasReviews || !pin.AvgRating.HasValue)
+                return false;
+            var min = _minStarFilter.Value;
+            if (min >= 5)
+                return pin.AvgRating.Value >= 4.75m;
+            return pin.AvgRating.Value >= min;
+        }
 
         static string GetFilterLabel(WorkshopServiceKindCode? filter)
         {
@@ -134,12 +233,30 @@ namespace DriveCare.Pages.User.ActionPages
             }
         }
 
+        static string GetStarFilterLabel(int? minStars)
+        {
+            if (!minStars.HasValue)
+                return "любой рейтинг";
+            if (minStars >= 5)
+                return "★ 5";
+            return $"★ {minStars}+";
+        }
+
         async Task SelectWorkshopAsync(Guid workshopId)
         {
             if (workshopId == Guid.Empty)
                 return;
             await LoadWorkshopDetailAsync(workshopId).ConfigureAwait(true);
-            await YandexMap.FocusWorkshopAsync(workshopId).ConfigureAwait(true);
+            if (_viewMode == ViewMode.Map)
+                await YandexMap.FocusWorkshopAsync(workshopId).ConfigureAwait(true);
+        }
+
+        private async void WorkshopListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressListSelection)
+                return;
+            if (WorkshopListView.SelectedItem is WorkshopMapPin pin)
+                await SelectWorkshopAsync(pin.WorkshopId).ConfigureAwait(true);
         }
 
         private async Task LoadWorkshopDetailAsync(Guid workshopId)
@@ -155,6 +272,29 @@ namespace DriveCare.Pages.User.ActionPages
 
             var pin = _allPins.FirstOrDefault(p => p.WorkshopId == workshopId
                 || (p.WorkshopIds != null && p.WorkshopIds.Contains(workshopId)));
+
+            var ratingTask = WorkshopReviewService.GetRatingSummaryAsync(workshopId);
+            var reviewsTask = WorkshopReviewService.ListForWorkshopAsync(workshopId);
+            await Task.WhenAll(ratingTask, reviewsTask).ConfigureAwait(true);
+            var rating = ratingTask.Result;
+            var reviews = reviewsTask.Result ?? new List<WorkshopReviewDisplay>();
+
+            if (pin != null && pin.HasReviews)
+            {
+                DetailRatingText.Text = pin.RatingLabel;
+                DetailRatingText.Visibility = Visibility.Visible;
+            }
+            else if (rating.HasReviews)
+            {
+                DetailRatingText.Text = rating.SummaryLine;
+                DetailRatingText.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                DetailRatingText.Text = "Пока нет отзывов";
+                DetailRatingText.Visibility = Visibility.Visible;
+            }
+
             DetailKindText.Text = pin != null && !string.IsNullOrWhiteSpace(pin.ServiceKindsLabel)
                 ? pin.ServiceKindsLabel
                 : WorkshopServiceKinds.GetDisplayName(detail.BusinessTypeId, detail.ServiceKindName);
@@ -183,6 +323,9 @@ namespace DriveCare.Pages.User.ActionPages
                 ? Visibility.Collapsed
                 : Visibility.Visible;
 
+            ReviewsList.ItemsSource = reviews;
+            DetailNoReviewsText.Visibility = reviews.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
             PanelColumn.Width = new GridLength(LeftDetailPanel.Width);
             LeftDetailPanel.Visibility = Visibility.Visible;
         }
@@ -193,9 +336,19 @@ namespace DriveCare.Pages.User.ActionPages
             _selectedPhone = null;
             PanelColumn.Width = new GridLength(0);
             LeftDetailPanel.Visibility = Visibility.Collapsed;
+            ReviewsList.ItemsSource = null;
         }
 
-        private void CloseDetailPanel_Click(object sender, RoutedEventArgs e) => HideDetail();
+        private void CloseDetailPanel_Click(object sender, RoutedEventArgs e)
+        {
+            HideDetail();
+            if (_viewMode == ViewMode.List)
+            {
+                _suppressListSelection = true;
+                WorkshopListView.SelectedItem = null;
+                _suppressListSelection = false;
+            }
+        }
 
         private void CallPhone_Click(object sender, RoutedEventArgs e)
         {
@@ -224,7 +377,7 @@ namespace DriveCare.Pages.User.ActionPages
         {
             if (_selectedWorkshopId == Guid.Empty)
             {
-                MessageBox.Show("Сначала выберите автосервис на карте.", "Сообщения",
+                MessageBox.Show("Сначала выберите автосервис.", "Сообщения",
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -253,7 +406,7 @@ namespace DriveCare.Pages.User.ActionPages
         {
             if (_selectedWorkshopId == Guid.Empty)
             {
-                MessageBox.Show("Сначала выберите автосервис на карте.", "Запись",
+                MessageBox.Show("Сначала выберите автосервис.", "Запись",
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }

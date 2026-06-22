@@ -1,3 +1,4 @@
+using DriveCareCore.ServiceVisits;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +21,8 @@ namespace DriveCarePro.Services.ServiceDocuments
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public bool IsCurrentTaskRoot { get; set; }
+        public ServiceDocumentClientStage ClientStage { get; set; }
+        public string ClientStageDisplay { get; set; }
     }
 
     public sealed class ServiceDocumentPreview

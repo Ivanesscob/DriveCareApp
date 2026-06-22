@@ -377,6 +377,33 @@ namespace DriveCarePro.Services.WorkshopServices
             return vm;
         }
 
+        public static TaskServiceLineVm CreateFromCatalog(WorkshopServiceItem item, IList<WorkshopServiceItem> catalog = null)
+        {
+            var vm = new TaskServiceLineVm { Catalog = catalog };
+            vm.InitializeFromCatalog(item);
+            return vm;
+        }
+
+        public void InitializeFromCatalog(WorkshopServiceItem item)
+        {
+            if (item == null)
+                return;
+
+            WorkshopServiceId = item.RowId;
+            var name = (item.Name ?? string.Empty).Trim();
+            SetServiceSearchTextInternal(name, notify: false);
+            SetServiceNameInternal(name, fromSearch: true);
+            SetUnitNameInternal(string.IsNullOrWhiteSpace(item.UnitName) ? "усл." : item.UnitName.Trim());
+            SetUnitPriceInternal(item.Price);
+            if (Catalog != null)
+                _selectedCatalog = Catalog.FirstOrDefault(c => c.RowId == item.RowId) ?? item;
+            else
+                _selectedCatalog = item;
+            if (Quantity <= 0)
+                Quantity = 1;
+            Recalculate();
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged([CallerMemberName] string name = null) =>
@@ -750,6 +777,42 @@ namespace DriveCarePro.Services.WorkshopServices
             }
             vm.Recalculate();
             return vm;
+        }
+
+        public static TaskPartLineVm CreateFromCatalog(
+            WorkshopPartItem item,
+            IList<WorkshopPartItem> catalog = null,
+            ISet<Guid> pickerIncludeZeroStockIds = null)
+        {
+            var vm = new TaskPartLineVm
+            {
+                Catalog = catalog,
+                PickerIncludeZeroStockIds = pickerIncludeZeroStockIds
+            };
+            vm.InitializeFromCatalog(item);
+            return vm;
+        }
+
+        public void InitializeFromCatalog(WorkshopPartItem item)
+        {
+            if (item == null || IsPurchaseLine)
+                return;
+
+            if (Catalog != null)
+                _selectedCatalog = Catalog.FirstOrDefault(c => c.RowId == item.RowId) ?? item;
+            else
+                _selectedCatalog = item;
+
+            WorkshopPartId = item.RowId;
+            var name = (item.Name ?? string.Empty).Trim();
+            SetPartSearchTextInternal(name, notify: false);
+            PartName = name;
+            UnitName = string.IsNullOrWhiteSpace(item.UnitName) ? "шт." : item.UnitName.Trim();
+            UnitPrice = item.Price;
+            StockOnHand = item.QuantityOnHand;
+            if (Quantity <= 0)
+                Quantity = 1;
+            Recalculate();
         }
 
         /// <summary>Восстановить выбор и текст после обновления ItemsSource ComboBox.</summary>

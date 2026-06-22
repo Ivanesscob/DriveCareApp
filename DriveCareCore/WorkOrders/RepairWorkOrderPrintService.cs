@@ -7,7 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace DriveCarePro.Services.RepairWorkOrder
+namespace DriveCareCore.WorkOrders
 {
     public static class RepairWorkOrderPrintService
     {
@@ -144,26 +144,37 @@ namespace DriveCarePro.Services.RepairWorkOrder
             if (string.IsNullOrWhiteSpace(targetPath))
                 throw new ArgumentException("Укажите путь для сохранения.", nameof(targetPath));
 
+            model.RecalculateTotals();
+
             var values = model.ToTokenMap(includeWorkRowTokens: false);
-            var workLines = model.WorkLines != null && model.WorkLines.Count > 0
-                ? (IReadOnlyList<RepairWorkOrderWorkLine>)model.WorkLines
+            var effectiveWork = model.GetEffectiveWorkLines();
+            var workLines = effectiveWork != null && effectiveWork.Count > 0
+                ? effectiveWork
                 : null;
             var partLines = model.PartLines != null && model.PartLines.Count > 0
                 ? (IReadOnlyList<RepairWorkOrderPartLine>)model.PartLines
                 : null;
-            return FillAndSave(values, targetPath, workLines, partLines);
+            return FillAndSave(values, targetPath, workLines, partLines, requireTokensTemplate: true);
         }
 
         private static string FillAndSave(
             IDictionary<string, string> tokenValues,
             string targetPath,
             IReadOnlyList<RepairWorkOrderWorkLine> workLines,
-            IReadOnlyList<RepairWorkOrderPartLine> partLines)
+            IReadOnlyList<RepairWorkOrderPartLine> partLines,
+            bool requireTokensTemplate = false)
         {
             var templatePath = ResolveTemplatePath(TokensTemplateFile);
             var legacyTemplate = false;
             if (!File.Exists(templatePath))
             {
+                if (requireTokensTemplate)
+                {
+                    throw new FileNotFoundException(
+                        "Не найден шаблон shablon_tokens.docx. Выполните Resources\\Words\\pack_shablon_tokens.ps1 и пересоберите проект.",
+                        templatePath);
+                }
+
                 templatePath = ResolveTemplatePath(LegacyTemplateFile);
                 legacyTemplate = true;
             }
@@ -204,6 +215,7 @@ namespace DriveCarePro.Services.RepairWorkOrder
                 }
 
                 FillWorkAndPartsTableRows(document, workLines, partLines);
+                CleanupDocumentLayout(document);
 
                 var entryPath = entry.FullName;
                 entry.Delete();
@@ -223,19 +235,18 @@ namespace DriveCarePro.Services.RepairWorkOrder
             if (workLines != null && workLines.Count > 0)
                 FillWorkTable(document, workLines);
             else
-                ClearTableRowByToken(document, RepairWorkOrderTokens.WorkName, CreateWorkRowTokenMap(new RepairWorkOrderWorkLine()));
+                ClearTableRowByToken(document, RepairWorkOrderTokens.WorkCode, CreateWorkRowTokenMap(new RepairWorkOrderWorkLine()));
 
             if (partLines != null && partLines.Count > 0)
                 FillPartsTable(document, partLines);
             else
-                ClearTableRowByToken(document, RepairWorkOrderTokens.PartsName, CreatePartsRowTokenMap(new RepairWorkOrderPartLine()));
+                ClearTableRowByToken(document, RepairWorkOrderTokens.PartsNumber, CreatePartsRowTokenMap(new RepairWorkOrderPartLine()));
         }
 
         private static void FillWorkTable(XDocument document, IReadOnlyList<RepairWorkOrderWorkLine> workLines)
         {
-            var templateRow = document
-                .Descendants(W + "tr")
-                .FirstOrDefault(row => RowContainsToken(row, RepairWorkOrderTokens.WorkName));
+            var templateRow = FindTableRowByToken(document, RepairWorkOrderTokens.WorkCode)
+                ?? FindTableRowByToken(document, RepairWorkOrderTokens.WorkName);
 
             if (templateRow == null)
                 return;
@@ -253,9 +264,8 @@ namespace DriveCarePro.Services.RepairWorkOrder
 
         private static void FillPartsTable(XDocument document, IReadOnlyList<RepairWorkOrderPartLine> partLines)
         {
-            var templateRow = document
-                .Descendants(W + "tr")
-                .FirstOrDefault(row => RowContainsToken(row, RepairWorkOrderTokens.PartsName));
+            var templateRow = FindTableRowByToken(document, RepairWorkOrderTokens.PartsNumber)
+                ?? FindTableRowByToken(document, RepairWorkOrderTokens.PartsName);
 
             if (templateRow == null)
                 return;
@@ -292,9 +302,7 @@ namespace DriveCarePro.Services.RepairWorkOrder
 
         private static void ClearTableRowByToken(XDocument document, string markerToken, IDictionary<string, string> emptyValues)
         {
-            var row = document
-                .Descendants(W + "tr")
-                .FirstOrDefault(r => RowContainsToken(r, markerToken));
+            var row = FindTableRowByToken(document, markerToken);
 
             if (row != null)
                 ReplaceInRow(row, emptyValues);
@@ -315,11 +323,25 @@ namespace DriveCarePro.Services.RepairWorkOrder
             };
         }
 
+        private static XElement FindTableRowByToken(XDocument document, string token)
+        {
+            if (document == null || string.IsNullOrEmpty(token))
+                return null;
+
+            return document
+                .Descendants(W + "tr")
+                .FirstOrDefault(row => RowContainsToken(row, token));
+        }
+
         private static bool RowContainsToken(XElement row, string token)
         {
-            foreach (var text in row.Descendants(W + "t"))
+            if (row == null || string.IsNullOrEmpty(token))
+                return false;
+
+            foreach (var cell in row.Elements(W + "tc"))
             {
-                if (text.Value != null && text.Value.IndexOf(token, StringComparison.Ordinal) >= 0)
+                var combined = string.Concat(cell.Descendants(W + "t").Select(t => t.Value ?? string.Empty));
+                if (combined.IndexOf(token, StringComparison.Ordinal) >= 0)
                     return true;
             }
 
@@ -346,17 +368,35 @@ namespace DriveCarePro.Services.RepairWorkOrder
 
         private static void ReplaceInRow(XElement row, IDictionary<string, string> tokens)
         {
-            foreach (var text in row.Descendants(W + "t"))
-            {
-                if (string.IsNullOrEmpty(text.Value))
-                    continue;
+            foreach (var cell in row.Elements(W + "tc"))
+                ReplaceTokensInContainer(cell, tokens);
+        }
 
-                foreach (var pair in tokens)
-                {
-                    if (text.Value.IndexOf(pair.Key, StringComparison.Ordinal) >= 0)
-                        text.Value = text.Value.Replace(pair.Key, pair.Value ?? string.Empty);
-                }
+        private static void ReplaceTokensInContainer(XElement container, IDictionary<string, string> tokens)
+        {
+            if (container == null || tokens == null || tokens.Count == 0)
+                return;
+
+            var textNodes = container.Descendants(W + "t").ToList();
+            if (textNodes.Count == 0)
+                return;
+
+            var combined = string.Concat(textNodes.Select(t => t.Value ?? string.Empty));
+            var updated = combined;
+            foreach (var pair in tokens.OrderByDescending(p => p.Key.Length))
+            {
+                if (string.IsNullOrEmpty(pair.Key))
+                    continue;
+                if (updated.IndexOf(pair.Key, StringComparison.Ordinal) >= 0)
+                    updated = updated.Replace(pair.Key, pair.Value ?? string.Empty);
             }
+
+            if (string.Equals(combined, updated, StringComparison.Ordinal))
+                return;
+
+            textNodes[0].Value = updated;
+            for (var i = 1; i < textNodes.Count; i++)
+                textNodes[i].Value = string.Empty;
         }
 
         private static void ReplaceTextInDocument(XDocument document, string search, string replace)
@@ -364,11 +404,154 @@ namespace DriveCarePro.Services.RepairWorkOrder
             if (string.IsNullOrEmpty(search))
                 return;
 
-            foreach (var text in document.Descendants(W + "t"))
+            foreach (var paragraph in document.Descendants(W + "p"))
             {
-                if (!string.IsNullOrEmpty(text.Value) && text.Value.Contains(search))
-                    text.Value = text.Value.Replace(search, replace ?? string.Empty);
+                var textNodes = paragraph.Descendants(W + "t").ToList();
+                if (textNodes.Count == 0)
+                    continue;
+
+                var combined = string.Concat(textNodes.Select(t => t.Value ?? string.Empty));
+                if (!combined.Contains(search))
+                    continue;
+
+                var updated = combined.Replace(search, replace ?? string.Empty);
+                textNodes[0].Value = updated;
+                for (var i = 1; i < textNodes.Count; i++)
+                    textNodes[i].Value = string.Empty;
             }
+        }
+
+        private static void CleanupDocumentLayout(XDocument document)
+        {
+            RemoveCustomerPartsSection(document);
+            RemoveSurplusEmptyRows(document);
+        }
+
+        private static void RemoveCustomerPartsSection(XDocument document)
+        {
+            if (document == null)
+                return;
+
+            var rows = document.Descendants(W + "tr").ToList();
+            var startIndex = -1;
+            var endIndex = -1;
+
+            for (var i = 0; i < rows.Count; i++)
+            {
+                var text = GetRowPlainText(rows[i]);
+                if (text.IndexOf("{{CUSTOMER_PARTS", StringComparison.Ordinal) < 0)
+                    continue;
+
+                startIndex = i;
+                while (startIndex > 0)
+                {
+                    var prev = GetRowPlainText(rows[startIndex - 1]);
+                    if (prev.IndexOf(RepairWorkOrderTokens.PartsTotal, StringComparison.Ordinal) >= 0
+                        || prev.IndexOf(RepairWorkOrderTokens.LaborCostSum, StringComparison.Ordinal) >= 0)
+                        break;
+                    startIndex--;
+                }
+
+                break;
+            }
+
+            if (startIndex < 0)
+                return;
+
+            for (var i = startIndex; i < rows.Count; i++)
+            {
+                var text = GetRowPlainText(rows[i]);
+                if (text.IndexOf(RepairWorkOrderTokens.LaborCostSum, StringComparison.Ordinal) >= 0)
+                {
+                    endIndex = i;
+                    break;
+                }
+            }
+
+            var removeUntil = endIndex >= 0 ? endIndex : rows.Count;
+            for (var i = startIndex; i < removeUntil; i++)
+                rows[i].Remove();
+        }
+
+        private static void RemoveSurplusEmptyRows(XDocument document)
+        {
+            if (document == null)
+                return;
+
+            foreach (var row in document.Descendants(W + "tr").ToList())
+            {
+                if (ShouldRemoveEmptyRow(row))
+                    row.Remove();
+            }
+        }
+
+        private static bool ShouldRemoveEmptyRow(XElement row)
+        {
+            var text = GetRowPlainText(row).Trim();
+            if (string.IsNullOrEmpty(text))
+                return true;
+
+            if (text.IndexOf("Итого", StringComparison.OrdinalIgnoreCase) >= 0)
+                return false;
+
+            if (text.IndexOf("{{", StringComparison.Ordinal) >= 0)
+                return false;
+
+            if (IsTableHeaderRow(text))
+                return false;
+
+            if (IsSectionTitleRow(text))
+                return false;
+
+            return IsPlaceholderOnly(text);
+        }
+
+        private static bool IsTableHeaderRow(string text)
+        {
+            return text.IndexOf("Наименование", StringComparison.OrdinalIgnoreCase) >= 0
+                || text.IndexOf("Код работы", StringComparison.OrdinalIgnoreCase) >= 0
+                || text.IndexOf("Кратность", StringComparison.OrdinalIgnoreCase) >= 0
+                || text.IndexOf("Ед. изм", StringComparison.OrdinalIgnoreCase) >= 0
+                || text.IndexOf("Исполнитель", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static bool IsSectionTitleRow(string text)
+        {
+            if (text.IndexOf("Выполненные работы", StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+
+            if (text.IndexOf("потребител", StringComparison.OrdinalIgnoreCase) >= 0)
+                return false;
+
+            return text.IndexOf("Запасные детали", StringComparison.OrdinalIgnoreCase) >= 0
+                || text.IndexOf("расходные материалы", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static bool IsPlaceholderOnly(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return true;
+
+            foreach (var ch in text)
+            {
+                if (char.IsWhiteSpace(ch))
+                    continue;
+                if (ch == '×' || ch == 'x' || ch == 'X' || ch == 'х' || ch == 'Х')
+                    continue;
+                if (ch == '-' || ch == '—' || ch == '_' || ch == '.' || ch == ':' || ch == '|')
+                    continue;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static string GetRowPlainText(XElement row)
+        {
+            if (row == null)
+                return string.Empty;
+
+            return string.Concat(row.Descendants(W + "t").Select(t => t.Value ?? string.Empty));
         }
 
         private static ZipArchiveEntry FindDocumentXmlEntry(ZipArchive archive)

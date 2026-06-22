@@ -1,9 +1,11 @@
 using DriveCareCore.Data.BD;
 using DriveCareCore.Data.Services;
+using DriveCareCore.Reviews;
+using DriveCareCore.ServiceVisits;
 
 using DriveCarePro.Services;
 
-using DriveCarePro.Services.RepairWorkOrder;
+using DriveCareCore.WorkOrders;
 using DriveCarePro.Windows;
 
 using DriveCarePro.Services.ServiceBooking;
@@ -50,6 +52,7 @@ namespace DriveCarePro.Pages
         private readonly Guid _taskId;
 
         private Guid? _repairHistoryId;
+        private bool _requiresMileageOnComplete;
 
         private Guid _workshopId;
 
@@ -80,6 +83,10 @@ namespace DriveCarePro.Pages
         private Guid? _rootTaskId;
 
         private Guid? _onlineBookingId;
+
+        private Guid _chainRootTaskId;
+
+        private bool _isChainRootTask;
 
         private bool _isLoadingTask;
 
@@ -112,8 +119,6 @@ namespace DriveCarePro.Pages
             ServicesGrid.ItemsSource = _serviceLines;
 
             PartsGrid.ItemsSource = _partLines;
-
-            PartsGrid.LoadingRow += PartsGrid_LoadingRow;
 
             _partLines.CollectionChanged += PartLines_CollectionChanged;
 
@@ -193,22 +198,51 @@ namespace DriveCarePro.Pages
 
 
 
-        private void AddServiceLine_Click(object sender, RoutedEventArgs e) =>
-
-            _serviceLines.Add(NewServiceLine());
-
-
-
-        private void AddPartLine_Click(object sender, RoutedEventArgs e)
+        private void AddServiceLine_Click(object sender, RoutedEventArgs e)
         {
-            if (_partLines.Any(v => !v.IsPurchaseLine &&
-                    (!v.WorkshopPartId.HasValue || v.WorkshopPartId.Value == Guid.Empty)))
-        {
-            MessageBox.Show(
-                    "Сначала выберите деталь в текущей строке из списка.",
-                    "Детали", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (_isCompleted || _archiveView || _isPurchaseTask)
+                return;
+
+            if (_catalog == null || _catalog.Count == 0)
+            {
+                MessageBox.Show("Каталог услуг мастерской пуст.", "Услуги",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+
+            var owner = Window.GetWindow(this);
+            var picker = new PickWorkshopServiceWindow(_catalog) { Owner = owner };
+            if (picker.ShowDialog() != true || picker.SelectedItem == null)
+                return;
+
+            var item = picker.SelectedItem;
+            var existing = _serviceLines.FirstOrDefault(l =>
+                l.WorkshopServiceId.HasValue && l.WorkshopServiceId.Value == item.RowId);
+            if (existing != null)
+            {
+                existing.Quantity += 1;
+                existing.Recalculate();
+                return;
+            }
+
+            _serviceLines.Add(TaskServiceLineVm.CreateFromCatalog(item, _catalog));
+        }
+
+
+
+        private async void AddPartLine_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isCompleted || _archiveView || _isPurchaseTask)
+                return;
+
+            if (_workshopId == Guid.Empty)
+            {
+                MessageBox.Show("Не определена мастерская для склада.", "Детали",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            await RefreshPartsCatalogAsync().ConfigureAwait(true);
 
             if (!HasStockInCatalog())
             {
@@ -218,9 +252,36 @@ namespace DriveCarePro.Pages
                 return;
             }
 
-            _partLines.Add(NewPartLine());
+            var owner = Window.GetWindow(this);
+            var picker = new PickWorkshopPartWindow(_partsCatalog) { Owner = owner };
+            if (picker.ShowDialog() != true || picker.SelectedItem == null)
+                return;
+
+            var item = picker.SelectedItem;
+            var existing = _partLines.FirstOrDefault(l =>
+                !l.IsPurchaseLine
+                && l.WorkshopPartId.HasValue
+                && l.WorkshopPartId.Value == item.RowId);
+            if (existing != null)
+            {
+                var maxAllowed = item.QuantityOnHand + existing.ReservedQuantity;
+                if (existing.Quantity + 1 > maxAllowed)
+                {
+                    MessageBox.Show(
+                        $"На складе доступно {maxAllowed:0.###} {item.UnitName}.",
+                        "Детали", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                existing.Quantity += 1;
+                existing.Recalculate();
+                PruneSessionRemovedParts();
+                return;
+            }
+
+            var includeIds = CollectPickerPartIds();
+            _partLines.Add(TaskPartLineVm.CreateFromCatalog(item, _partsCatalog, includeIds));
             PruneSessionRemovedParts();
-            ScheduleRefreshPartComboDisplays();
         }
 
         private HashSet<Guid> CollectPickerPartIds()
@@ -374,7 +435,6 @@ namespace DriveCarePro.Pages
                 await RefreshPartsCatalogAsync().ConfigureAwait(true);
                 RefreshPartsUiState();
                 OnReportContentChanged();
-                ScheduleRefreshPartComboDisplays();
                 return;
             }
 
@@ -393,18 +453,10 @@ namespace DriveCarePro.Pages
             if (e.OldItems != null)
             {
                 foreach (TaskPartLineVm vm in e.OldItems)
-                {
                     vm.PropertyChanged -= ReportLine_PropertyChanged;
-                    vm.SuppressComboBindingUpdates = true;
-                }
             }
 
             OnReportContentChanged();
-        }
-
-        private void ScheduleRefreshPartComboDisplays()
-        {
-            Dispatcher.BeginInvoke(new Action(RefreshLineComboDisplays), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void ServiceLines_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -683,7 +735,10 @@ namespace DriveCarePro.Pages
                 {
                     var links = await TaskDelegationService.TryLoadLinksAsync(_taskId).ConfigureAwait(true);
                     if (links.ParentTaskId.HasValue)
+                    {
                         await TaskDelegationService.SyncPartLinesToAncestorsAsync(_taskId).ConfigureAwait(true);
+                        await TaskDelegationService.SyncServiceLinesToAncestorsAsync(_taskId).ConfigureAwait(true);
+                    }
                 }
             }
             catch (Exception ex)
@@ -792,29 +847,13 @@ namespace DriveCarePro.Pages
             {
                 _suppressStockSync = false;
             }
-
-            ScheduleRefreshPartComboDisplays();
         }
 
 
 
-        private TaskServiceLineVm NewServiceLine() =>
-
-            new TaskServiceLineVm { Catalog = _catalog };
-
-        private TaskPartLineVm NewPartLine() =>
-            new TaskPartLineVm
-            {
-                Catalog = _partsCatalog,
-                PickerIncludeZeroStockIds = CollectPickerPartIds()
-            };
-
         private void ConfigurePartsGridColumns(bool purchaseList, bool lineFieldsEditable)
         {
-            PartNameReadColumn.Visibility = purchaseList ? Visibility.Visible : Visibility.Collapsed;
-            PartNamePickColumn.Visibility = purchaseList ? Visibility.Collapsed : Visibility.Visible;
-            PartNamePickColumn.Header = purchaseList ? "Наименование" : "Наименование (поиск)";
-
+            PartNameColumn.IsReadOnly = true;
             PartQtyColumn.IsReadOnly = !lineFieldsEditable;
             PartUnitColumn.IsReadOnly = !lineFieldsEditable;
             PartPriceColumn.IsReadOnly = !lineFieldsEditable;
@@ -916,6 +955,7 @@ namespace DriveCarePro.Pages
                 ApplyTaskData(data, serviceRows, partRows, purchaseRequest, purchaseStatus);
 
                 await UpdateOnlineBookingNoShowUiAsync(taskId).ConfigureAwait(true);
+                await UpdateClientStageUiAsync(taskId, data.IsCompleted).ConfigureAwait(true);
                 await LoadDocumentAsync(taskId).ConfigureAwait(true);
                 await UpdateRootTaskNavigationAsync(taskId).ConfigureAwait(true);
 
@@ -995,6 +1035,22 @@ namespace DriveCarePro.Pages
             var repairHistoryId = await TaskRepairLinkResolver.ResolveRepairHistoryIdAsync(
                 db, taskId, task.CarId, extra?.RepairHistoryId).ConfigureAwait(false);
 
+            Guid? parentTaskId = null;
+            try
+            {
+                parentTaskId = await db.Database.SqlQuery<Guid?>(
+                    "SELECT ParentTaskId FROM Tasks WHERE RowId = @p0", taskId).FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+            }
+
+            int? repairMileageKm = null;
+            if (repairHistoryId.HasValue)
+                repairMileageKm = await RepairMileageService.TryLoadMileageAsync(db, repairHistoryId.Value)
+                    .ConfigureAwait(false);
+
             return new TaskCardData
             {
                 Title = string.IsNullOrWhiteSpace(task.Title) ? "Задание" : task.Title.Trim(),
@@ -1005,6 +1061,8 @@ namespace DriveCarePro.Pages
                 ReportText = task.ReportText ?? string.Empty,
                 IsCompleted = task.IsCompleted,
                 RepairHistoryId = repairHistoryId,
+                RepairMileageKm = repairMileageKm,
+                ParentTaskId = parentTaskId,
                 HasCar = hasCar,
                 ShowCarSection = hasCar && isRepairOrPainting,
                 CanDelegate = delegation.CanDelegate,
@@ -1119,10 +1177,6 @@ namespace DriveCarePro.Pages
 
             }
 
-            else if (!_isCompleted)
-
-                _serviceLines.Add(NewServiceLine());
-
             if (_isPurchaseTask && purchaseRequest != null)
             {
                 _purchaseRequestId = purchaseRequest.RequestId;
@@ -1173,13 +1227,25 @@ namespace DriveCarePro.Pages
 
             CompletionSection.Visibility = (_archiveView || data.IsCompleted) ? Visibility.Collapsed : Visibility.Visible;
 
+            _requiresMileageOnComplete = _repairHistoryId.HasValue && !_isPurchaseTask
+                && (!data.ParentTaskId.HasValue || data.ParentTaskId.Value == Guid.Empty);
+            var showMileagePanel = _requiresMileageOnComplete && !_archiveView && !data.IsCompleted;
+            CompletionMileagePanel.Visibility = showMileagePanel ? Visibility.Visible : Visibility.Collapsed;
+            if (showMileagePanel)
+                CompletionMileageBox.Text = data.RepairMileageKm?.ToString() ?? string.Empty;
+
             if (_archiveView)
                 WorkOrderButton.Content = "Скачать заказ-наряд";
 
-            var showWorkOrder = _repairHistoryId.HasValue && !_isPurchaseTask;
+            var showDocActions = (_isCompleted || _archiveView) && !_isPurchaseTask && _repairHistoryId.HasValue;
+            var showWorkOrder = showDocActions;
             WorkOrderButton.Visibility = showWorkOrder ? Visibility.Visible : Visibility.Collapsed;
             WorkOrderButton.IsEnabled = showWorkOrder;
-            if (!showWorkOrder && !_isPurchaseTask)
+            ViewDocumentButton.Visibility = showDocActions ? Visibility.Visible : Visibility.Collapsed;
+            ViewDocumentToolbarButton.Visibility = showDocActions ? Visibility.Visible : Visibility.Collapsed;
+            if (!showWorkOrder && !_isPurchaseTask && _repairHistoryId.HasValue && !_isCompleted)
+                WorkOrderButton.ToolTip = "Заказ-наряд доступен после завершения ремонта.";
+            else if (!showWorkOrder && !_isPurchaseTask)
                 WorkOrderButton.ToolTip = "Заказ-наряд доступен для заданий с записью на ремонт/покраску (нужна связь с RepairHistory в БД).";
 
             var reportEditable = !data.IsCompleted && !_archiveView;
@@ -1254,8 +1320,110 @@ namespace DriveCarePro.Pages
             CaptureReportSnapshot();
             UpdateSaveButtonState();
             UpdateViewDocumentButtonsState();
+        }
 
-            Dispatcher.BeginInvoke(new Action(RefreshLineComboDisplays), System.Windows.Threading.DispatcherPriority.Loaded);
+        private async Task UpdateClientStageUiAsync(Guid taskId, bool isCompleted)
+        {
+            ClientStageSection.Visibility = Visibility.Collapsed;
+            ClientHandoverSection.Visibility = Visibility.Collapsed;
+            MarkAcceptedButton.Visibility = Visibility.Collapsed;
+            MarkInRepairButton.Visibility = Visibility.Collapsed;
+
+            if (_isPurchaseTask || _archiveView)
+                return;
+
+            _chainRootTaskId = await TaskDelegationService.FindRootTaskIdAsync(taskId).ConfigureAwait(true);
+            _isChainRootTask = _chainRootTaskId != Guid.Empty && _chainRootTaskId == taskId;
+            if (!_isChainRootTask)
+                return;
+
+            var docInfo = await ServiceDocumentService.TryLoadInfoAsync(taskId).ConfigureAwait(true);
+            if (docInfo == null || docInfo.DocumentId == Guid.Empty)
+                return;
+
+            ClientStageSection.Visibility = Visibility.Visible;
+            ClientStageStatusText.Text = docInfo.ClientStageDisplay ?? ServiceDocumentClientStageLabels.InRepair;
+
+            if (!isCompleted)
+            {
+                if (docInfo.ClientStage == ServiceDocumentClientStage.Unknown)
+                    MarkAcceptedButton.Visibility = Visibility.Visible;
+
+                if (docInfo.ClientStage == ServiceDocumentClientStage.Unknown
+                    || docInfo.ClientStage == ServiceDocumentClientStage.Accepted)
+                    MarkInRepairButton.Visibility = Visibility.Visible;
+            }
+
+            if (docInfo.Status == ServiceDocumentStatus.Open
+                && docInfo.ClientStage == ServiceDocumentClientStage.ReadyForPickup)
+            {
+                ClientHandoverSection.Visibility = Visibility.Visible;
+            }
+        }
+
+        private async void MarkAccepted_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isPageBusy || !_isChainRootTask || _chainRootTaskId == Guid.Empty)
+                return;
+
+            SetPageBusy(true, "Обновление статуса…");
+            try
+            {
+                await ServiceDocumentClientStageService.TryMarkAcceptedAsync(_chainRootTaskId).ConfigureAwait(true);
+                await UpdateClientStageUiAsync(_taskId, _isCompleted).ConfigureAwait(true);
+            }
+            finally
+            {
+                SetPageBusy(false);
+            }
+        }
+
+        private async void MarkInRepair_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isPageBusy || !_isChainRootTask || _chainRootTaskId == Guid.Empty)
+                return;
+
+            SetPageBusy(true, "Обновление статуса…");
+            try
+            {
+                await ServiceDocumentClientStageService.TryMarkInRepairAsync(_chainRootTaskId).ConfigureAwait(true);
+                await UpdateClientStageUiAsync(_taskId, _isCompleted).ConfigureAwait(true);
+            }
+            finally
+            {
+                SetPageBusy(false);
+            }
+        }
+
+        private async void DeliverToClient_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isPageBusy || !_isChainRootTask || _chainRootTaskId == Guid.Empty)
+                return;
+
+            var confirm = MessageBox.Show(
+                "Подтвердите выдачу автомобиля клиенту. Заказ-наряд будет закрыт.",
+                "Выдача клиенту",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            SetPageBusy(true, "Выдача клиенту…");
+            try
+            {
+                await ServiceDocumentService.TryFinalizeForRootTaskAsync(_chainRootTaskId).ConfigureAwait(true);
+                var docInfo = await ServiceDocumentService.TryLoadInfoAsync(_taskId).ConfigureAwait(true);
+                if (docInfo != null)
+                    await TryNotifyClientToReviewAsync(_taskId, docInfo).ConfigureAwait(true);
+
+                MessageBox.Show("Автомобиль выдан. Клиент увидит завершение ремонта.",
+                    "Выдача", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppState.Navigate(new ProHomePage());
+            }
+            finally
+            {
+                SetPageBusy(false);
+            }
         }
 
         private async Task UpdateOnlineBookingNoShowUiAsync(Guid taskId)
@@ -1322,129 +1490,17 @@ namespace DriveCarePro.Pages
             }
         }
 
-        private void RefreshLineComboDisplays()
-        {
-            foreach (var vm in _serviceLines)
-                vm.PushComboDisplayToView();
-
-            foreach (var vm in _partLines.Where(v => !v.IsPurchaseLine))
-            {
-                vm.SuppressComboBindingUpdates = false;
-                vm.RestoreCatalogSelection();
-            }
-
-            RefreshPartsGridComboBoxes();
-        }
-
-        private void RefreshPartsGridComboBoxes()
-        {
-            if (PartsGrid == null)
-                return;
-
-            foreach (var item in _partLines.Where(v => !v.IsPurchaseLine))
-            {
-                var row = PartsGrid.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
-            if (row == null)
-                    continue;
-
-                var combo = FindVisualChild<ComboBox>(row);
-                if (combo != null)
-                    ApplyComboLineDisplay(combo);
-            }
-        }
-
-        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-        {
-            if (parent == null)
-                return null;
-
-            for (var i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-                if (child is T match)
-                    return match;
-
-                var nested = FindVisualChild<T>(child);
-                if (nested != null)
-                    return nested;
-            }
-
-            return null;
-        }
-
-        private void TaskLineComboBox_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (!(sender is ComboBox combo))
-                return;
-
-            if (combo.DataContext is TaskPartLineVm partLine)
-                partLine.SuppressComboBindingUpdates = false;
-
-            combo.Unloaded -= TaskLineComboBox_Unloaded;
-            combo.Unloaded += TaskLineComboBox_Unloaded;
-            combo.DataContextChanged -= TaskLineComboBox_DataContextChanged;
-            combo.DataContextChanged += TaskLineComboBox_DataContextChanged;
-            ApplyComboLineDisplay(combo);
-        }
-
-        private void TaskLineComboBox_Unloaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is ComboBox combo && combo.DataContext is TaskPartLineVm partLine)
-                partLine.SuppressComboBindingUpdates = true;
-        }
-
-        private void PartsGrid_LoadingRow(object sender, DataGridRowEventArgs e)
-        {
-            if (!(e.Row.Item is TaskPartLineVm partLine) || partLine.IsPurchaseLine)
-                return;
-
-            partLine.SuppressComboBindingUpdates = false;
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (e.Row.Item != partLine)
-                    return;
-
-                var combo = FindVisualChild<ComboBox>(e.Row);
-                if (combo != null)
-                    ApplyComboLineDisplay(combo);
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-        }
-
-        private void TaskLineComboBox_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (sender is ComboBox combo)
-                ApplyComboLineDisplay(combo);
-        }
-
-        private static void ApplyComboLineDisplay(ComboBox combo)
-        {
-            if (combo.DataContext is TaskServiceLineVm serviceLine)
-            {
-                serviceLine.PushComboDisplayToView();
-                if (serviceLine.SelectedCatalog != null)
-                    combo.SelectedItem = serviceLine.SelectedCatalog;
-                var text = serviceLine.ServiceSearchText;
-                if (!string.IsNullOrEmpty(text))
-                    combo.Text = text;
-                return;
-            }
-
-            if (combo.DataContext is TaskPartLineVm partLine && !partLine.IsPurchaseLine)
-            {
-                partLine.RestoreCatalogSelection();
-                if (partLine.SelectedCatalog != null)
-                    combo.SelectedItem = partLine.SelectedCatalog;
-                var text = partLine.PartSearchText;
-                if (string.IsNullOrEmpty(text))
-                    text = partLine.PartName;
-                if (!string.IsNullOrEmpty(text))
-                    combo.Text = text;
-            }
-        }
-
         private async Task LoadDocumentAsync(Guid taskId)
         {
             if (_isPurchaseTask || _archiveView)
+            {
+                DocumentSection.Visibility = Visibility.Collapsed;
+                ViewDocumentButton.Visibility = Visibility.Collapsed;
+                ViewDocumentToolbarButton.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            if (!_isCompleted)
             {
                 DocumentSection.Visibility = Visibility.Collapsed;
                 ViewDocumentButton.Visibility = Visibility.Collapsed;
@@ -1549,6 +1605,25 @@ namespace DriveCarePro.Pages
             if (emp == null || _archiveView || _isCompleted)
                 return;
 
+            if (HasReportChanges())
+            {
+                SetPageBusy(true, "Сохранение перед передачей…");
+                try
+                {
+                    var (saveOk, saveErr) = await SaveTaskReportAsync().ConfigureAwait(true);
+                    if (!saveOk)
+                    {
+                        MessageBox.Show(saveErr ?? "Сначала сохраните задание.", "Поручение",
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                finally
+                {
+                    SetPageBusy(false);
+                }
+            }
+
             var employees = await TaskDelegationService.ListDelegateTargetsAsync(emp.RowId, _taskId)
                 .ConfigureAwait(true);
             if (employees.Count == 0)
@@ -1616,24 +1691,28 @@ namespace DriveCarePro.Pages
 
             var repairId = _repairHistoryId.Value;
             var model = await DatabaseExecutor.WithDbAsync(db =>
-                    ServiceBookingWorkOrderBuilder.BuildFromRepairAsync(db, repairId, scope.scope))
+                    ServiceBookingWorkOrderBuilder.BuildFromRepairAsync(db, repairId, scope.scope, _taskId))
                 .ConfigureAwait(true);
 
             if (model == null)
                 return (false, null, "Не удалось собрать данные для заказ-наряда.");
 
-            var workLines = TaskReportService.ToWorkOrderLines(_serviceLines.Select(v => v.ToRow()).ToList());
-            if (workLines.Count > 0)
-                model.WorkLines = workLines;
+            var uiServices = _serviceLines
+                .Select(v => { v.Recalculate(); return v.ToRow(); })
+                .Where(r => !string.IsNullOrWhiteSpace(r.ServiceName))
+                .ToList();
+            if (uiServices.Count > 0)
+                ServiceBookingWorkOrderBuilder.ApplyServiceLinesToModel(model, uiServices);
 
-            var partRows = _partLines
+            var uiParts = _partLines
                 .Where(v => !v.IsPurchaseLine)
                 .Select(v => { v.Recalculate(); return v.ToRow(); })
                 .Where(r => !string.IsNullOrWhiteSpace(r.PartName))
                 .ToList();
-            if (partRows.Count == 0)
-                partRows = await TaskReportService.LoadPartLinesAsync(_taskId).ConfigureAwait(true);
-            ServiceBookingWorkOrderBuilder.ApplyPartLinesToModel(model, partRows);
+            if (uiParts.Count > 0)
+                ServiceBookingWorkOrderBuilder.ApplyPartLinesToModel(model, uiParts);
+
+            model.RecalculateTotals();
 
             var preferredPath = RepairWorkOrderPrintService.GetDesktopOrderPath("Zakaz-naryad-vydacha");
             var (genOk, savedPath, genError) = await Task.Run(() =>
@@ -1817,6 +1896,22 @@ namespace DriveCarePro.Pages
 
             var freeNote = _reportNoteText;
 
+            int? completionMileageKm = null;
+            if (_requiresMileageOnComplete)
+            {
+                if (!RepairMileageService.TryParseMileage(CompletionMileageBox.Text, out var km))
+                {
+                    MessageBox.Show(
+                        "Укажите пробег автомобиля (км) перед закрытием ремонта.",
+                        "Пробег",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                completionMileageKm = km;
+            }
+
             var taskId = _taskId;
             var taskLinks = await TaskDelegationService.TryLoadLinksAsync(taskId).ConfigureAwait(true);
 
@@ -1847,6 +1942,18 @@ namespace DriveCarePro.Pages
                             await TaskReportService.SaveReportAsync(db, taskId, serviceRows, partRows, freeNote)
                                 .ConfigureAwait(false);
 
+                            if (completionMileageKm.HasValue && _repairHistoryId.HasValue)
+                            {
+                                var (mileageOk, mileageErr) = await RepairMileageService.SaveRepairMileageAsync(
+                                    db,
+                                    _repairHistoryId.Value,
+                                    completionMileageKm.Value,
+                                    task.ClientUserId,
+                                    task.CarId).ConfigureAwait(false);
+                                if (!mileageOk)
+                                    throw new InvalidOperationException(mileageErr ?? "Не удалось сохранить пробег.");
+                            }
+
                             var docId = await ServiceDocumentService.TryGetDocumentIdForTaskAsync(db, taskId)
                                 .ConfigureAwait(false);
                             ServiceDocumentInfo docInfo = null;
@@ -1860,6 +1967,8 @@ namespace DriveCarePro.Pages
                             else
                             {
                                 await TaskDelegationService.SyncPartLinesToAncestorsAsync(db, taskId)
+                                    .ConfigureAwait(false);
+                                await TaskDelegationService.SyncServiceLinesToAncestorsAsync(db, taskId)
                                     .ConfigureAwait(false);
                             }
 
@@ -1924,6 +2033,12 @@ namespace DriveCarePro.Pages
                     msg = autoClosedCount > 0
                         ? $"Задание завершено. Документ заказ-наряда закрыт, автоматически завершено связанных заданий: {autoClosedCount}."
                         : "Задание завершено. Единый документ заказ-наряда закрыт.";
+                else if (docAfter != null
+                         && docAfter.IsCurrentTaskRoot
+                         && docAfter.ClientStage == ServiceDocumentClientStage.ReadyForPickup)
+                    msg = autoClosedCount > 0
+                        ? $"Ремонт завершён. Автомобиль готов к выдаче. Закрыто связанных заданий: {autoClosedCount}. Нажмите «Выдать клиенту», когда клиент заберёт машину."
+                        : "Ремонт завершён. Автомобиль готов к выдаче — нажмите «Выдать клиенту», когда клиент заберёт машину.";
                 else if (autoClosedCount > 0)
                     msg = $"Задание завершено. Автоматически закрыто дочерних заданий: {autoClosedCount}.";
                 else if (taskLinks.ParentTaskId.HasValue && taskLinks.DelegateTaskId.HasValue)
@@ -1941,6 +2056,17 @@ namespace DriveCarePro.Pages
                     AppState.CurrentEmployee?.WorkshopId,
                     entityType: "Task",
                     entityId: taskId);
+
+                if (docAfter != null && docAfter.Status == ServiceDocumentStatus.Completed)
+                {
+                    await TryNotifyClientToReviewAsync(taskId, docAfter).ConfigureAwait(true);
+                }
+                else if (docAfter != null
+                         && docAfter.IsCurrentTaskRoot
+                         && docAfter.ClientStage == ServiceDocumentClientStage.ReadyForPickup)
+                {
+                    await TryNotifyClientToReviewAsync(taskId, docAfter).ConfigureAwait(true);
+                }
 
                 if (CanGenerateWorkOrderDocx)
                 {
@@ -1965,6 +2091,15 @@ namespace DriveCarePro.Pages
                                 "Заказ-наряд", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                     }
+                }
+
+                if (docAfter != null
+                    && docAfter.IsCurrentTaskRoot
+                    && docAfter.ClientStage == ServiceDocumentClientStage.ReadyForPickup
+                    && docAfter.Status == ServiceDocumentStatus.Open)
+                {
+                    AppState.Navigate(new EmployeeTaskCardPage(taskId));
+                    return;
                 }
 
                 AppState.Navigate(new ProHomePage());
@@ -2077,6 +2212,52 @@ namespace DriveCarePro.Pages
             }
         }
 
+        private async Task TryNotifyClientToReviewAsync(Guid taskId, ServiceDocumentInfo docInfo)
+        {
+            if (docInfo == null || docInfo.DocumentId == Guid.Empty)
+                return;
+
+            try
+            {
+                await DatabaseExecutor.WithDbAsync(async db =>
+                {
+                    var task = await db.Tasks.AsNoTracking()
+                        .FirstOrDefaultAsync(t => t.RowId == taskId)
+                        .ConfigureAwait(false);
+                    if (task?.ClientUserId == null || task.ClientUserId == Guid.Empty)
+                        return;
+
+                    var workshopId = AppState.CurrentEmployee?.WorkshopId ?? Guid.Empty;
+                    if (workshopId == Guid.Empty)
+                    {
+                        workshopId = await db.Database.SqlQuery<Guid?>(
+                            "SELECT WorkshopId FROM ServiceDocuments WHERE RowId = @p0", docInfo.DocumentId)
+                            .FirstOrDefaultAsync().ConfigureAwait(false) ?? Guid.Empty;
+                    }
+
+                    if (workshopId == Guid.Empty)
+                        return;
+
+                    var workshopName = await db.Workshops.AsNoTracking()
+                        .Where(w => w.RowId == workshopId)
+                        .Select(w => w.Name)
+                        .FirstOrDefaultAsync()
+                        .ConfigureAwait(false);
+
+                    await WorkshopReviewNotifier.NotifyClientAfterRepairAsync(
+                        db,
+                        task.ClientUserId.Value,
+                        workshopId,
+                        docInfo.DocumentId,
+                        _repairHistoryId,
+                        workshopName).ConfigureAwait(false);
+                }).ConfigureAwait(true);
+            }
+            catch
+            {
+            }
+        }
+
         private sealed class TaskCardData
 
         {
@@ -2096,6 +2277,10 @@ namespace DriveCarePro.Pages
             public bool IsCompleted { get; set; }
 
             public Guid? RepairHistoryId { get; set; }
+
+            public int? RepairMileageKm { get; set; }
+
+            public Guid? ParentTaskId { get; set; }
 
             public bool HasCar { get; set; }
 

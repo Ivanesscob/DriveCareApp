@@ -314,6 +314,7 @@ namespace DriveCarePro.Services
                     await TrySetParentTaskIdAsync(db, childId, sourceTaskId).ConfigureAwait(false);
                     await TrySetDelegateTaskIdAsync(db, sourceTaskId, childId).ConfigureAwait(false);
                     await ServiceDocumentService.TryCopyDocumentIdAsync(db, sourceTaskId, childId).ConfigureAwait(false);
+                    await CopyReportLinesAsync(db, sourceTaskId, childId).ConfigureAwait(false);
 
                     return (true, null, childId);
                 }).ConfigureAwait(false);
@@ -614,6 +615,33 @@ namespace DriveCarePro.Services
         public static Task SyncPartLinesToAncestorsAsync(Guid childTaskId) =>
             DatabaseExecutor.WithDbAsync(db => SyncPartLinesToAncestorsAsync(db, childTaskId));
 
+        /// <summary>
+        /// Переносит строки услуг из поручения вверх по цепочке ParentTaskId.
+        /// </summary>
+        public static Task SyncServiceLinesToAncestorsAsync(Guid childTaskId) =>
+            DatabaseExecutor.WithDbAsync(db => SyncServiceLinesToAncestorsAsync(db, childTaskId));
+
+        public static async Task SyncServiceLinesToAncestorsAsync(DriveCareDBEntities db, Guid childTaskId)
+        {
+            var childServices = await TaskReportService.LoadServiceLinesAsync(db, childTaskId).ConfigureAwait(false);
+            childServices = childServices.Where(s => !string.IsNullOrWhiteSpace(s.ServiceName)).ToList();
+            if (childServices.Count == 0)
+                return;
+
+            var links = await TryLoadLinksAsync(childTaskId).ConfigureAwait(false);
+            var walkId = links.ParentTaskId;
+            var depth = 0;
+
+            while (walkId.HasValue && walkId.Value != Guid.Empty && depth++ < MaxChainDepth)
+            {
+                var parentId = walkId.Value;
+                await MergeChildServicesIntoParentAsync(db, parentId, childServices).ConfigureAwait(false);
+
+                var parentLinks = await TryLoadLinksAsync(parentId).ConfigureAwait(false);
+                walkId = parentLinks.ParentTaskId;
+            }
+        }
+
         public static async Task SyncPartLinesToAncestorsAsync(DriveCareDBEntities db, Guid childTaskId)
         {
             var childParts = await TaskReportService.LoadPartLinesAsync(db, childTaskId).ConfigureAwait(false);
@@ -668,6 +696,32 @@ namespace DriveCarePro.Services
             return set;
         }
 
+        private static async Task CopyReportLinesAsync(DriveCareDBEntities db, Guid fromTaskId, Guid toTaskId)
+        {
+            var services = await TaskReportService.LoadServiceLinesAsync(db, fromTaskId).ConfigureAwait(false);
+            var parts = await TaskReportService.LoadPartLinesAsync(db, fromTaskId).ConfigureAwait(false);
+            if (services.Count == 0 && parts.Count == 0)
+                return;
+
+            var freeNote = await TaskReportService.LoadFreeTextNoteAsync(db, fromTaskId).ConfigureAwait(false);
+            await TaskReportService.SaveReportAsync(db, toTaskId, services, parts, freeNote).ConfigureAwait(false);
+        }
+
+        private static async Task MergeChildServicesIntoParentAsync(
+            DriveCareDBEntities db,
+            Guid parentTaskId,
+            IList<TaskServiceLineRow> childServices)
+        {
+            var parentServices = await TaskReportService.LoadServiceLinesAsync(db, parentTaskId).ConfigureAwait(false);
+            var merged = MergeServiceLists(parentServices, childServices);
+            if (ServicesListsEquivalent(parentServices, merged))
+                return;
+
+            var parts = await TaskReportService.LoadPartLinesAsync(db, parentTaskId).ConfigureAwait(false);
+            var freeNote = await TaskReportService.LoadFreeTextNoteAsync(db, parentTaskId).ConfigureAwait(false);
+            await TaskReportService.SaveReportAsync(db, parentTaskId, merged, parts, freeNote).ConfigureAwait(false);
+        }
+
         private static async Task MergeChildPartsIntoParentAsync(
             DriveCareDBEntities db,
             Guid parentTaskId,
@@ -682,6 +736,81 @@ namespace DriveCarePro.Services
             var freeNote = await TaskReportService.LoadFreeTextNoteAsync(db, parentTaskId).ConfigureAwait(false);
             await TaskReportService.SaveReportAsync(db, parentTaskId, services, merged, freeNote).ConfigureAwait(false);
         }
+
+        private static List<TaskServiceLineRow> MergeServiceLists(
+            IList<TaskServiceLineRow> parentServices,
+            IList<TaskServiceLineRow> incomingServices)
+        {
+            var result = parentServices.Select(CloneServiceRow).ToList();
+
+            foreach (var inc in incomingServices)
+            {
+                if (string.IsNullOrWhiteSpace(inc.ServiceName))
+                    continue;
+
+                var key = ServiceMatchKey(inc);
+                var existing = result.FirstOrDefault(s => ServiceMatchKey(s) == key);
+                if (existing == null)
+                {
+                    result.Add(CloneServiceRow(inc));
+                    continue;
+                }
+
+                if (inc.Quantity > existing.Quantity)
+                    existing.Quantity = inc.Quantity;
+                if (inc.UnitPrice > 0)
+                    existing.UnitPrice = inc.UnitPrice;
+                if (inc.DiscountPercent > existing.DiscountPercent)
+                    existing.DiscountPercent = inc.DiscountPercent;
+                existing.RecalculateAmount();
+            }
+
+            return result;
+        }
+
+        private static bool ServicesListsEquivalent(IList<TaskServiceLineRow> left, IList<TaskServiceLineRow> right)
+        {
+            var leftMap = left
+                .GroupBy(ServiceMatchKey)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+            var rightMap = right
+                .GroupBy(ServiceMatchKey)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+            if (leftMap.Count != rightMap.Count)
+                return false;
+
+            foreach (var kv in leftMap)
+            {
+                if (!rightMap.TryGetValue(kv.Key, out var r))
+                    return false;
+                if (kv.Value.Quantity != r.Quantity || kv.Value.UnitPrice != r.UnitPrice)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private static string ServiceMatchKey(TaskServiceLineRow s)
+        {
+            if (s.WorkshopServiceId.HasValue && s.WorkshopServiceId.Value != Guid.Empty)
+                return "id:" + s.WorkshopServiceId.Value.ToString("N");
+
+            return "n:" + (s.ServiceName ?? string.Empty).Trim().ToLowerInvariant()
+                   + "|" + (s.UnitName ?? string.Empty).Trim().ToLowerInvariant();
+        }
+
+        private static TaskServiceLineRow CloneServiceRow(TaskServiceLineRow s) => new TaskServiceLineRow
+        {
+            RowId = s.RowId,
+            WorkshopServiceId = s.WorkshopServiceId,
+            ServiceName = s.ServiceName,
+            Quantity = s.Quantity,
+            UnitName = s.UnitName,
+            UnitPrice = s.UnitPrice,
+            DiscountPercent = s.DiscountPercent,
+            LineAmount = s.LineAmount
+        };
 
         private static List<TaskPartLineRow> MergePartLists(
             IList<TaskPartLineRow> parentParts,

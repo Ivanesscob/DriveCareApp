@@ -72,7 +72,8 @@ namespace DriveCare.Pages.User.ActionPages
 
         private async Task LoadCategoryAsync(string category)
         {
-            var all = ToolsStoreCatalog.ListByCategory(category)
+            var catalog = await UserPartsCatalogService.ListByCategoryAsync(category).ConfigureAwait(true);
+            var all = catalog
                 .Select(p => new ShopProductVm
                 {
                     ProductId = p.ProductId,

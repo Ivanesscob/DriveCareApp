@@ -1,8 +1,11 @@
 using DriveCare;
 using DriveCare.Pages.User;
 using DriveCare.Windows;
+using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Task = System.Threading.Tasks.Task;
 
 namespace DriveCare.Pages.User.ActionPages
 {
@@ -15,12 +18,33 @@ namespace DriveCare.Pages.User.ActionPages
             InitializeComponent();
             _vm = new ServiceMaintenanceViewModel();
             DataContext = _vm;
-            Loaded += (_, __) => _vm.Refresh();
+            LoadingOverlay.Visibility = Visibility.Visible;
+            Loaded += ServiceCarPage_Loaded;
+        }
+
+        async void ServiceCarPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            Loaded -= ServiceCarPage_Loaded;
+            await Task.Yield();
+            try
+            {
+                await _vm.RefreshAsync().ConfigureAwait(true);
+            }
+            finally
+            {
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             AppState.SetFrame<UserHomePage>();
+        }
+
+        private void OpenVisits_Click(object sender, RoutedEventArgs e)
+        {
+            var userCarId = _vm.SelectedCar?.UserCarId ?? Guid.Empty;
+            AppState.Navigate(new ServiceVisitsPage(userCarId));
         }
 
         private void AddRealMileage_Click(object sender, RoutedEventArgs e)

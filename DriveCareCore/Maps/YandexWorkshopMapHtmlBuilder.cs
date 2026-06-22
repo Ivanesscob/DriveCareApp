@@ -21,6 +21,8 @@ namespace DriveCareCore.Maps
             public double Latitude { get; set; }
             public double Longitude { get; set; }
             public string IconPreset { get; set; }
+            public double? AvgRating { get; set; }
+            public int ReviewCount { get; set; }
         }
 
         public static string Build(IReadOnlyList<WorkshopMapPin> pins, string apiKey)
@@ -47,7 +49,9 @@ namespace DriveCareCore.Maps
                     ServiceKindCode = (int)code,
                     Latitude = p.Latitude,
                     Longitude = p.Longitude,
-                    IconPreset = WorkshopServiceKinds.GetYandexIconPreset(code)
+                    IconPreset = WorkshopServiceKinds.GetYandexIconPreset(code),
+                    AvgRating = p.AvgRating.HasValue ? (double?)decimal.ToDouble(p.AvgRating.Value) : null,
+                    ReviewCount = p.ReviewCount
                 };
             }).ToList();
 
@@ -102,6 +106,8 @@ ymaps.ready(function () {
             var coords = [p.Latitude, p.Longitude];
             bounds.push(coords);
             var body = (p.ServiceKindName ? ('<b>' + p.ServiceKindName + '</b><br/>') : '') +
+                (p.ReviewCount > 0 && p.AvgRating ? ('<span style=""color:#2563A6;font-weight:bold"">' +
+                    '★ ' + Number(p.AvgRating).toFixed(1) + ' (' + p.ReviewCount + ' отз.)</span><br/>') : '') +
                 (p.AddressLine || '') +
                 (p.Phone ? ('<br/>Тел.: ' + p.Phone) : '') +
                 selectLink(p.WorkshopId);

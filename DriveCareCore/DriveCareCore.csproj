@@ -257,6 +257,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.IO.Pipelines, Version=10.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Pipelines.10.0.7\lib\net462\System.IO.Pipelines.dll</HintPath>
     </Reference>
@@ -396,6 +398,7 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Shop\ToolsStoreCatalog.cs" />
+    <Compile Include="Shop\UserPartsCatalogService.cs" />
     <Compile Include="Shop\StoreOrderStatus.cs" />
     <Compile Include="Shop\OrderPickupPointItem.cs" />
     <Compile Include="Shop\OrderPickupPointService.cs" />
@@ -429,6 +432,21 @@
     <Compile Include="Bookings\WorkshopOnlineBookingCapacity.cs" />
     <Compile Include="Bookings\WorkshopBookingIssueCategories.cs" />
     <Compile Include="Bookings\UserCarPickerItem.cs" />
+    <Compile Include="ServiceVisits\UserServiceVisitModels.cs" />
+    <Compile Include="ServiceVisits\UserServiceVisitService.cs" />
+    <Compile Include="ServiceVisits\ServiceDocumentClientStage.cs" />
+    <Compile Include="ServiceVisits\ServiceDocumentClientStageService.cs" />
+    <Compile Include="ServiceVisits\UserActiveRepairService.cs" />
+    <Compile Include="ServiceVisits\UserWorkOrderDocxService.cs" />
+    <Compile Include="ServiceVisits\RepairMileageService.cs" />
+    <Compile Include="Reviews\WorkshopReviewModels.cs" />
+    <Compile Include="Reviews\WorkshopReviewService.cs" />
+    <Compile Include="Reviews\WorkshopReviewNotifier.cs" />
+    <Compile Include="WorkOrders\RepairWorkOrderModel.cs" />
+    <Compile Include="WorkOrders\RepairWorkOrderWorkLine.cs" />
+    <Compile Include="WorkOrders\RepairWorkOrderPartLine.cs" />
+    <Compile Include="WorkOrders\RepairWorkOrderTokens.cs" />
+    <Compile Include="WorkOrders\RepairWorkOrderPrintService.cs" />
     <Compile Include="Painting\CarPaintModels.cs" />
     <Compile Include="Painting\CarPaintService.cs" />
     <Compile Include="Painting\WorkshopPaintCatalogModels.cs" />

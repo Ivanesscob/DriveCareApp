@@ -275,12 +275,14 @@
                                            VerticalAlignment="Center"
                                            Visibility="{Binding NoNotificationsVisibility}"/>
 
-                                <ListBox ItemsSource="{Binding NotificationItems}"
+                                <ListBox x:Name="NotificationsList"
+                                         ItemsSource="{Binding NotificationItems}"
                                          Visibility="{Binding NotificationsListVisibility}"
                                          Background="Transparent"
                                          BorderThickness="0"
                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                         MaxHeight="260">
+                                         MaxHeight="260"
+                                         MouseLeftButtonUp="NotificationsList_Click">
                                     <ListBox.ItemContainerStyle>
                                         <Style TargetType="ListBoxItem">
                                             <Setter Property="Padding" Value="0"/>
@@ -350,6 +352,41 @@
                                            Visibility="{Binding ShowNavChrome, Converter={StaticResource BoolToVis}}"/>
                                 <TextBlock Text="{Binding CarTitle}" FontSize="22" FontWeight="SemiBold"
                                            Foreground="{DynamicResource App.Brush.Foreground}" TextWrapping="Wrap" LineHeight="28"/>
+
+                                <Border Margin="0,14,0,0" Padding="12,10" CornerRadius="12"
+                                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                                        Visibility="{Binding RepairStatusVisibility}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding RepairStageLabel}" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource Brush.Accent}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding RepairWorkshopName}" FontSize="12" Margin="0,4,0,10"
+                                                   Foreground="{StaticResource Brush.Muted}" TextWrapping="Wrap"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                                <Ellipse Width="10" Height="10" Fill="{Binding RepairStep1Brush}"/>
+                                                <TextBlock Text="Принята" FontSize="10" Margin="0,6,0,0" TextAlignment="Center"
+                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                                <Ellipse Width="10" Height="10" Fill="{Binding RepairStep2Brush}"/>
+                                                <TextBlock Text="В ремонте" FontSize="10" Margin="0,6,0,0" TextAlignment="Center"
+                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                                <Ellipse Width="10" Height="10" Fill="{Binding RepairStep3Brush}"/>
+                                                <TextBlock Text="Готова" FontSize="10" Margin="0,6,0,0" TextAlignment="Center"
+                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
                                 <TextBlock Text="Ваш активный автомобиль в DriveCare"
                                            FontSize="13" Foreground="{StaticResource Brush.Muted}" Margin="0,14,0,0" TextWrapping="Wrap"/>
                             </StackPanel>

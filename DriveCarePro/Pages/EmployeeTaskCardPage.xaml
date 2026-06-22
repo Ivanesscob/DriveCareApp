@@ -146,7 +146,7 @@
 
                                    Foreground="{DynamicResource App.Brush.Foreground}"/>
 
-                        <TextBlock Text="Выберите услугу из каталога (поиск по названию) — цена и единица подставятся автоматически."
+                        <TextBlock Text="Нажмите «Выбрать услугу» — откроется каталог. Цена и единица подставятся автоматически."
 
                                    FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap" Margin="0,4,0,8"/>
 
@@ -164,25 +164,7 @@
 
                             <DataGrid.Columns>
 
-                                <DataGridTemplateColumn Header="Наименование" Width="2*" MinWidth="180">
-
-                                    <DataGridTemplateColumn.CellTemplate>
-
-                                        <DataTemplate>
-
-                                            <ComboBox ItemsSource="{Binding Catalog}" DisplayMemberPath="Name"
-                                                      SelectedItem="{Binding SelectedCatalog, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                      Text="{Binding ServiceSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                      IsEditable="True" IsTextSearchEnabled="True" StaysOpenOnEdit="True"
-                                                      MinHeight="30" VerticalContentAlignment="Center"
-                                                      Loaded="TaskLineComboBox_Loaded"
-                                                      ToolTip="Выберите услугу из каталога или введите название"/>
-
-                                        </DataTemplate>
-
-                                    </DataGridTemplateColumn.CellTemplate>
-
-                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Наименование" Binding="{Binding ServiceName}" Width="2*" MinWidth="180" IsReadOnly="True"/>
 
                                 <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
 
@@ -199,7 +181,7 @@
                         </DataGrid>
 
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <Button x:Name="AddServiceLineButton" Content="+ Добавить услугу"
+                            <Button x:Name="AddServiceLineButton" Content="+ Выбрать услугу"
                                     Style="{StaticResource App.Button.Outline}" Height="32" MinWidth="150" Margin="0,0,8,0"
                                     Click="AddServiceLine_Click"/>
                             <Button x:Name="RemoveServiceLineButton" Content="− Удалить услугу"
@@ -213,7 +195,7 @@
 
                                    Foreground="{DynamicResource App.Brush.Foreground}"/>
 
-                        <TextBlock x:Name="PartsSectionHintText" Text="Детали со склада мастерской (остаток больше 0). Списание — по кнопке «Сохранить». Если пусто — «Магазин»."
+                        <TextBlock x:Name="PartsSectionHintText" Text="Нажмите «Выбрать деталь» — откроется склад мастерской. Списание — по кнопке «Сохранить». Если пусто — «Магазин»."
 
                                    FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap" Margin="0,4,0,4"/>
 
@@ -229,30 +211,7 @@
 
                             <DataGrid.Columns>
 
-                                <DataGridTemplateColumn x:Name="PartNameReadColumn" Header="Наименование" Width="2*" MinWidth="180"
-                                                        Visibility="Collapsed">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding PartName}" VerticalAlignment="Center" Margin="8,0,4,0"
-                                                       TextTrimming="CharacterEllipsis" ToolTip="{Binding PartName}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn x:Name="PartNamePickColumn" Header="Наименование (поиск)" Width="2*" MinWidth="200">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <ComboBox ItemsSource="{Binding FilteredCatalog}" DisplayMemberPath="Name"
-                                                      SelectedItem="{Binding SelectedCatalog, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                      Text="{Binding PartSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                      IsEditable="True" IsTextSearchEnabled="True" StaysOpenOnEdit="True"
-                                                      MinHeight="30" VerticalContentAlignment="Center"
-                                                      Loaded="TaskLineComboBox_Loaded"
-                                                      Unloaded="TaskLineComboBox_Unloaded"
-                                                      ToolTip="Выберите деталь со склада (можно печатать название для поиска)"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                <DataGridTextColumn x:Name="PartNameColumn" Header="Наименование" Binding="{Binding PartName}" Width="2*" MinWidth="180" IsReadOnly="True"/>
 
                                 <DataGridTextColumn x:Name="PartQtyColumn" Header="Кол-во" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
 
@@ -267,7 +226,7 @@
                         </DataGrid>
 
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <Button x:Name="AddPartLineButton" Content="+ Добавить деталь"
+                            <Button x:Name="AddPartLineButton" Content="+ Выбрать деталь"
                                     Style="{StaticResource App.Button.Outline}" Height="32" MinWidth="140" Margin="0,0,8,0"
                                     Click="AddPartLine_Click"/>
                             <Button x:Name="RemovePartLineButton" Content="− Удалить деталь"
@@ -377,6 +336,17 @@
 
                                    Foreground="{DynamicResource App.Brush.Foreground}"/>
 
+                        <StackPanel x:Name="CompletionMileagePanel" Visibility="Collapsed" Margin="0,10,0,0">
+                            <TextBlock Text="Пробег при выдаче авто" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                            <TextBlock Text="Обязательно перед закрытием ремонта. Укажите показания одометра."
+                                       FontSize="11" TextWrapping="Wrap" Margin="0,4,0,6"
+                                       Foreground="{DynamicResource App.Brush.Muted}"/>
+                            <TextBox x:Name="CompletionMileageBox" Style="{StaticResource App.FieldTextBox}"
+                                     MinHeight="40" FontSize="15" MaxLength="9"
+                                     InputMethod.IsInputMethodEnabled="False"/>
+                        </StackPanel>
+
                         <Button x:Name="CompleteButton" Content="Завершить задание" Style="{StaticResource App.Button.Primary}"
 
                                 Height="44" MinWidth="220" HorizontalAlignment="Left" Margin="0,12,0,0"
@@ -395,6 +365,42 @@
 
                     </StackPanel>
 
+                </Border>
+
+                <Border x:Name="ClientStageSection" Margin="0,16,0,0" Padding="12,10" CornerRadius="10"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Статус для клиента" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock x:Name="ClientStageStatusText" Margin="0,6,0,10" FontSize="12"
+                                   Foreground="{DynamicResource App.Brush.Muted}" TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="MarkAcceptedButton" Content="Машина принята"
+                                    Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="160"
+                                    Margin="0,0,8,0" Visibility="Collapsed" Click="MarkAccepted_Click"/>
+                            <Button x:Name="MarkInRepairButton" Content="Поступила в ремонт"
+                                    Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="170"
+                                    Visibility="Collapsed" Click="MarkInRepair_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="ClientHandoverSection" Margin="0,16,0,0" Padding="12,10" CornerRadius="10"
+                        Background="{DynamicResource App.Brush.SurfaceCard}"
+                        BorderBrush="{DynamicResource App.Brush.Accent}" BorderThickness="1"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Автомобиль готов к выдаче" FontWeight="SemiBold" FontSize="13"
+                                   Foreground="{DynamicResource App.Brush.Foreground}"/>
+                        <TextBlock Text="Клиент видит статус на главной. Нажмите, когда автомобиль передан клиенту."
+                                   FontSize="12" TextWrapping="Wrap" Margin="0,6,0,10"
+                                   Foreground="{DynamicResource App.Brush.Muted}"/>
+                        <Button x:Name="DeliverToClientButton" Content="Выдать клиенту"
+                                Style="{StaticResource App.Button.Primary}" Height="40" MinWidth="200"
+                                HorizontalAlignment="Left" Click="DeliverToClient_Click"/>
+                    </StackPanel>
                 </Border>
 
             </StackPanel>

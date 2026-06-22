@@ -1,4 +1,4 @@
-namespace DriveCarePro.Services.RepairWorkOrder
+namespace DriveCareCore.WorkOrders
 
 {
 

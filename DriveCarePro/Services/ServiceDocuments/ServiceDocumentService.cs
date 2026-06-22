@@ -1,4 +1,5 @@
 using DriveCareCore.Data.BD;
+using DriveCareCore.ServiceVisits;
 using DriveCarePro.Services.ServiceBooking;
 using DriveCarePro.Services.WorkshopServices;
 using System;
@@ -128,6 +129,7 @@ namespace DriveCarePro.Services.ServiceDocuments
                     ctx?.RepairTypeDisplay ?? string.Empty,
                     DateTime.Now).ConfigureAwait(false);
 
+                await ServiceDocumentClientStageService.TryMarkAcceptedAsync(db, taskId).ConfigureAwait(false);
                 await TrySetTaskDocumentIdAsync(db, taskId, docId).ConfigureAwait(false);
                 return docId;
             }
@@ -319,6 +321,9 @@ namespace DriveCarePro.Services.ServiceDocuments
                     return null;
 
                 var status = row.Status == 1 ? ServiceDocumentStatus.Completed : ServiceDocumentStatus.Open;
+                var stage = await ServiceDocumentClientStageService
+                    .TryGetStageForRootTaskAsync(db, row.RootTaskId).ConfigureAwait(false)
+                    ?? ServiceDocumentClientStageLabels.Normalize(0, row.Status);
                 return new ServiceDocumentInfo
                 {
                     DocumentId = row.RowId,
@@ -327,10 +332,14 @@ namespace DriveCarePro.Services.ServiceDocuments
                     Title = row.Title ?? "Заказ-наряд",
                     StatusDisplay = status == ServiceDocumentStatus.Completed
                         ? "Документ закрыт"
-                        : "Документ в работе",
+                        : stage == ServiceDocumentClientStage.ReadyForPickup
+                            ? ServiceDocumentClientStageLabels.ReadyForPickup
+                            : "Документ в работе",
                     CreatedAt = row.CreatedAt,
                     CompletedAt = row.CompletedAt,
-                    IsCurrentTaskRoot = row.RootTaskId == taskId
+                    IsCurrentTaskRoot = row.RootTaskId == taskId,
+                    ClientStage = stage,
+                    ClientStageDisplay = ServiceDocumentClientStageLabels.ForUser(stage)
                 };
             }
             catch (SqlException)
@@ -340,21 +349,13 @@ namespace DriveCarePro.Services.ServiceDocuments
         }
 
         public static Task TryCompleteForRootTaskAsync(DriveCareDBEntities db, Guid rootTaskId) =>
-            TryCompleteDocumentAsync(db, rootTaskId);
+            ServiceDocumentClientStageService.TryMarkReadyForPickupAsync(db, rootTaskId);
 
-        public static async Task TryCompleteDocumentAsync(DriveCareDBEntities db, Guid rootTaskId)
-        {
-            try
-            {
-                await db.Database.ExecuteSqlCommandAsync(
-                    @"UPDATE ServiceDocuments SET Status = 1, CompletedAt = @p1
-                      WHERE RootTaskId = @p0 AND Status = 0",
-                    rootTaskId, DateTime.Now).ConfigureAwait(false);
-            }
-            catch (SqlException)
-            {
-            }
-        }
+        public static Task TryFinalizeForRootTaskAsync(DriveCareDBEntities db, Guid rootTaskId) =>
+            ServiceDocumentClientStageService.TryFinalizeDocumentAsync(db, rootTaskId);
+
+        public static Task TryFinalizeForRootTaskAsync(Guid rootTaskId) =>
+            DatabaseExecutor.WithDbAsync(db => TryFinalizeForRootTaskAsync(db, rootTaskId));
 
         public static Task<List<TaskTreeNodeVm>> BuildTreeForTaskAsync(Guid taskId, Guid currentEmployeeId) =>
             BuildTreeForTaskChainAsync(taskId, currentEmployeeId);

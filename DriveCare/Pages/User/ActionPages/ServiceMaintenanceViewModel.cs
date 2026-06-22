@@ -15,9 +15,11 @@ using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Task = System.Threading.Tasks.Task;
 
 namespace DriveCare.Pages.User.ActionPages
 {
@@ -179,6 +181,145 @@ namespace DriveCare.Pages.User.ActionPages
 
         public Visibility EmptyHistoryVisibility =>
             GarageCars.Count > 0 && HistoryItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        public async Task RefreshAsync()
+        {
+            var keepId = _selectedCar?.UserCarId ?? Guid.Empty;
+            var uid = AppState.CurrentUserId;
+            var hasUser = uid != Guid.Empty && AppState.CurrentUser != null;
+
+            var snapshot = await Task.Run(() => LoadRefreshSnapshot(uid, hasUser, keepId)).ConfigureAwait(true);
+            ApplyRefreshSnapshot(snapshot);
+        }
+
+        sealed class RefreshSnapshot
+        {
+            public List<CarDisplayItem> Cars { get; set; } = new List<CarDisplayItem>();
+            public Guid SelectedUserCarId { get; set; }
+            public List<MaintenanceHistoryItemVm> History { get; set; } = new List<MaintenanceHistoryItemVm>();
+        }
+
+        static RefreshSnapshot LoadRefreshSnapshot(Guid uid, bool hasUser, Guid keepUserCarId)
+        {
+            var snapshot = new RefreshSnapshot { SelectedUserCarId = keepUserCarId };
+
+            if (hasUser)
+            {
+                try
+                {
+                    using (var db = new DriveCareDBEntities())
+                    {
+                        var rows = db.UserCars
+                            .Include("Car")
+                            .Include("Car.CarType")
+                            .Include("Car.Model")
+                            .Include("Car.Model.Brand")
+                            .Where(uc => uc.UserId == uid)
+                            .ToList();
+
+                        var seenCarIds = new HashSet<Guid>();
+                        foreach (var uc in rows.Where(uc => uc.Car != null))
+                        {
+                            if (seenCarIds.Contains(uc.CarId))
+                                continue;
+                            seenCarIds.Add(uc.CarId);
+
+                            var car = uc.Car;
+                            var photo = CarTypeImageHelper.GetImageForCarTypeName(car.CarType?.Name);
+                            var brand = car.Model?.Brand?.Name?.Trim();
+                            var model = car.Model?.Name?.Trim();
+                            string name;
+                            if (!string.IsNullOrEmpty(brand) && !string.IsNullOrEmpty(model))
+                                name = $"{brand} {model}";
+                            else if (!string.IsNullOrEmpty(model))
+                                name = model;
+                            else if (!string.IsNullOrEmpty(brand))
+                                name = brand;
+                            else
+                                name = "Автомобиль";
+
+                            snapshot.Cars.Add(new CarDisplayItem
+                            {
+                                Photo = photo,
+                                Name = name,
+                                CarId = uc.CarId,
+                                UserCarId = uc.RowId
+                            });
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            CarDisplayItem pick = null;
+            if (keepUserCarId != Guid.Empty)
+                pick = snapshot.Cars.FirstOrDefault(c => c.UserCarId == keepUserCarId);
+            if (pick == null && snapshot.Cars.Count > 0)
+                pick = snapshot.Cars[0];
+
+            if (pick != null)
+            {
+                try
+                {
+                    snapshot.History = ServiceMaintenanceRepository.LoadHistory(pick.UserCarId).ToList();
+                    snapshot.SelectedUserCarId = pick.UserCarId;
+                }
+                catch
+                {
+                    snapshot.History = new List<MaintenanceHistoryItemVm>();
+                }
+            }
+
+            return snapshot;
+        }
+
+        void ApplyRefreshSnapshot(RefreshSnapshot snapshot)
+        {
+            if (snapshot == null)
+            {
+                Refresh();
+                return;
+            }
+
+            GarageCars.Clear();
+            foreach (var car in snapshot.Cars)
+                GarageCars.Add(car);
+
+            var pick = snapshot.Cars.FirstOrDefault(c => c.UserCarId == snapshot.SelectedUserCarId)
+                       ?? snapshot.Cars.FirstOrDefault();
+
+            _selectedCar = pick;
+            OnPropertyChanged(nameof(SelectedCar));
+            NotifyShell();
+
+            HistoryItems.Clear();
+            ComponentStatuses.Clear();
+            KmRecommendations.Clear();
+            _historyNewestFirst = snapshot.History ?? new List<MaintenanceHistoryItemVm>();
+
+            if (_selectedCar == null)
+            {
+                CenterCarImage = LoadDefaultCarPackImage();
+                MileagePlotModel = new PlotModel();
+                ClearMileageInsight();
+                NotifyMileageUi();
+                NotifyComponentUi();
+                return;
+            }
+
+            CenterCarImage = _selectedCar.Photo ?? LoadDefaultCarPackImage();
+            foreach (var h in _historyNewestFirst)
+                HistoryItems.Add(h);
+
+            UpdateApproximateCurrentMileage();
+            RebuildComponentStatuses();
+            RebuildKmRecommendations();
+            RebuildMileageChart();
+            NotifyShell();
+            NotifyComponentUi();
+        }
 
         public void Refresh()
         {

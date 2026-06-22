@@ -389,6 +389,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\PickWorkshopServiceWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Windows\PickWorkshopPartWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\ServiceDocumentPreviewWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -593,6 +601,12 @@
     <Compile Include="Windows\RequestPurchaseWindow.xaml.cs">
       <DependentUpon>RequestPurchaseWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\PickWorkshopServiceWindow.xaml.cs">
+      <DependentUpon>PickWorkshopServiceWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\PickWorkshopPartWindow.xaml.cs">
+      <DependentUpon>PickWorkshopPartWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\ServiceDocumentPreviewWindow.xaml.cs">
       <DependentUpon>ServiceDocumentPreviewWindow.xaml</DependentUpon>
     </Compile>
@@ -621,11 +635,6 @@
     <Compile Include="Services\TaskPurchaseRequestService.cs" />
     <Compile Include="Services\ProEmployeeNotificationService.cs" />
     <Compile Include="Services\RepairWorkOrder\RepairWorkOrderDataService.cs" />
-    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderModel.cs" />
-    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderWorkLine.cs" />
-    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderPartLine.cs" />
-    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderPrintService.cs" />
-    <Compile Include="Services\RepairWorkOrder\RepairWorkOrderTokens.cs" />
     <Compile Include="Services\ServiceBooking\ServiceBookingContext.cs" />
     <Compile Include="Services\ServiceBooking\ServiceClientLookupService.cs" />
     <Compile Include="Services\ServiceBooking\ServiceBookingPersistenceService.cs" />

@@ -27,5 +27,14 @@ namespace DriveCareCore.Maps
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+
+        public decimal? AvgRating { get; set; }
+        public int ReviewCount { get; set; }
+
+        public bool HasReviews => ReviewCount > 0;
+
+        public string RatingLabel => HasReviews
+            ? $"{AvgRating.GetValueOrDefault():0.0} ★ ({ReviewCount})"
+            : string.Empty;
     }
 }

@@ -4,6 +4,9 @@
       xmlns:controls="clr-namespace:DriveCare.Controls"
       Title="Автосервисы"
       Background="{DynamicResource App.Brush.PageBackground}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Page.Resources>
     <Grid Margin="20,16,20,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,7 +20,7 @@
             <StackPanel DockPanel.Dock="Left" Margin="16,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="Автосервисы" FontSize="22" FontWeight="SemiBold"
                            Foreground="{DynamicResource App.Brush.Foreground}"/>
-                <TextBlock Text="Яндекс.Карта · перетаскивайте карту, нажмите метку автосервиса"
+                <TextBlock x:Name="SubtitleText" Text="Карта или список · фильтр по типу и рейтингу"
                            FontSize="13" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,4,0,0"/>
             </StackPanel>
             <Button DockPanel.Dock="Right" Content="Обновить" Style="{StaticResource App.Button.Outline}"
@@ -25,6 +28,14 @@
         </DockPanel>
 
         <StackPanel Grid.Row="1" Margin="0,0,0,8">
+            <WrapPanel Margin="0,0,0,8">
+                <Button x:Name="ViewMapButton" Content="Карта" Tag="Map" Margin="0,0,8,6"
+                        Style="{StaticResource App.Button.Primary}" Height="36" MinWidth="80"
+                        Click="ViewModeButton_Click"/>
+                <Button x:Name="ViewListButton" Content="Список" Tag="List" Margin="0,0,8,6"
+                        Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="88"
+                        Click="ViewModeButton_Click"/>
+            </WrapPanel>
             <WrapPanel x:Name="KindFilterPanel" Margin="0,0,0,8">
                 <Button x:Name="FilterAll" Content="Все" Tag="" Margin="0,0,8,6"
                         Style="{StaticResource App.Button.Primary}" Height="36" MinWidth="72"
@@ -38,6 +49,22 @@
                 <Button x:Name="FilterTire" Content="Шиномонтаж" Tag="TireService" Margin="0,0,8,6"
                         Style="{StaticResource App.Button.Outline}" Height="36" MinWidth="120"
                         Click="KindFilterButton_Click"/>
+            </WrapPanel>
+            <WrapPanel x:Name="StarFilterPanel" Margin="0,0,0,8">
+                <TextBlock Text="Рейтинг:" VerticalAlignment="Center" Margin="0,0,8,6"
+                           Foreground="{DynamicResource App.Brush.Muted}" FontSize="12"/>
+                <Button x:Name="StarFilterAll" Content="Все" Tag="" Margin="0,0,6,6"
+                        Style="{StaticResource App.Button.Primary}" Height="32" MinWidth="56"
+                        Click="StarFilterButton_Click"/>
+                <Button x:Name="StarFilter5" Content="★ 5" Tag="5" Margin="0,0,6,6"
+                        Style="{StaticResource App.Button.Outline}" Height="32" MinWidth="52"
+                        Click="StarFilterButton_Click"/>
+                <Button x:Name="StarFilter4" Content="★ 4+" Tag="4" Margin="0,0,6,6"
+                        Style="{StaticResource App.Button.Outline}" Height="32" MinWidth="52"
+                        Click="StarFilterButton_Click"/>
+                <Button x:Name="StarFilter3" Content="★ 3+" Tag="3" Margin="0,0,6,6"
+                        Style="{StaticResource App.Button.Outline}" Height="32" MinWidth="52"
+                        Click="StarFilterButton_Click"/>
             </WrapPanel>
             <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontSize="12"
                        Foreground="{DynamicResource App.Brush.Muted}"/>
@@ -69,6 +96,8 @@
                             </Border>
                             <TextBlock x:Name="DetailNameText" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap"
                                        Foreground="{DynamicResource App.Brush.Foreground}"/>
+                            <TextBlock x:Name="DetailRatingText" FontSize="15" FontWeight="SemiBold" Margin="0,8,0,0"
+                                       Foreground="{DynamicResource App.Brush.Accent}"/>
                             <TextBlock x:Name="DetailCompanyText" FontSize="12" Margin="0,4,0,0"
                                        Foreground="{DynamicResource App.Brush.Muted}"/>
                             <TextBlock x:Name="DetailAddressText" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0"
@@ -77,6 +106,39 @@
                                        Foreground="{DynamicResource App.Brush.Foreground}"/>
                             <TextBlock x:Name="DetailDescriptionText" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0"
                                        Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+
+                            <TextBlock Text="Отзывы" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,8"
+                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                            <TextBlock x:Name="DetailNoReviewsText" Text="Отзывов пока нет."
+                                       FontSize="12" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,0,0,8"/>
+                            <ItemsControl x:Name="ReviewsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,10" Padding="10" CornerRadius="8"
+                                                Background="{DynamicResource App.Brush.PageBackground}"
+                                                BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding StarsDisplay}" FontSize="14"
+                                                               Foreground="{DynamicResource App.Brush.Accent}"/>
+                                                    <TextBlock Text="{Binding AuthorName}" FontSize="12" Margin="10,0,0,0"
+                                                               Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                                    <TextBlock Text="{Binding DateLabel}" FontSize="11" Margin="8,0,0,0"
+                                                               Foreground="{DynamicResource App.Brush.Muted}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                                           FontSize="12" Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                                <TextBlock Text="{Binding Pros, StringFormat=+ {0}}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                           FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"
+                                                           Visibility="{Binding HasPros, Converter={StaticResource BoolToVis}}"/>
+                                                <TextBlock Text="{Binding Cons, StringFormat=- {0}}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                                           FontSize="11" Foreground="{DynamicResource App.Brush.Muted}"
+                                                           Visibility="{Binding HasCons, Converter={StaticResource BoolToVis}}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
                             <TextBlock Text="Связаться" FontSize="14" FontWeight="SemiBold" Margin="0,20,0,10"
                                        Foreground="{DynamicResource App.Brush.Foreground}"/>
@@ -91,10 +153,47 @@
                 </DockPanel>
             </Border>
 
-            <Border Grid.Column="1" CornerRadius="12" ClipToBounds="True"
+            <Border x:Name="MapPanel" Grid.Column="1" CornerRadius="12" ClipToBounds="True"
                     BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
                     Background="{DynamicResource App.Brush.SurfaceCard}">
                 <controls:YandexWorkshopMapView x:Name="YandexMap"/>
+            </Border>
+
+            <Border x:Name="ListPanel" Grid.Column="1" CornerRadius="12" Visibility="Collapsed"
+                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1"
+                    Background="{DynamicResource App.Brush.SurfaceCard}">
+                <ListView x:Name="WorkshopListView" BorderThickness="0" Background="Transparent"
+                          SelectionChanged="WorkshopListView_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="14,12" Margin="8,4" CornerRadius="10"
+                                    Background="{DynamicResource App.Brush.PageBackground}"
+                                    BorderBrush="{DynamicResource App.Brush.Border}" BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding WorkshopName}" FontSize="15" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding ServiceKindsLabel}" FontSize="11" Margin="0,2,0,0"
+                                                   Foreground="{DynamicResource App.Brush.Primary}"/>
+                                        <TextBlock Text="{Binding AddressLine}" FontSize="12" Margin="0,6,0,0"
+                                                   TextWrapping="Wrap" Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                        <TextBlock Text="{Binding Phone}" FontSize="12" Margin="0,4,0,0"
+                                                   Foreground="{DynamicResource App.Brush.Muted}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                                        <TextBlock Text="{Binding RatingLabel}" FontSize="13" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Right"
+                                                   Foreground="{DynamicResource App.Brush.Accent}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </Border>
         </Grid>
     </Grid>

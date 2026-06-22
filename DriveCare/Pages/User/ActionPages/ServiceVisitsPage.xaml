@@ -1,0 +1,141 @@
+<Page x:Class="DriveCare.Pages.User.ActionPages.ServiceVisitsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:visits="clr-namespace:DriveCareCore.ServiceVisits;assembly=DriveCareCore"
+      Title="Визиты в сервис"
+      Background="{DynamicResource App.Brush.PageBackground}">
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="VisitCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="16,14"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.SurfaceCard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource App.Brush.Border}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="StatusPill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="{DynamicResource App.Brush.Surface2}"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="20,16,20,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12" LastChildFill="False">
+            <Button DockPanel.Dock="Left" Content="← Назад" Style="{StaticResource App.Button.Outline}"
+                    Height="40" MinWidth="110" Click="Back_Click"/>
+            <StackPanel DockPanel.Dock="Left" Margin="16,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="Визиты в сервис" FontSize="22" FontWeight="SemiBold"
+                           Foreground="{DynamicResource App.Brush.Foreground}"/>
+                <TextBlock Text="История обращений, оказанные услуги и заказ-наряды"
+                           FontSize="13" Foreground="{DynamicResource App.Brush.Muted}" Margin="0,4,0,0"/>
+            </StackPanel>
+            <Button DockPanel.Dock="Right" Content="Обновить" Style="{StaticResource App.Button.Outline}"
+                    Height="36" MinWidth="100" Click="Refresh_Click"/>
+        </DockPanel>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Автомобиль" Foreground="{DynamicResource App.Brush.Muted}" FontSize="12" Margin="0,0,0,6"/>
+            <ComboBox x:Name="CarCombo" MinHeight="44" SelectionChanged="CarCombo_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Photo}" Width="32" Height="32" Margin="0,0,8,0"
+                                   Stretch="Uniform" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource App.Brush.Foreground}" FontSize="14"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock x:Name="StatusText" Margin="0,10,0,0" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource App.Brush.Muted}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="VisitsList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type visits:UserServiceVisitItem}">
+                            <Border Style="{StaticResource VisitCard}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" Width="64" Margin="0,0,14,0" CornerRadius="10"
+                                            Background="{DynamicResource App.Brush.Surface2}" Padding="8,10">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding DateLabel}" FontSize="13" FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                            <TextBlock Text="{Binding TimeLabel}" FontSize="11" Margin="0,2,0,0"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1">
+                                        <DockPanel LastChildFill="False">
+                                            <Border DockPanel.Dock="Right" Style="{StaticResource StatusPill}" Margin="8,0,0,0">
+                                                <TextBlock Text="{Binding StatusLabel}" FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding WorkshopName}" FontSize="16" FontWeight="SemiBold"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource App.Brush.Foreground}"/>
+                                        </DockPanel>
+
+                                        <TextBlock Margin="0,6,0,0" FontSize="12"
+                                                   Foreground="{DynamicResource App.Brush.Accent}">
+                                            <Run Text="{Binding KindLine, Mode=OneWay}"/>
+                                            <Run Text=" · " Foreground="{DynamicResource App.Brush.Muted}"/>
+                                            <Run Text="{Binding MileageLine, Mode=OneWay}" Foreground="{DynamicResource App.Brush.Muted}"/>
+                                        </TextBlock>
+
+                                        <TextBlock Margin="0,10,0,0" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Text="Зачем обратились"/>
+                                        <TextBlock Text="{Binding ReasonLine}" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+
+                                        <TextBlock Margin="0,10,0,0" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource App.Brush.Foreground}" Text="Оказанные услуги"/>
+                                        <TextBlock Text="{Binding ServicesLine}" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                   Foreground="{DynamicResource App.Brush.SecondaryText}"/>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                            <Button Content="Заказ-наряд" Style="{StaticResource App.Button.Outline}"
+                                                    Height="36" MinWidth="120" Margin="0,0,8,0"
+                                                    Click="ViewWorkOrder_Click"
+                                                    IsEnabled="{Binding CanOpenWorkOrder}"/>
+                                            <Button Content="Оценить сервис" Style="{StaticResource App.Button.Primary}"
+                                                    Height="36" MinWidth="130"
+                                                    Click="RateService_Click"
+                                                    IsEnabled="{Binding CanOpenWorkOrder}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Border x:Name="LoadingOverlay" Background="#88000000" CornerRadius="12"
+                    Visibility="Collapsed" Panel.ZIndex="5">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="Загрузка визитов…" FontSize="15" Foreground="White"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

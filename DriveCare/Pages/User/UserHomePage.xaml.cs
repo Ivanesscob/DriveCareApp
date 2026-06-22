@@ -1,7 +1,10 @@
 using DriveCare.Pages.User.ActionPages;
+using DriveCare.Windows;
 using DriveCareCore;
 using DriveCareCore.Data.BD;
 using DriveCareCore.Messaging;
+using DriveCareCore.ServiceVisits;
+using DriveCareCore.Reviews;
 using DriveCareCore.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -25,6 +28,7 @@ namespace DriveCare.Pages.User
         private ImageSource _carImage;
         private string _carTitle = string.Empty;
         private string _positionText = string.Empty;
+        private UserCarRepairStatusVm _repairStatus;
 
         public UserHomePage()
         {
@@ -129,6 +133,24 @@ namespace DriveCare.Pages.User
         public Visibility NotificationsListVisibility =>
             NotificationItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+        public Visibility RepairStatusVisibility =>
+            _repairStatus != null ? Visibility.Visible : Visibility.Collapsed;
+
+        public string RepairStageLabel => _repairStatus?.StageLabel ?? string.Empty;
+
+        public string RepairWorkshopName => _repairStatus == null
+            ? string.Empty
+            : "Автосервис: " + (_repairStatus.WorkshopName ?? "—");
+
+        public Brush RepairStep1Brush => StepBrush(_repairStatus?.StageStep >= 1);
+        public Brush RepairStep2Brush => StepBrush(_repairStatus?.StageStep >= 2);
+        public Brush RepairStep3Brush => StepBrush(_repairStatus?.StageStep >= 3);
+
+        static Brush StepBrush(bool active) =>
+            active
+                ? new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x4C, 0xAF, 0x50))
+                : new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x90, 0x90, 0x90));
+
         private void ReloadCars()
         {
             GarageCars.Clear();
@@ -201,6 +223,7 @@ namespace DriveCare.Pages.User
                 var uid = AppState.CurrentUserId;
 
                 const string sql = @"SELECT 
+    un.RowId AS UserNotificationId,
     n.Title,
     n.Message,
     n.Description,
@@ -220,8 +243,10 @@ ORDER BY n.CreatedAt DESC;";
                 {
                     NotificationItems.Add(new NotificationDisplayItem
                     {
+                        UserNotificationId = row.UserNotificationId,
                         Title = string.IsNullOrWhiteSpace(row.Title) ? "Уведомление" : row.Title.Trim(),
-                        Text = BuildNotificationText(row.Message, row.CreatedAt, row.IsRead)
+                        Text = BuildNotificationText(row.Message, row.CreatedAt, row.IsRead),
+                        Description = row.Description ?? string.Empty
                     });
                 }
             
@@ -247,13 +272,14 @@ ORDER BY n.CreatedAt DESC;";
             ApplyHeroFromIndex();
         }
 
-        private void ApplyHeroFromIndex()
+        private async void ApplyHeroFromIndex()
         {
             if (GarageCars.Count == 0)
             {
                 CarImage = LoadDefaultCarPackImage();
                 CarTitle = string.Empty;
                 PositionText = string.Empty;
+                _repairStatus = null;
             }
             else
             {
@@ -264,9 +290,35 @@ ORDER BY n.CreatedAt DESC;";
                 PositionText = GarageCars.Count > 1
                     ? $"{_index + 1} из {GarageCars.Count}"
                     : string.Empty;
+
+                if (IsLoggedIn && item.CarId != Guid.Empty)
+                {
+                    try
+                    {
+                        _repairStatus = await UserActiveRepairService
+                            .TryLoadForCarAsync(AppState.CurrentUserId, item.CarId).ConfigureAwait(true);
+                    }
+                    catch
+                    {
+                        _repairStatus = null;
+                    }
+                }
+                else
+                    _repairStatus = null;
             }
 
             NotifyChrome();
+            NotifyRepairStatus();
+        }
+
+        private void NotifyRepairStatus()
+        {
+            OnPropertyChanged(nameof(RepairStatusVisibility));
+            OnPropertyChanged(nameof(RepairStageLabel));
+            OnPropertyChanged(nameof(RepairWorkshopName));
+            OnPropertyChanged(nameof(RepairStep1Brush));
+            OnPropertyChanged(nameof(RepairStep2Brush));
+            OnPropertyChanged(nameof(RepairStep3Brush));
         }
 
         private void NotifyChrome()
@@ -351,6 +403,35 @@ ORDER BY n.CreatedAt DESC;";
         {
             ReloadNotifications();
             NotificationsPopup.IsOpen = !NotificationsPopup.IsOpen;
+        }
+
+        private async void NotificationsList_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (!(NotificationsList.SelectedItem is NotificationDisplayItem item))
+                return;
+
+            NotificationsPopup.IsOpen = false;
+
+            if (!string.IsNullOrWhiteSpace(item.Description)
+                && item.Description.StartsWith(WorkshopReviewService.NotificationDescriptionPrefix + "|"))
+            {
+                await WorkshopReviewWindow.TryShowFromNotificationAsync(
+                    Window.GetWindow(this), AppState.CurrentUserId, item.Description).ConfigureAwait(true);
+            }
+
+            if (item.UserNotificationId != Guid.Empty)
+            {
+                try
+                {
+                    AppConnect.model1.Database.ExecuteSqlCommand(
+                        "UPDATE UserNotifications SET IsRead = 1 WHERE RowId = @p0", item.UserNotificationId);
+                }
+                catch
+                {
+                }
+            }
+
+            ReloadNotifications();
         }
 
         private void ChatsButton_Click(object sender, RoutedEventArgs e)
@@ -448,14 +529,18 @@ ORDER BY n.CreatedAt DESC;";
 
     public sealed class NotificationDisplayItem
     {
+        public Guid UserNotificationId { get; set; }
         public string Title { get; set; }
         public string Text { get; set; }
+        public string Description { get; set; }
     }
 
     internal sealed class UserNotificationSqlRow
     {
+        public Guid UserNotificationId { get; set; }
         public string Title { get; set; }
         public string Message { get; set; }
+        public string Description { get; set; }
         public DateTime? CreatedAt { get; set; }
         public bool IsRead { get; set; }
     }

@@ -107,10 +107,6 @@ $indexTokens = @{
     104 = '{{PARTS_DISCOUNT}}'
     105 = '{{PARTS_AMOUNT}}'
     124 = '{{PARTS_TOTAL}}'
-    130 = '{{CUSTOMER_PARTS_NUMBER}}'
-    131 = '{{CUSTOMER_PARTS_NAME}}'
-    132 = '{{CUSTOMER_PARTS_QUANTITY}}'
-    141 = '{{CUSTOMER_PARTS_TOTAL}}'
     156 = '{{SUBTOTAL}}'
 }
 
@@ -138,4 +134,5 @@ Remove-Item $dest -Force -ErrorAction SilentlyContinue
 Compress-Archive -Path "$tmp\doc\*" -DestinationPath "$tmp\out.zip" -Force
 Move-Item "$tmp\out.zip" $dest -Force
 Remove-Item $tmp -Recurse -Force
+& (Join-Path $dir 'pack_shablon_tokens.ps1')
 Write-Host "Built: $dest"

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DriveCarePro.Services.RepairWorkOrder
+namespace DriveCareCore.WorkOrders
 {
     /// <summary>Данные заказ-наряда для печати (пока без сохранения в БД).</summary>
     public sealed class RepairWorkOrderModel
@@ -151,5 +151,56 @@ namespace DriveCarePro.Services.RepairWorkOrder
                 return string.Empty;
             return string.Join(Environment.NewLine, lines.Select(l => l.Name?.Trim()).Where(n => !string.IsNullOrEmpty(n)));
         }
+
+        public void RecalculateTotals()
+        {
+            var labor = SumLineAmounts(WorkLines?.Select(l => l?.Amount));
+            var parts = SumLineAmounts(PartLines?.Select(l => l?.Amount));
+            var laborText = FormatMoney(labor);
+            var partsText = FormatMoney(parts);
+            var subtotalText = FormatMoney(labor + parts);
+
+            WorksTotal = laborText;
+            LaborCostSum = laborText;
+            PartsTotal = partsText;
+            PartsCostSum = partsText;
+            Subtotal = subtotalText;
+            TotalToPay = subtotalText;
+        }
+
+        private static decimal SumLineAmounts(IEnumerable<string> amounts)
+        {
+            if (amounts == null)
+                return 0m;
+
+            decimal sum = 0m;
+            foreach (var amount in amounts)
+            {
+                if (TryParseMoney(amount, out var value))
+                    sum += value;
+            }
+
+            return sum;
+        }
+
+        private static bool TryParseMoney(string text, out decimal value)
+        {
+            value = 0m;
+            if (string.IsNullOrWhiteSpace(text))
+                return false;
+
+            var normalized = text.Trim()
+                .Replace(" ", string.Empty)
+                .Replace("\u00A0", string.Empty)
+                .Replace(',', '.');
+
+            return decimal.TryParse(
+                normalized,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out value);
+        }
+
+        private static string FormatMoney(decimal value) => value.ToString("N2");
     }
 }

@@ -40,6 +40,15 @@ SELECT CASE WHEN COL_LENGTH(N'dbo.Addresses', N'Latitude') IS NOT NULL
         {
             var result = new WorkshopMapLoadResult();
             var hasCoordCols = await ColumnExistsAsync(db, "Addresses", "Latitude").ConfigureAwait(false);
+            var hasReviews = await TableExistsAsync(db, "WorkshopReviews").ConfigureAwait(false);
+
+            var ratingSql = hasReviews
+                ? @",
+       (SELECT AVG(CAST(rv.Rating AS DECIMAL(4,2))) FROM dbo.WorkshopReviews rv
+        WHERE rv.WorkshopId = w.RowId AND rv.Status = 1) AS AvgRating,
+       (SELECT COUNT(1) FROM dbo.WorkshopReviews rv
+        WHERE rv.WorkshopId = w.RowId AND rv.Status = 1) AS ReviewCount"
+                : ", CAST(NULL AS DECIMAL(4,2)) AS AvgRating, CAST(0 AS INT) AS ReviewCount";
 
             var sql = @"
 SELECT w.RowId AS WorkshopId, w.Name AS WorkshopName, co.Name AS CompanyName, w.Description,
@@ -47,7 +56,7 @@ SELECT w.RowId AS WorkshopId, w.Name AS WorkshopName, co.Name AS CompanyName, w.
        a.RowId AS AddressId, a.FullAddress, a.City, a.Street, a.House,
        (SELECT TOP 1 e.Phone FROM dbo.Employees e
         WHERE e.WorkshopId = w.RowId AND e.IsActive = 1 AND e.Phone IS NOT NULL AND LTRIM(RTRIM(e.Phone)) <> N''
-        ORDER BY e.HireDate) AS Phone" +
+        ORDER BY e.HireDate) AS Phone" + ratingSql +
                 (hasCoordCols ? ", a.Latitude, a.Longitude" : ", CAST(NULL AS FLOAT) AS Latitude, CAST(NULL AS FLOAT) AS Longitude") + @"
 FROM dbo.Workshops w
 INNER JOIN dbo.Companies co ON co.RowId = w.CompanyId
@@ -112,7 +121,9 @@ ORDER BY w.Name;";
                     ServiceKindsLabel = WorkshopServiceKinds.BuildKindsLabel(typeIds),
                     AddressId = row.AddressId,
                     Latitude = lat,
-                    Longitude = lon
+                    Longitude = lon,
+                    AvgRating = row.AvgRating,
+                    ReviewCount = row.ReviewCount
                 };
 
                 var siteKey = BuildSiteKey(row.AddressId, lat, lon);
@@ -169,6 +180,17 @@ ORDER BY w.Name;";
             var phones = ordered.Select(p => p.Phone).FirstOrDefault(p => !string.IsNullOrWhiteSpace(p)) ?? string.Empty;
             var descriptions = ordered.Select(p => p.Description).Where(d => !string.IsNullOrWhiteSpace(d)).Distinct().ToList();
 
+            var totalReviews = ordered.Sum(p => p.ReviewCount);
+            decimal? avgRating = null;
+            if (totalReviews > 0)
+            {
+                var weighted = ordered
+                    .Where(p => p.ReviewCount > 0 && p.AvgRating.HasValue)
+                    .Sum(p => p.AvgRating.Value * p.ReviewCount);
+                if (weighted > 0)
+                    avgRating = weighted / totalReviews;
+            }
+
             return new WorkshopMapPin
             {
                 WorkshopId = primary.WorkshopId,
@@ -184,7 +206,9 @@ ORDER BY w.Name;";
                 ServiceKindsLabel = WorkshopServiceKinds.BuildKindsLabel(typeIds),
                 AddressId = primary.AddressId,
                 Latitude = primary.Latitude,
-                Longitude = primary.Longitude
+                Longitude = primary.Longitude,
+                AvgRating = avgRating ?? primary.AvgRating,
+                ReviewCount = totalReviews
             };
         }
 
@@ -228,6 +252,20 @@ ORDER BY w.Name;";
                 new SqlParameter("@id", addressId)).ConfigureAwait(false);
         }
 
+        static async Task<bool> TableExistsAsync(DriveCareDBEntities db, string tableName)
+        {
+            try
+            {
+                var sql = @"SELECT CASE WHEN OBJECT_ID(@t, N'U') IS NOT NULL THEN 1 ELSE 0 END;";
+                return await db.Database.SqlQuery<int>(sql, new SqlParameter("@t", "dbo." + tableName))
+                    .FirstOrDefaultAsync().ConfigureAwait(false) == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         static async Task<bool> ColumnExistsAsync(DriveCareDBEntities db, string table, string column)
         {
             var sql = "SELECT CASE WHEN COL_LENGTH(@t, @c) IS NOT NULL THEN 1 ELSE 0 END";
@@ -259,6 +297,8 @@ ORDER BY w.Name;";
             public string House { get; set; }
             public double? Latitude { get; set; }
             public double? Longitude { get; set; }
+            public decimal? AvgRating { get; set; }
+            public int ReviewCount { get; set; }
         }
     }
 }
