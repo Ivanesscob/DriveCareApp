@@ -163,6 +163,7 @@ namespace DriveCarePro.Pages
             AppState.SetControlVisible(BtnPaintShopSettings, canServices);
             AppState.SetControlVisible(BtnShop, AppState.CanAccessPurchaserShop);
             AppState.SetControlVisible(BtnOnlineBookings, AppState.CanAccessEmployeeWorkspace);
+            AppState.SetControlVisible(BtnClientMessages, AppState.CanAccessEmployeeWorkspace);
             AppState.SetControlVisible(BtnWorkSchedule,
                 AppState.HasPermission(ProPermissions.ManageWorkshopSchedule) || AppState.IsCurrentEmployeeOwner);
 
@@ -233,6 +234,9 @@ namespace DriveCarePro.Pages
 
         private List<Guid> ResolveWorkshopIdsForMessages()
         {
+            if (!AppState.CanAccessEmployeeWorkspace)
+                return new List<Guid>();
+
             var ids = new List<Guid>();
             if (OwnerOrganizationScope.TryResolve(out var scope, out _) && scope?.WorkshopIds != null)
                 ids.AddRange(scope.WorkshopIds.Where(id => id != Guid.Empty));

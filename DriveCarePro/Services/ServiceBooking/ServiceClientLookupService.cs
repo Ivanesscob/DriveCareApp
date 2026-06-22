@@ -102,8 +102,8 @@ namespace DriveCarePro.Services.ServiceBooking
                     DisplayName = display,
                     Year = x.c.Year,
                     Color = color ?? string.Empty,
-                    Vin = ExtractTag(x.c.Description, "VIN:"),
-                    PlateNumber = ExtractTag(x.c.Description, "Гос:")
+                    Vin = FirstNonEmpty(x.c.Vin, ExtractTag(x.c.Description, "VIN:")),
+                    PlateNumber = FirstNonEmpty(x.c.PlateNumber, ExtractTag(x.c.Description, "Гос:"))
                 });
             }
 
@@ -132,6 +132,13 @@ namespace DriveCarePro.Services.ServiceBooking
             }
 
             return string.Empty;
+        }
+
+        private static string FirstNonEmpty(string primary, string fallback)
+        {
+            if (!string.IsNullOrWhiteSpace(primary))
+                return primary.Trim();
+            return fallback ?? string.Empty;
         }
 
         public sealed class UserLookupResult

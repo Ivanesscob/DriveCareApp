@@ -62,10 +62,11 @@ namespace DriveCarePro.Services.WorkshopServices
         }
 
         /// <summary>Магазин — категория как у пользователя DriveCare.</summary>
-        public static Task<List<WorkshopPartItem>> ListShopForWorkshopAsync(Guid workshopId, string category)
+        public static async Task<List<WorkshopPartItem>> ListShopForWorkshopAsync(Guid workshopId, string category)
         {
             _ = workshopId;
-            var items = ToolsStoreCatalog.ListByCategory(category)
+            var catalog = await UserPartsCatalogService.ListByCategoryAsync(category).ConfigureAwait(false);
+            return catalog
                 .Select(ToWorkshopPart)
                 .Select(p =>
                 {
@@ -73,7 +74,6 @@ namespace DriveCarePro.Services.WorkshopServices
                     return p;
                 })
                 .ToList();
-            return Task.FromResult(items);
         }
 
         public static string CategoryRu(string category) => ToolsStoreCatalog.CategoryRu(category);

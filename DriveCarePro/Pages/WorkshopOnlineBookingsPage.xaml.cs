@@ -40,6 +40,17 @@ namespace DriveCarePro.Pages
 
         private async System.Threading.Tasks.Task ReloadAsync()
         {
+            if (!AppState.CanAccessEmployeeWorkspace)
+            {
+                MessageBox.Show(
+                    "Онлайн-записи доступны сотрудникам организации, не платформенному администратору.",
+                    "Онлайн-записи",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                ProNavigation.GoHome();
+                return;
+            }
+
             _workshopIds.Clear();
             if (OwnerOrganizationScope.TryResolve(out var scope, out _))
                 _workshopIds.AddRange(scope.WorkshopIds);

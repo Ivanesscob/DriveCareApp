@@ -53,6 +53,17 @@ namespace DriveCarePro.Pages
 
         private async Task InitializeAsync()
         {
+            if (!AppState.CanAccessEmployeeWorkspace)
+            {
+                MessageBox.Show(
+                    "Сообщения клиентам доступны сотрудникам организации, не платформенному администратору.",
+                    "Сообщения",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                ProNavigation.GoHome();
+                return;
+            }
+
             _workshopIds.Clear();
             _primaryWorkshopId = Guid.Empty;
 

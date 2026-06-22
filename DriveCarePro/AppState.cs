@@ -36,13 +36,14 @@ namespace DriveCarePro
             HasAnyAssignedPermission(ProPermissions.AdminPanelCodes) ||
             (HasNoAssignedPermissions() && HasAdminRoleByName());
 
-        /// <summary>Рабочая панель сотрудника организации (сервис, владелец, салон).</summary>
+        /// <summary>Рабочая панель сотрудника организации (сервис, владелец, салон). Не для платформенного админа.</summary>
         public static bool CanAccessEmployeeWorkspace =>
-            HasAnyAssignedPermission(ProPermissions.WorkspaceCodes) ||
+            !CanAccessAdminPanel &&
+            (HasAnyAssignedPermission(ProPermissions.WorkspaceCodes) ||
             IsCurrentEmployeeOwner ||
             IsCurrentEmployeeServiceWorker ||
             IsCurrentEmployeeDealershipHead ||
-            (HasNoAssignedPermissions() && !HasAdminRoleByName());
+            (HasNoAssignedPermissions() && !HasAdminRoleByName()));
 
         /// <summary>Доступ к админ-страницам и действиям платформы.</summary>
         public static bool IsCurrentEmployeeProAdmin => CanAccessAdminPanel;

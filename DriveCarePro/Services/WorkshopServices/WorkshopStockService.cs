@@ -207,8 +207,8 @@ namespace DriveCarePro.Services.WorkshopServices
                 return existing.RowId;
             }
 
-            var catalog = line.WorkshopPartId.HasValue
-                ? ToolsStoreCatalog.FindById(line.WorkshopPartId.Value)
+            var catalog = line.WorkshopPartId.HasValue && line.WorkshopPartId.Value != Guid.Empty
+                ? await UserPartsCatalogService.FindByIdAsync(db, line.WorkshopPartId.Value).ConfigureAwait(false)
                 : null;
 
             var newId = Guid.NewGuid();
