@@ -1979,9 +1979,9 @@ namespace DriveCarePro.Pages
                             var isRootTask = docInfo != null && docInfo.IsCurrentTaskRoot
                                 || !taskLinks.ParentTaskId.HasValue || taskLinks.ParentTaskId.Value == Guid.Empty;
 
-                            if (docInfo != null && docInfo.IsCurrentTaskRoot && docId.HasValue)
+                            if (docInfo != null && docId.HasValue && isRootTask)
                             {
-                                await ServiceDocumentService.TryCompleteForRootTaskAsync(db, taskId)
+                                await ServiceDocumentService.TryCompleteForRootTaskAsync(db, docInfo.RootTaskId)
                                     .ConfigureAwait(false);
                                 autoClosedCount = await TaskDelegationService.CompleteOpenTasksForDocumentAsync(
                                     db, docId.Value, parentName, excludeTaskId: taskId).ConfigureAwait(false);
@@ -2034,7 +2034,6 @@ namespace DriveCarePro.Pages
                         ? $"Задание завершено. Документ заказ-наряда закрыт, автоматически завершено связанных заданий: {autoClosedCount}."
                         : "Задание завершено. Единый документ заказ-наряда закрыт.";
                 else if (docAfter != null
-                         && docAfter.IsCurrentTaskRoot
                          && docAfter.ClientStage == ServiceDocumentClientStage.ReadyForPickup)
                     msg = autoClosedCount > 0
                         ? $"Ремонт завершён. Автомобиль готов к выдаче. Закрыто связанных заданий: {autoClosedCount}. Нажмите «Выдать клиенту», когда клиент заберёт машину."
@@ -2062,7 +2061,6 @@ namespace DriveCarePro.Pages
                     await TryNotifyClientToReviewAsync(taskId, docAfter).ConfigureAwait(true);
                 }
                 else if (docAfter != null
-                         && docAfter.IsCurrentTaskRoot
                          && docAfter.ClientStage == ServiceDocumentClientStage.ReadyForPickup)
                 {
                     await TryNotifyClientToReviewAsync(taskId, docAfter).ConfigureAwait(true);

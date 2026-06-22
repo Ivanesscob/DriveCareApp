@@ -125,7 +125,7 @@ namespace DriveCare.Pages.User.ActionPages
                     .ConfigureAwait(true);
                 VisitsList.ItemsSource = visits;
                 StatusText.Text = visits.Count > 0
-                    ? $"Записей: {visits.Count}. Заказ-наряд и оценка доступны после завершения ремонта."
+                    ? $"Записей: {visits.Count}. Заказ-наряд и оценка доступны, когда ремонт завершён в мастерской."
                     : "Пока нет визитов в сервис с привязкой к вашему аккаунту.";
             }
             catch (Exception ex)

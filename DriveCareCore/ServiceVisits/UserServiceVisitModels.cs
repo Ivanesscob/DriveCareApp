@@ -46,7 +46,21 @@ namespace DriveCareCore.ServiceVisits
         public string ServicesLine => string.IsNullOrWhiteSpace(ServicesSummary)
             ? "Услуги будут указаны после завершения ремонта"
             : ServicesSummary.Trim();
-        public bool CanOpenWorkOrder => IsCompleted;
+        public bool RootTaskCompleted { get; set; }
+
+        /// <summary>Заказ-наряд и отзыв доступны после завершения ремонта (готова к выдаче или выдана).</summary>
+        public bool CanOpenWorkOrder
+        {
+            get
+            {
+                if (IsCompleted || RootTaskCompleted)
+                    return true;
+
+                var stage = ServiceDocumentClientStageLabels.Normalize(ClientStage, Status);
+                return stage == ServiceDocumentClientStage.ReadyForPickup
+                    || stage == ServiceDocumentClientStage.Completed;
+            }
+        }
     }
 
     public sealed class UserWorkOrderLineVm

@@ -67,10 +67,12 @@ namespace DriveCareCore.ServiceVisits
 SELECT sd.RowId AS DocumentId, sd.RootTaskId, sd.RepairHistoryId, sd.WorkshopId, sd.CarId,
        w.Name AS WorkshopName, sd.VisitReason, sd.ServiceKind, sd.Status,
        {stageSel}, sd.CreatedAt, sd.CompletedAt, rh.Mileage AS MileageKm, rh.RepairDate,
-       {servicesExpr} AS ServicesSummary
+       {servicesExpr} AS ServicesSummary,
+       CAST(ISNULL(rt.IsCompleted, 0) AS bit) AS RootTaskCompleted
 FROM dbo.ServiceDocuments sd
 INNER JOIN dbo.Workshops w ON w.RowId = sd.WorkshopId
 LEFT JOIN dbo.RepairHistory rh ON rh.RowId = sd.RepairHistoryId
+LEFT JOIN dbo.Tasks rt ON rt.RowId = sd.RootTaskId
 WHERE sd.ClientUserId = @userId" +
                 (filterCarId.HasValue ? " AND sd.CarId = @carId" : string.Empty) + @"
 ORDER BY COALESCE(sd.CompletedAt, sd.CreatedAt) DESC;";

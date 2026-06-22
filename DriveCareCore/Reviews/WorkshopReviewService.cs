@@ -13,6 +13,8 @@ namespace DriveCareCore.Reviews
     {
         public const string NotificationDescriptionPrefix = "WorkshopReview";
 
+        public static event Action ReviewSubmitted;
+
         public static Task<bool> TableExistsAsync() =>
             WithDb(async db =>
             {
@@ -44,8 +46,9 @@ namespace DriveCareCore.Reviews
             }
         }
 
-        public static Task<(bool ok, string error)> TrySubmitAsync(WorkshopReviewSubmit submit) =>
-            WithDb(async db =>
+        public static async Task<(bool ok, string error)> TrySubmitAsync(WorkshopReviewSubmit submit)
+        {
+            var result = await WithDb(async db =>
             {
                 if (submit == null)
                     return (false, "Нет данных.");
@@ -86,7 +89,13 @@ VALUES (@id, @ws, @u, @doc, @rh, @rating, @comment, @pros, @cons, 1, @dt)",
                 {
                     return (false, ex.Message);
                 }
-            });
+            }).ConfigureAwait(false);
+
+            if (result.Item1)
+                ReviewSubmitted?.Invoke();
+
+            return result;
+        }
 
         public static Task<WorkshopReviewRequest> TryParseNotificationDescription(string description)
         {

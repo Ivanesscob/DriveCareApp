@@ -45,6 +45,8 @@ namespace DriveCare.Pages.User
                 ReloadNotifications();
                 WorkshopChatRealtimeClient.MessageReceived -= OnChatMessageReceived;
                 WorkshopChatRealtimeClient.MessageReceived += OnChatMessageReceived;
+                WorkshopReviewService.ReviewSubmitted -= OnReviewSubmitted;
+                WorkshopReviewService.ReviewSubmitted += OnReviewSubmitted;
                 if (AppState.CurrentUserId != Guid.Empty)
                     WorkshopChatRealtimeClient.StartForUser(AppState.CurrentUserId);
                 await ReloadChatsUnreadBadgeAsync().ConfigureAwait(true);
@@ -52,6 +54,7 @@ namespace DriveCare.Pages.User
             Unloaded += (_, __) =>
             {
                 WorkshopChatRealtimeClient.MessageReceived -= OnChatMessageReceived;
+                WorkshopReviewService.ReviewSubmitted -= OnReviewSubmitted;
             };
         }
 
@@ -272,6 +275,41 @@ ORDER BY n.CreatedAt DESC;";
             ApplyHeroFromIndex();
         }
 
+        private void OnReviewSubmitted()
+        {
+            _ = Dispatcher.InvokeAsync(async () => await RefreshRepairStatusAsync().ConfigureAwait(true));
+        }
+
+        private async Task RefreshRepairStatusAsync()
+        {
+            if (GarageCars.Count == 0 || !IsLoggedIn)
+            {
+                _repairStatus = null;
+                NotifyRepairStatus();
+                return;
+            }
+
+            var item = GarageCars[_index];
+            if (item.CarId == Guid.Empty)
+            {
+                _repairStatus = null;
+            }
+            else
+            {
+                try
+                {
+                    _repairStatus = await UserActiveRepairService
+                        .TryLoadForCarAsync(AppState.CurrentUserId, item.CarId).ConfigureAwait(true);
+                }
+                catch
+                {
+                    _repairStatus = null;
+                }
+            }
+
+            NotifyRepairStatus();
+        }
+
         private async void ApplyHeroFromIndex()
         {
             if (GarageCars.Count == 0)
@@ -280,6 +318,7 @@ ORDER BY n.CreatedAt DESC;";
                 CarTitle = string.Empty;
                 PositionText = string.Empty;
                 _repairStatus = null;
+                NotifyRepairStatus();
             }
             else
             {
@@ -292,23 +331,15 @@ ORDER BY n.CreatedAt DESC;";
                     : string.Empty;
 
                 if (IsLoggedIn && item.CarId != Guid.Empty)
-                {
-                    try
-                    {
-                        _repairStatus = await UserActiveRepairService
-                            .TryLoadForCarAsync(AppState.CurrentUserId, item.CarId).ConfigureAwait(true);
-                    }
-                    catch
-                    {
-                        _repairStatus = null;
-                    }
-                }
+                    await RefreshRepairStatusAsync().ConfigureAwait(true);
                 else
+                {
                     _repairStatus = null;
+                    NotifyRepairStatus();
+                }
             }
 
             NotifyChrome();
-            NotifyRepairStatus();
         }
 
         private void NotifyRepairStatus()
@@ -417,6 +448,7 @@ ORDER BY n.CreatedAt DESC;";
             {
                 await WorkshopReviewWindow.TryShowFromNotificationAsync(
                     Window.GetWindow(this), AppState.CurrentUserId, item.Description).ConfigureAwait(true);
+                await RefreshRepairStatusAsync().ConfigureAwait(true);
             }
 
             if (item.UserNotificationId != Guid.Empty)
