@@ -1,0 +1,3 @@
+nord.owner owner123
+admin admin123
+service.nord service123
