@@ -7,6 +7,15 @@ namespace DriveCarePro.Services
     /// <summary>Асинхронные запросы в отдельном DbContext (не блокируют UI и не конфликтуют с singleton).</summary>
     internal static class DatabaseExecutor
     {
+        public static T WithDb<T>(Func<DriveCareDBEntities, T> work)
+        {
+            if (work == null)
+                throw new ArgumentNullException(nameof(work));
+
+            using (var db = new DriveCareDBEntities())
+                return work(db);
+        }
+
         public static async System.Threading.Tasks.Task<T> WithDbAsync<T>(Func<DriveCareDBEntities, System.Threading.Tasks.Task<T>> work)
         {
             if (work == null)

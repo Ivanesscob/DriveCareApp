@@ -423,8 +423,129 @@ namespace DriveCareCore.WorkOrders
 
         private static void CleanupDocumentLayout(XDocument document)
         {
+            ApplyTableAutoFit(document);
             RemoveCustomerPartsSection(document);
             RemoveSurplusEmptyRows(document);
+        }
+
+        /// <summary>Подгоняет все таблицы под ширину страницы (автоподбор по ширине окна).</summary>
+        private static void ApplyTableAutoFit(XDocument document)
+        {
+            if (document == null)
+                return;
+
+            var body = document.Root?.Element(W + "body");
+            if (body == null)
+                return;
+
+            var contentWidth = GetPageContentWidthTwips(body);
+            foreach (var table in document.Descendants(W + "tbl").ToList())
+                ApplyAutoFitToTable(table, contentWidth);
+        }
+
+        private static int GetPageContentWidthTwips(XElement body)
+        {
+            const int defaultPageWidth = 11906;
+            const int defaultMargin = 567;
+
+            var sectPr = body.Elements(W + "sectPr").LastOrDefault()
+                ?? body.Descendants(W + "sectPr").LastOrDefault();
+
+            var pageWidth = defaultPageWidth;
+            var marginLeft = defaultMargin;
+            var marginRight = defaultMargin;
+
+            if (sectPr != null)
+            {
+                var pgSz = sectPr.Element(W + "pgSz");
+                var pgMar = sectPr.Element(W + "pgMar");
+                if (pgSz != null && int.TryParse((string)pgSz.Attribute(W + "w"), out var w) && w > 0)
+                    pageWidth = w;
+                if (pgMar != null)
+                {
+                    if (int.TryParse((string)pgMar.Attribute(W + "left"), out var left) && left >= 0)
+                        marginLeft = left;
+                    if (int.TryParse((string)pgMar.Attribute(W + "right"), out var right) && right >= 0)
+                        marginRight = right;
+                }
+            }
+
+            return Math.Max(1000, pageWidth - marginLeft - marginRight);
+        }
+
+        private static void ApplyAutoFitToTable(XElement table, int targetWidthTwips)
+        {
+            if (table == null || targetWidthTwips <= 0)
+                return;
+
+            var tblPr = table.Element(W + "tblPr");
+            if (tblPr == null)
+            {
+                tblPr = new XElement(W + "tblPr");
+                table.AddFirst(tblPr);
+            }
+
+            tblPr.Elements(W + "tblW").Remove();
+            tblPr.Elements(W + "tblLayout").Remove();
+            tblPr.Elements(W + "tblInd").Remove();
+            tblPr.Elements(W + "jc").Remove();
+
+            tblPr.AddFirst(new XElement(W + "tblInd",
+                new XAttribute(W + "w", 0),
+                new XAttribute(W + "type", "dxa")));
+            tblPr.AddFirst(new XElement(W + "tblLayout",
+                new XAttribute(W + "type", "autofit")));
+            tblPr.AddFirst(new XElement(W + "tblW",
+                new XAttribute(W + "w", 5000),
+                new XAttribute(W + "type", "pct")));
+
+            ScaleTableGrid(table, targetWidthTwips);
+
+            foreach (var tc in table.Descendants(W + "tc"))
+            {
+                var tcPr = tc.Element(W + "tcPr");
+                if (tcPr == null)
+                    continue;
+                tcPr.Elements(W + "tcW").Remove();
+            }
+        }
+
+        private static void ScaleTableGrid(XElement table, int targetWidthTwips)
+        {
+            var tblGrid = table.Element(W + "tblGrid");
+            if (tblGrid == null)
+                return;
+
+            var gridCols = tblGrid.Elements(W + "gridCol").ToList();
+            if (gridCols.Count == 0)
+                return;
+
+            var totalGrid = 0;
+            foreach (var col in gridCols)
+            {
+                if (int.TryParse((string)col.Attribute(W + "w"), out var w) && w > 0)
+                    totalGrid += w;
+            }
+
+            if (totalGrid <= 0)
+                totalGrid = gridCols.Count * 1000;
+
+            var widths = new int[gridCols.Count];
+            var assigned = 0;
+            for (var i = 0; i < gridCols.Count; i++)
+            {
+                var source = int.TryParse((string)gridCols[i].Attribute(W + "w"), out var w) && w > 0
+                    ? w
+                    : 1000;
+                widths[i] = (int)((long)source * targetWidthTwips / totalGrid);
+                assigned += widths[i];
+            }
+
+            if (assigned != targetWidthTwips)
+                widths[widths.Length - 1] += targetWidthTwips - assigned;
+
+            for (var i = 0; i < gridCols.Count; i++)
+                gridCols[i].SetAttributeValue(W + "w", widths[i]);
         }
 
         private static void RemoveCustomerPartsSection(XDocument document)

@@ -128,13 +128,13 @@ namespace DriveCarePro.Services
 
 
 
-        public static List<PermissionItem> LoadPermissions(bool systemRolesMode)
+        public static List<PermissionItem> LoadPermissions(bool systemRolesMode) =>
+            LoadPermissions(AppConnect.model1, systemRolesMode);
 
+        static List<PermissionItem> LoadPermissions(DriveCareDBEntities db, bool systemRolesMode)
         {
-
-            var db = AppConnect.model1;
-
-
+            if (db == null)
+                return new List<PermissionItem>();
 
             var rows = (
 
@@ -303,179 +303,111 @@ namespace DriveCarePro.Services
 
 
         public static SaveRoleResult Save(RoleEditModel model, bool systemRolesMode, OwnerOrganizationScope scope)
-
         {
-
             if (model == null)
-
                 return Fail("Нет данных для сохранения.");
 
+            try
+            {
+                return DatabaseExecutor.WithDb(db => SaveCore(db, model, systemRolesMode, scope));
+            }
+            catch (Exception ex)
+            {
+                return Fail(FormatSaveError(ex));
+            }
+            finally
+            {
+                AppConnect.ResetModel();
+            }
+        }
 
-
+        static SaveRoleResult SaveCore(
+            DriveCareDBEntities db,
+            RoleEditModel model,
+            bool systemRolesMode,
+            OwnerOrganizationScope scope)
+        {
             var name = (model.Name ?? string.Empty).Trim();
-
             if (name.Length == 0)
-
                 return Fail("Введите название роли.");
 
-
-
-            var db = AppConnect.model1;
-
             var desc = (model.Description ?? string.Empty).Trim();
-
             Role role;
 
-
-
             if (!model.RoleId.HasValue)
-
             {
-
                 if (systemRolesMode)
-
                 {
-
                     if (NameConflictSystem(db, name, null))
-
                         return Fail("Системная роль с таким названием уже существует.");
 
                     role = new Role
-
                     {
-
                         RowId = Guid.NewGuid(),
-
                         Name = name,
-
                         Description = desc.Length == 0 ? null : desc,
-
                         WorkshopId = null,
-
                         CompanyId = null,
-
                         IsActive = model.IsActive
-
                     };
-
                 }
-
                 else
-
                 {
-
                     role = new Role
-
                     {
-
                         RowId = Guid.NewGuid(),
-
                         Name = name,
-
                         Description = desc.Length == 0 ? null : desc,
-
                         IsActive = model.IsActive
-
                     };
 
                     var scopeErr = ApplyOrganizationScope(role, model, scope);
-
                     if (scopeErr != null)
-
                         return Fail(scopeErr);
 
                     if (NameConflictOrganization(db, name, role, scope))
-
                         return Fail("Роль с таким названием уже существует в выбранной области.");
-
                 }
 
                 db.Roles.Add(role);
-
             }
-
             else
-
             {
-
                 role = db.Roles.FirstOrDefault(r => r.RowId == model.RoleId.Value);
-
                 if (role == null || !CanEdit(role, systemRolesMode, scope))
-
                     return Fail("Эту роль нельзя изменить.");
 
-
-
                 if (systemRolesMode)
-
                 {
-
                     if (NameConflictSystem(db, name, role.RowId))
-
                         return Fail("Системная роль с таким названием уже существует.");
 
                     role.Name = name;
-
                     role.Description = desc.Length == 0 ? null : desc;
-
                     role.WorkshopId = null;
-
                     role.CompanyId = null;
-
                     role.IsActive = model.IsActive;
-
                 }
-
                 else
-
                 {
-
                     var apply = ApplyOrganizationScope(role, model, scope);
-
                     if (apply != null)
-
                         return Fail(apply);
 
                     if (NameConflictOrganization(db, name, role, scope))
-
                         return Fail("Роль с таким названием уже существует в выбранной области.");
 
                     role.Name = name;
-
                     role.Description = desc.Length == 0 ? null : desc;
-
                     role.IsActive = model.IsActive;
-
                 }
-
             }
 
-
-
-            try
-
-            {
-
-                var allowed = new HashSet<Guid>(LoadPermissions(systemRolesMode).Select(p => p.PermissionId));
-
-                var selected = model.PermissionIds.Where(allowed.Contains).ToList();
-
-                SyncPermissions(db, role.RowId, selected);
-
-                db.SaveChanges();
-
-                return new SaveRoleResult { Success = true, RoleId = role.RowId };
-
-            }
-
-            catch (Exception ex)
-
-            {
-
-                return Fail(FormatSaveError(ex));
-
-            }
-
+            var allowed = new HashSet<Guid>(LoadPermissions(db, systemRolesMode).Select(p => p.PermissionId));
+            var selected = model.PermissionIds.Where(allowed.Contains).ToList();
+            SyncPermissions(db, role.RowId, selected);
+            db.SaveChanges();
+            return new SaveRoleResult { Success = true, RoleId = role.RowId };
         }
 
 
@@ -500,6 +432,12 @@ namespace DriveCarePro.Services
 
             var text = msg.ToString();
 
+            if (text.IndexOf("unexpected number of rows", StringComparison.OrdinalIgnoreCase) >= 0
+                || text.IndexOf("DbUpdateConcurrencyException", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                text += " Обновите список ролей и повторите операцию.";
+            }
+
             if (text.IndexOf("FK_RolePermissionsMap_Permissions", StringComparison.OrdinalIgnoreCase) >= 0
 
                 || (text.IndexOf("RolePermissionsMap", StringComparison.OrdinalIgnoreCase) >= 0
@@ -521,79 +459,71 @@ namespace DriveCarePro.Services
 
 
         public static string TryDelete(Guid roleId, bool systemRolesMode, OwnerOrganizationScope scope)
-
         {
-
-            var db = AppConnect.model1;
-
-            var role = db.Roles.FirstOrDefault(r => r.RowId == roleId);
-
-            if (role == null || !CanEdit(role, systemRolesMode, scope))
-
-                return systemRolesMode
-
-                    ? "Удалить можно только системную роль."
-
-                    : "Эту роль нельзя удалить.";
-
-
-
-            List<EmployeeRolesMap> empMaps;
-
-            if (systemRolesMode)
-
-                empMaps = db.EmployeeRolesMaps.Where(m => m.RoleId == role.RowId).ToList();
-
-            else
-
-            {
-
-                var orgIds = scope.EmployeesInOrganization(db).Select(emp => emp.RowId).ToList();
-
-                empMaps = db.EmployeeRolesMaps
-
-                    .Where(m => m.RoleId == role.RowId && orgIds.Contains(m.EmployeeId))
-
-                    .ToList();
-
-            }
-
-
-
-            var userMaps = db.UserRoles.Where(m => m.RoleId == role.RowId).ToList();
-
-            if (empMaps.Count > 0 || userMaps.Count > 0)
-
-                return $"Нельзя удалить: роль назначена сотрудникам ({empMaps.Count}) или пользователям ({userMaps.Count}).";
-
-
-
-            foreach (var rp in db.RolePermissionsMaps.Where(r => r.RoleId == role.RowId).ToList())
-
-                db.RolePermissionsMaps.Remove(rp);
-
-            db.Roles.Remove(role);
-
-
-
             try
-
             {
+                return DatabaseExecutor.WithDb(db => TryDeleteCore(db, roleId, systemRolesMode, scope));
+            }
+            catch (Exception ex)
+            {
+                return "Не удалось удалить: " + ex.Message;
+            }
+            finally
+            {
+                AppConnect.ResetModel();
+            }
+        }
 
-                db.SaveChanges();
-
+        static string TryDeleteCore(
+            DriveCareDBEntities db,
+            Guid roleId,
+            bool systemRolesMode,
+            OwnerOrganizationScope scope)
+        {
+            var role = db.Roles.FirstOrDefault(r => r.RowId == roleId);
+            if (role == null)
                 return null;
 
-            }
+            if (!CanEdit(role, systemRolesMode, scope))
+                return systemRolesMode
+                    ? "Удалить можно только системную роль."
+                    : "Эту роль нельзя удалить.";
 
-            catch (Exception ex)
-
+            List<EmployeeRolesMap> empMaps;
+            if (systemRolesMode)
             {
-
-                return "Не удалось удалить: " + ex.Message;
-
+                empMaps = db.EmployeeRolesMaps.Where(m => m.RoleId == role.RowId).ToList();
+            }
+            else
+            {
+                var orgIds = scope.EmployeesInOrganization(db).Select(emp => emp.RowId).ToList();
+                empMaps = db.EmployeeRolesMaps
+                    .Where(m => m.RoleId == role.RowId && orgIds.Contains(m.EmployeeId))
+                    .ToList();
             }
 
+            var userMaps = db.UserRoles.Where(m => m.RoleId == role.RowId).ToList();
+            if (empMaps.Count > 0 || userMaps.Count > 0)
+                return $"Нельзя удалить: роль назначена сотрудникам ({empMaps.Count}) или пользователям ({userMaps.Count}).";
+
+            using (var tx = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    foreach (var rp in db.RolePermissionsMaps.Where(r => r.RoleId == role.RowId).ToList())
+                        db.RolePermissionsMaps.Remove(rp);
+
+                    db.Roles.Remove(role);
+                    db.SaveChanges();
+                    tx.Commit();
+                    return null;
+                }
+                catch
+                {
+                    tx.Rollback();
+                    throw;
+                }
+            }
         }
 
 
